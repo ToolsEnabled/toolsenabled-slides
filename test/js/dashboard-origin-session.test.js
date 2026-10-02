@@ -1,0 +1,21 @@
+'use strict';
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {createDashboardSession}=require('../../src/lib/dashboard-session');
+test('a dashboard cookie cannot authorize controls on its own',async()=>{
+ const capability=createDashboardSession(4599);
+ const launch=new URL(capability.launchPath,'http://127.0.0.1:4599');
+ assert.match(launch.hash,/^#launch=[a-f0-9]{64}$/);
+ assert.equal(launch.search,'');
+ let status,headers,body;
+ const res={writeHead(s,h){status=s;headers=h;},end(s){body=s;}};
+ const request={method:'POST',headers:{host:launch.host,origin:launch.origin}};
+ await capability.handle(request,res,new URL('/api/dashboard/session',launch),async()=>({launchToken:launch.hash.slice(8)}));
+ assert.equal(status,200);
+ const cookie=headers['Set-Cookie'].split(';')[0];
+ const token=JSON.parse(body).token;
+ assert.equal(capability.requireSession({...request,headers:{...request.headers,cookie}},res),false);
+ assert.equal(status,403);
+ assert.equal(capability.requireSession({...request,headers:{...request.headers,cookie,'x-slides-session':cookie.split('=')[1]}},res),false);
+ assert.equal(capability.requireSession({...request,headers:{...request.headers,cookie,'x-slides-session':token}},res),true);
+});

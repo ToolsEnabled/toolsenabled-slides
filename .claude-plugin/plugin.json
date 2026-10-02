@@ -1,0 +1,58 @@
+{
+  "name": "toolsenabled-slides",
+  "version": "0.1.0",
+  "displayName": "ToolsEnabled Slides",
+  "description": "Create and edit local PowerPoint decks with a live studio, slide locks, lint and portable exports.",
+  "author": {
+    "name": "ToolsEnabled, Inc.",
+    "email": "support@toolsenabled.ai",
+    "url": "https://toolsenabled.ai"
+  },
+  "homepage": "https://toolsenabled.ai",
+  "repository": "https://github.com/ToolsEnabled/toolsenabled-slides",
+  "license": "MIT",
+  "keywords": [
+    "presentations",
+    "powerpoint",
+    "editing",
+    "local"
+  ],
+  "userConfig": {
+    "python_executable": {
+      "type": "file",
+      "title": "Prepared Python executable",
+      "description": "Absolute path to the external venv Python created by tools/setup-runtime.py. No packages are installed at launch.",
+      "required": true
+    },
+    "node_executable": {
+      "type": "file",
+      "title": "Node.js executable",
+      "description": "Absolute path to an existing Node.js 22+ executable outside the workspace and plugin.",
+      "required": true
+    },
+    "workspace_directory": {
+      "type": "directory",
+      "title": "Presentation workspace",
+      "description": "Absolute path to a dedicated workspace outside the plugin cache. Decks, assets and private state live here. Use a separate workspace and port per concurrent client.",
+      "required": true
+    },
+    "port": {
+      "type": "number",
+      "title": "Local studio port",
+      "description": "Loopback port from 1024 through 65535, unused by other workspaces.",
+      "default": 4599
+    },
+    "renderer": {
+      "type": "string",
+      "title": "PDF and PNG renderer",
+      "description": "Use auto, libreoffice or powerpoint. Auto checks PowerPoint on Windows, then LibreOffice.",
+      "default": "auto"
+    },
+    "libreoffice_executable": {
+      "type": "file",
+      "title": "Optional LibreOffice executable",
+      "description": "Absolute path to LibreOffice soffice when it is outside PATH. Leave empty for automatic discovery.",
+      "default": ""
+    }
+  }
+}

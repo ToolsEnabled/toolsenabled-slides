@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "slides": {
+      "command": "${user_config.python_executable}",
+      "args": [
+        "-I",
+        "${CLAUDE_PLUGIN_ROOT}/src/python/mcp_launcher.py",
+        "--node",
+        "${user_config.node_executable}",
+        "--workspace",
+        "${user_config.workspace_directory}",
+        "--port",
+        "${user_config.port}"
+      ],
+      "env": {
+        "SLIDES_WORKSPACE": "${user_config.workspace_directory}",
+        "SUITE_PYTHON": "${user_config.python_executable}",
+        "SUITE_PORT": "${user_config.port}",
+        "SLIDES_RENDERER": "${user_config.renderer}",
+        "SLIDES_SOFFICE": "${user_config.libreoffice_executable}",
+        "SUITE_ALLOWED_ORIGINS": "",
+        "SUITE_HEADERS_TIMEOUT_MS": "10000",
+        "SUITE_REQUEST_BODY_TIMEOUT_MS": "15000",
+        "SUITE_MCP_HTTP_TIMEOUT_MS": ""
+      }
+    }
+  }
+}

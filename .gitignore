@@ -1,0 +1,12 @@
+data/
+.slides-state/
+.slides-workspace/
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+output/
+dist/
+*.log
+warm*.json
+agent-settings.json

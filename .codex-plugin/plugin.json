@@ -1,0 +1,52 @@
+{
+  "name": "toolsenabled-slides",
+  "version": "0.1.0",
+  "description": "Build and edit real PowerPoint decks with a live local studio and human pause and undo controls.",
+  "author": {
+    "name": "ToolsEnabled, Inc.",
+    "email": "support@toolsenabled.ai",
+    "url": "https://toolsenabled.ai"
+  },
+  "mcpServers": {
+    "slides": {
+      "command": "node",
+      "args": [
+        "./slides-mcp.js"
+      ],
+      "cwd": "./",
+      "env": {
+        "SLIDES_PLUGIN_MODE": "1"
+      },
+      "env_vars": [
+        "SLIDES_WORKSPACE",
+        "SUITE_PYTHON",
+        "SUITE_PORT",
+        "SLIDES_RENDERER",
+        "SLIDES_SOFFICE",
+        "SUITE_ALLOWED_ORIGINS",
+        "SUITE_HEADERS_TIMEOUT_MS",
+        "SUITE_REQUEST_BODY_TIMEOUT_MS",
+        "SUITE_MCP_HTTP_TIMEOUT_MS"
+      ]
+    }
+  },
+  "interface": {
+    "displayName": "ToolsEnabled Slides",
+    "shortDescription": "Local presentation editing over MCP",
+    "longDescription": "Create, import and export PowerPoint decks through a local MCP server. Watch changes in the browser studio, pause editing and undo changes. Supports LibreOffice PDF and PNG export.",
+    "defaultPrompt": [
+      "Build a three-slide project update, then export it as PowerPoint and PDF."
+    ],
+    "developerName": "ToolsEnabled, Inc.",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://toolsenabled.ai",
+    "privacyPolicyURL": "https://toolsenabled.ai/legal/privacy/"
+  },
+  "homepage": "https://toolsenabled.ai",
+  "repository": "https://github.com/ToolsEnabled/toolsenabled-slides",
+  "license": "MIT"
+}

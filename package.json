@@ -1,0 +1,23 @@
+{
+  "name": "toolsenabled-slides",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local presentation editing over MCP with a live studio, human controls and portable exports.",
+  "type": "commonjs",
+  "bin": {
+    "ppt": "src/ppt.js",
+    "slides-mcp": "slides-mcp.js"
+  },
+  "scripts": {
+    "start": "node slides-mcp.js",
+    "studio": "node src/cli/studio.js",
+    "doctor": "node src/cli/doctor.js",
+    "test": "node test/run.js",
+    "test:findings": "node --test test/js/findings.test.js",
+    "package": "python3 tools/package.py"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}
