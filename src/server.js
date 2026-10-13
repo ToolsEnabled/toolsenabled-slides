@@ -639,6 +639,7 @@ if (state.protections === undefined) state.protections = [];
 if (state.protectionExceptions === undefined) state.protectionExceptions = [];
 
 if (state.protectionHistory === undefined) state.protectionHistory = [];
+setAsideMissingObjectProtections();
 for (let i = 0; i < state.protections.length; i++) {
   const protection = state.protections[i];
   const slide = model.slides.find((item) => item.id === protection.slideId);
@@ -668,6 +669,37 @@ for (let i = 0; i < state.protectionExceptions.length; i++) {
     );
   }
 }
+// Slides 0.1.4 and earlier let ppt_import replace the deck without checking protections on single
+// objects, which left a protection naming an object the deck no longer has. Such a row protects
+// nothing, yet refusing to start left the workspace unusable until state.json was edited by hand.
+// Set exactly those rows aside: keep the previous state.json byte for byte next to it, remove only
+// those rows, and say so. Every other mismatch between state.json and the deck still fails closed.
+function setAsideMissingObjectProtections() {
+  const missing = state.protections.filter((protection) => protection.kind === 'object' &&
+    !protectionObject(model.slides.find((slide) => slide.id === protection.slideId),
+      protection.objectKind, protection.objectId));
+  if (!missing.length) return;
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const kept = path.join(DATA, `state-before-protection-repair-${stamp}-${crypto.randomBytes(3).toString('hex')}.json`);
+  fs.copyFileSync(STATE_PATH, kept, fs.constants.COPYFILE_EXCL);
+  const names = missing.map((protection) =>
+    `${protection.objectKind} ${protection.objectId} on slide ${protection.slideId}`).join(', ');
+  const detail = `Removed ${missing.length} protection${missing.length === 1 ? '' : 's'} for objects no longer ` +
+    `in the deck (${names}); the previous state.json is kept as ${path.basename(kept)}`;
+  state.protections = state.protections.filter((protection) => !missing.includes(protection));
+  appendStateLog(state, {
+    kind: 'protections-set-aside',
+    by: 'Slides',
+    detail,
+    protections: missing.map((protection) => Object.assign({}, protection))
+  });
+  // Written directly: the shared atomic writer reports failures to dashboard clients, which do not exist yet.
+  const staged = `${STATE_PATH}.${process.pid}.${crypto.randomBytes(3).toString('hex')}.tmp`;
+  fs.writeFileSync(staged, JSON.stringify(state, null, 2));
+  fs.renameSync(staged, STATE_PATH);
+  console.error(detail);
+}
+
 // Pause/resume each change two operating-system locks across awaits. Keep the
 // complete transition (including its state guard and response snapshot) in one
 // FIFO lane so opposite clicks cannot interleave those locks.
@@ -4181,8 +4213,16 @@ async function handleRequest(req, res) {
       if(state.paused)throw new RequestError(423,'paused');
       if(model.rev!==capturedRev)throw new RequestError(409,'Deck changed during import; review it before retrying');
       for(const slide of model.slides){const lock=locks.get(slide.id);if(!lock||lock.by!==editor||Date.now()-lock.ts>LOCK_TTL)throw new RequestError(409,'Lock all current slides before importing');}
-      const conflict=protectionConflictForScope({slides:model.slides.map(s=>s.id),wholeSlides:model.slides.map(s=>s.id),objects:[]});
-      if(conflict)throw new RequestError(423,'Protected content must be unlocked by the human before replacing the deck');
+      // Import replaces every slide and every object on it, so a protection on any single object binds as
+      // well as a slide protection does. Without the objects in scope, a protected object was destroyed and
+      // its protection was left naming an object the deck no longer has.
+      const objects=new Map();for(const slide of model.slides)addSlideObjectsToScope(objects,slide);
+      const conflict=protectionConflictForScope({slides:model.slides.map(s=>s.id),wholeSlides:model.slides.map(s=>s.id),objects:[...objects.values()]});
+      if(conflict){
+        const target=conflict.kind==='slide'?`slide ${conflict.slideId}`:`${conflict.objectKind} ${conflict.objectId} on slide ${conflict.slideId}`;
+        const refused=new RequestError(423,`Protected content must be unlocked by the human before replacing the deck (${target} is protected)`);
+        refused.protection=Object.assign({},conflict);throw refused;
+      }
     };
     if (pluginJobActive) return json(res,429,{error:'An import or export is already running; retry when it finishes'});
     pluginJobActive = true;
@@ -4238,7 +4278,7 @@ async function handleRequest(req, res) {
       }else fs.copyFileSync(output,target,fs.constants.COPYFILE_EXCL);
       const receiptRecorded=saveJSONAtomic(receiptPath,receipts);
       return json(res,200,{ok:true,rev:capturedRev,renderer,files,receiptRecorded,...(!receiptRecorded?{warning:'Export succeeded, but its history receipt could not be saved.'}:{})});
-    }catch(e){console.error(importing?'Import failed:':'Export failed:',e);const timeout=!importing&&e.code==='RENDERER_TIMEOUT';const safe=timeout?'Export failed: renderer timed out':(e instanceof RequestError ? e.message : (e.message === 'Import refused: invalid or unsupported PPTX content' ? e.message : (importing ? 'Import failed; check the file format, path and package limits' : 'Export failed; check the destination and renderer with npm run doctor')));return json(res,timeout?504:(e instanceof RequestError?e.status:400),{error:safe});}
+    }catch(e){console.error(importing?'Import failed:':'Export failed:',e);const timeout=!importing&&e.code==='RENDERER_TIMEOUT';const safe=timeout?'Export failed: renderer timed out':(e instanceof RequestError ? e.message : (e.message === 'Import refused: invalid or unsupported PPTX content' ? e.message : (importing ? 'Import failed; check the file format, path and package limits' : 'Export failed; check the destination and renderer with npm run doctor')));return json(res,timeout?504:(e instanceof RequestError?e.status:400),{error:safe,...(e instanceof RequestError&&e.protection?{protection:e.protection}:{})});}
     finally{pluginJobActive = false;if(stage)fs.rmSync(stage,{recursive:true,force:true});}
   }
 

@@ -1390,11 +1390,25 @@ async function main() {
       kind: 'object', slideId: 's1', objectId: 'asset-example',
       objectKind: 'element', by: 'human-test', createdAt: 1
     }];
-    fs.writeFileSync(statePath, JSON.stringify(staleTarget, null, 2));
-    await expectStartupFailure(
-      suiteDir, port, 'persisted object-kind mismatch fails closed without rewriting state',
-      'names missing element "asset-example"'
-    );
+    // An object protection whose target is not in the deck protects nothing (Slides 0.1.4 import left such
+    // rows behind). It is set aside with a byte-for-byte copy of the previous state.json instead of
+    // stopping every later start; the other cases above still fail closed.
+    const staleText = JSON.stringify(staleTarget, null, 2);
+    fs.writeFileSync(statePath, staleText);
+    child = startServer(suiteDir, port, true);
+    await waitFor('start with a protection naming a missing object', async () =>
+      child.exitCode !== null || (await fetch(base + '/api/health')).ok, 8000);
+    const keptCopies = fs.readdirSync(dataDir).filter((name) => name.startsWith('state-before-protection-repair-'));
+    const afterStale = child.exitCode === null ? await api(base, '/api/protections') : null;
+    check('a persisted object protection naming a missing object is set aside, not a startup failure',
+      child.exitCode === null &&
+      child.output.includes('Removed 1 protection for objects no longer in the deck (element asset-example on slide s1)') &&
+      afterStale && afterStale.body.protections.length === 0 &&
+      keptCopies.length === 1 && fs.readFileSync(path.join(dataDir, keptCopies[0]), 'utf8') === staleText &&
+      JSON.parse(fs.readFileSync(statePath, 'utf8')).protections.length === 0,
+      child.output);
+    await stopServer(child); child = null;
+    for (const name of keptCopies) fs.rmSync(path.join(dataDir, name), { force: true });
     fs.writeFileSync(statePath, validState);
   } finally {
     setMode('');

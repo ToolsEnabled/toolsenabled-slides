@@ -77,6 +77,13 @@ const isUnitNumber = (value, positive) =>
 // polling loop against the human's pause button burns tokens and defeats the
 // point of a hard stop.
 function refusal(r, what) {
+  // 423 also means protected content. Reporting that as a pause told the agent to wait for a Resume
+  // that would never come; name the protection instead, as the CLI does.
+  if (r.status === 423 && r.body && (r.body.error === 'protected' || r.body.protection)) {
+    return `PROTECTED. ${r.body.message || r.body.error}. ` +
+      'Your change was NOT applied. Do not retry it: only the human can unprotect this content in the studio. ' +
+      'Work on unprotected content, or ask the human with ppt_note.';
+  }
   if (r.status === 423) {
     return 'PAUSED. The human has paused all editing' +
       (r.body && r.body.pausedBy ? ` (paused by ${JSON.stringify(r.body.pausedBy)})` : '') + '. ' +
