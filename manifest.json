@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "toolsenabled-slides",
   "display_name": "ToolsEnabled Slides",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Create and edit local PowerPoint decks with a live studio, slide locks, lint and portable exports.",
   "author": {
     "name": "ToolsEnabled, Inc.",

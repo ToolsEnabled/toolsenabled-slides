@@ -1,6 +1,6 @@
 {
   "name": "toolsenabled-slides",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "displayName": "ToolsEnabled Slides",
   "description": "Create and edit local PowerPoint decks with a live studio, slide locks, lint and portable exports.",
   "author": {

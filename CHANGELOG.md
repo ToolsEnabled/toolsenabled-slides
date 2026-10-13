@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.4 — 2026-10-13
+
+- A lock refusal now names the slides to lock. For example, `ppt_add_slide` with a slide still unlocked returns "Lock the affected slides with ppt_lock before editing: s2 (add-slide changes the whole deck, so it needs every current slide locked)" instead of the bare instruction; the HTTP response also lists them as `lockSlides`.
+- A start that finds no `presentation.pptx` yet (for example after `claude mcp list` stopped the first start before its first render) logs "creating the initial presentation.pptx" instead of "presentation needs a boot render: ENOENT …". A deck that is out of date for another reason logs "presentation.pptx is out of date, rendering it again: <reason>".
+- `node src/cli/doctor.js` prints install commands only for what is missing (`missing` and `install` appear only then); with everything present it prints none.
+- `node tools/mcp-config.mjs` names Node.js by the PATH entry that runs it (for example `/usr/local/bin/node`) instead of the file a version manager links it to, falling back to the running executable when no PATH entry matches.
+- Install docs: after the documented `claude plugin install`, the message "2 userConfig options not yet set" is expected; it refers to the optional renderer and LibreOffice settings, which keep their defaults. The docs name Claude Code 2.1.296, the version this release was tested with.
+
 ## 0.1.3 — 2026-10-13
 
 - Every one of the 37 MCP tools now declares a plain title and the `readOnlyHint`, `destructiveHint`, `idempotentHint` and `openWorldHint` annotations, reviewed against each tool's handler. Eight tools only read. The other 29 are marked destructive; for `ppt_add_*`, `ppt_note`, `ppt_lock`, `ppt_unlock`, `ppt_task_done` and `ppt_export` this is new and conservative (an edit clears redo and can drop the oldest undo state, a board post can drop old agent messages, an export trims its receipt list; an export still never overwrites a file). No tool reaches beyond this computer. Tool names, inputs and behavior are unchanged; docs/MCP.md lists the rules.

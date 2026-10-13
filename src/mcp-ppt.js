@@ -1335,7 +1335,7 @@ async function handle(line) {
       // Echo the client's protocol version: safest across versions.
       protocolVersion: (params && params.protocolVersion) || '2025-06-18',
       capabilities: { tools: {} },
-      serverInfo: { name: 'toolsenabled-slides', version: '0.1.3' },
+      serverInfo: { name: 'toolsenabled-slides', version: '0.1.4' },
       instructions: require('./lib/mcp-instructions'),
     } });
   }
