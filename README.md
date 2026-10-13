@@ -28,7 +28,7 @@ node src/cli/doctor.js
 
 Install LibreOffice with `sudo apt-get install libreoffice-impress` on Ubuntu. Set `SLIDES_SOFFICE` to the executable if it is outside PATH. Doctor reports the selected renderer and missing prerequisites. Nothing installs itself at startup. Helper executables are resolved to absolute paths outside the workspace, with an explicit install-directory working directory. Python prerequisite probes use isolated mode.
 
-Plugin route, which needs the external runtime from [docs/CLAUDE-INSTALL.md](docs/CLAUDE-INSTALL.md): in Claude Code, `claude plugin marketplace add ToolsEnabled/toolsenabled-slides` then `claude plugin install toolsenabled-slides@toolsenabled-slides` (or in one step `/plugin install toolsenabled-slides --marketplace ToolsEnabled/toolsenabled-slides`); in Codex, `codex plugin marketplace add ToolsEnabled/toolsenabled-slides` then `codex plugin add toolsenabled-slides@toolsenabled-slides` or the `/plugins` directory.
+Plugin route, which needs the external runtime from [docs/CLAUDE-INSTALL.md](docs/CLAUDE-INSTALL.md): in Claude Code, `claude plugin marketplace add ToolsEnabled/toolsenabled-slides`, then install it with the four settings it requires (the paths are examples): `claude plugin install -s local toolsenabled-slides@toolsenabled-slides --config python_executable="/absolute/private/Slides Runtime/bin/python" --config node_executable=/absolute/node --config workspace_directory="/absolute/decks/Project Update" --config port=4599`. Without these settings the plugin installs but starts no server. In Codex, `codex plugin marketplace add ToolsEnabled/toolsenabled-slides` then `codex plugin add toolsenabled-slides@toolsenabled-slides` or the `/plugins` directory.
 
 Start the stdio MCP server with one command:
 
