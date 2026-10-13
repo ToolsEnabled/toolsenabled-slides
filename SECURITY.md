@@ -1,3 +1,48 @@
+# Security policy
+
+ToolsEnabled's security policy applies to every ToolsEnabled product; this file states it for ToolsEnabled Slides. The full policy lives at https://toolsenabled.ai/security/. The latest release of Slides is the supported one; fixes ship as a new release.
+
+## Report a problem
+
+Please report a security problem privately, not in a public issue:
+
+- use **Report a vulnerability** on this repository's **Security** tab (GitHub's private vulnerability reporting, enabled for this repository: https://github.com/ToolsEnabled/toolsenabled-slides/security/advisories/new), or
+- email **security@toolsenabled.ai**.
+
+Reports from anyone are welcome, including from the directories that list this plugin. Tell us the Slides version (the `version` in `manifest.json` and `package.json`, which your agent CLI's plugin list also shows), what you found, and how to reproduce it. We read every report, reply as soon as we can, keep you informed while we fix it, tell you when the fix is released, and credit you in the release notes if you want that.
+
+## What we ask
+
+Good faith means:
+
+- you test on computers, accounts and projects that are yours or that you have permission to use;
+- you stop once you can show the problem, and do not use it to go further;
+- you do not access, change or keep other people's data beyond what you need to show the problem, and you delete it afterwards;
+- you do not disrupt services or other people;
+- you give us a reasonable chance to fix the problem before you publish it. We will not ask you to stay silent indefinitely; if we have not fixed it within 90 days of your report, you may publish.
+
+If you are unsure whether something is covered, ask us first at the addresses above.
+
+## Safe harbor
+
+We want people to look for problems in Slides, and we will not treat good-faith research as an attack. If you research and report in good faith under this policy:
+
+- we consider your research authorized, and we will not bring or support any legal action against you for it, including under anti-hacking, anti-circumvention or similar laws;
+- we waive any part of our own terms that would otherwise stop you from doing that research;
+- if someone else takes legal action against you for research that followed this policy, we will make it known that your research was authorized by us.
+
+This safe harbor covers ToolsEnabled's own code and releases. It cannot grant permission for other parties' systems: report a problem in an agent CLI, a model provider or any other software we did not write to its own maker.
+
+## Rewards
+
+ToolsEnabled is a small, self-funded company. We do not pay rewards for reports. We are grateful for every one, and we will credit you publicly if you want that.
+
+Like every ToolsEnabled release, Slides is provided "as is", without warranty of any kind, as https://toolsenabled.ai/terms/ says. This policy says how we handle reports, not that any release is free of problems.
+
+## Security boundaries of this release
+
+The rest of this file is the security document that ships with this release, kept as written: what Slides protects, what it does not claim, and the limits it enforces. Where it says to report privately to the package maintainer, use the addresses above.
+
 # Security
 
 ToolsEnabled Slides runs on loopback for one local user. Human controls are not available as MCP tools and require the dashboard session. Open the one-time URL printed at launch within ten minutes. Its secret is a URL fragment, which is never sent in an HTTP request or Referer header. The page removes that fragment and exchanges the secret once by a same-Origin JSON POST. It stores the returned token only in sessionStorage, scoped to the exact origin including its port, and sends it in the X-Slides-Session header for human controls. An independent HttpOnly, SameSite=Strict, host-only cookie is an additional factor; that cookie alone never authorizes a control. No GET returns a controller or session token. Restarting the server invalidates both values. Keep the launch URL private.
