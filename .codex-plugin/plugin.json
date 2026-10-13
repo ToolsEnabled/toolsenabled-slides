@@ -43,10 +43,10 @@
       "Interactive",
       "Write"
     ],
-    "websiteURL": "https://toolsenabled.ai",
-    "privacyPolicyURL": "https://toolsenabled.ai/legal/privacy/"
+    "websiteURL": "https://toolsenabled.ai/slides/",
+    "privacyPolicyURL": "https://toolsenabled.ai/privacy/"
   },
-  "homepage": "https://toolsenabled.ai",
+  "homepage": "https://toolsenabled.ai/slides/",
   "repository": "https://github.com/ToolsEnabled/toolsenabled-slides",
   "license": "MIT"
 }

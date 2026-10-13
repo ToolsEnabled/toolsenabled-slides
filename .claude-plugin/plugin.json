@@ -8,8 +8,11 @@
     "email": "support@toolsenabled.ai",
     "url": "https://toolsenabled.ai"
   },
-  "homepage": "https://toolsenabled.ai",
+  "homepage": "https://toolsenabled.ai/slides/",
   "repository": "https://github.com/ToolsEnabled/toolsenabled-slides",
+  "documentationUrl": "https://github.com/ToolsEnabled/toolsenabled-slides#readme",
+  "privacyPolicyUrl": "https://toolsenabled.ai/privacy/",
+  "supportUrl": "https://toolsenabled.ai/support/",
   "license": "MIT",
   "keywords": [
     "presentations",

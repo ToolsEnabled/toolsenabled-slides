@@ -9,7 +9,7 @@
     "email": "support@toolsenabled.ai",
     "url": "https://toolsenabled.ai"
   },
-  "homepage": "https://toolsenabled.ai",
+  "homepage": "https://toolsenabled.ai/slides/",
   "documentation": "https://github.com/ToolsEnabled/toolsenabled-slides#readme",
   "support": "mailto:support@toolsenabled.ai",
   "repository": {
@@ -18,7 +18,7 @@
   },
   "license": "MIT",
   "privacy_policies": [
-    "https://toolsenabled.ai/legal/privacy/"
+    "https://toolsenabled.ai/privacy/"
   ],
   "server": {
     "type": "python",

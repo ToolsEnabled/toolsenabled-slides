@@ -57,7 +57,7 @@ A development signature establishes no publisher trust. Stock mcpb 2.1.2 verific
 
 ## Privacy and support
 
-Slides edits local files and serves a loopback dashboard. The MCP host receives tool results and may apply its own service/data policy. Slides has no built-in provider or credential store. See [SECURITY.md](../SECURITY.md), [ToolsEnabled privacy policy](https://toolsenabled.ai/legal/privacy/) and contact [support@toolsenabled.ai](mailto:support@toolsenabled.ai).
+Slides edits local files and serves a loopback dashboard. The MCP host receives tool results and may apply its own service/data policy. Slides has no built-in provider or credential store. See [SECURITY.md](../SECURITY.md), [ToolsEnabled privacy policy](https://toolsenabled.ai/privacy/) and contact [support@toolsenabled.ai](mailto:support@toolsenabled.ai).
 
 ## Startup environment contract
 
