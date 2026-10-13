@@ -36,7 +36,8 @@ for(const [type,fields,verify] of [
   assert.deepEqual((await r.post('/api/locks',{by:'bob',slideIds:['s2']})).body.locked,['s2']);
   const before=(await r.state()).model;
   for(const op of [{type,...fields},{type,...fields,slideId:'s1'}]){
-   const result=await r.post('/api/edit',{editor:'alice',op});assert.equal(result.status,409,type+' must not narrow its lock scope');assert.match(result.body.error,/Lock/);assert.deepEqual((await r.state()).model,before);
+   const result=await r.post('/api/edit',{editor:'alice',op});assert.equal(result.status,409,type+' must not narrow its lock scope');assert.match(result.body.error,/Lock/);
+   assert.match(result.body.error,/ppt_lock before editing: s2 \(.*every current slide/,'the refusal names the slide still to lock');assert.deepEqual(result.body.lockSlides,['s2']);assert.deepEqual((await r.state()).model,before);
   }
   assert.equal((await r.post('/api/locks/release',{by:'bob',slideIds:['s2']})).status,200);
   assert.deepEqual((await r.post('/api/locks',{by:'alice',slideIds:['s2']})).body.locked,['s2']);
@@ -57,7 +58,8 @@ test('unprefixed editor labels cannot edit without their own lock',async()=>{
   for(const editor of ['alice','human','dashboard','studio','lead','cc-agent','',null])assert.equal((await r.post('/api/edit',{editor,op:{type:'set-notes',slideId:'s1',text:'Denied'}})).status,409,JSON.stringify(editor));
   assert.deepEqual((await r.state()).model,before);
   await r.post('/api/locks',{by:'alice',slideIds:['s1']});
-  assert.equal((await r.post('/api/edit',{editor:'bob',op:{type:'set-notes',slideId:'s1',text:'Denied'}})).status,409);
+  const denied=await r.post('/api/edit',{editor:'bob',op:{type:'set-notes',slideId:'s1',text:'Denied'}});assert.equal(denied.status,409);
+  assert.match(denied.body.error,/ppt_lock before editing: s1$/);assert.deepEqual(denied.body.lockSlides,['s1']);
   assert.equal((await r.post('/api/edit',{editor:'alice',op:{type:'set-notes',slideId:'s1',text:'Owned'}})).status,200);
   assert.equal((await r.post('/api/edit',{editor:'human',op:{type:'set-notes',slideId:'s2',text:'Dashboard'}},r.auth)).status,200);
   const after=(await r.state()).model;assert.equal(after.slides[0].notes,'Owned');assert.equal(after.slides[1].notes,'Dashboard');

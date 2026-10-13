@@ -5230,7 +5230,11 @@ async function handleRequest(req, res) {
     if (process.env.SLIDES_WORKSPACE && !dashboardSession.authenticated(req)) {
       const deckWide = ['add-slide', 'set-theme', 'set-presentation-title'].includes(op.type);
       const ids = !deckWide && op.slideId ? [op.slideId] : model.slides.map(s => s.id);
-      if (ids.some(id => { const held = locks.get(id); return !held || held.by !== editor || Date.now()-held.ts > LOCK_TTL; })) return json(res,409,{error:'Lock the affected slides with ppt_lock before editing'});
+      const lockSlides = ids.filter(id => { const held = locks.get(id); return !held || held.by !== editor || Date.now()-held.ts > LOCK_TTL; });
+      if (lockSlides.length) {
+        const why = deckWide ? ` (${op.type} changes the whole deck, so it needs every current slide locked)` : '';
+        return json(res,409,{error:`Lock the affected slides with ppt_lock before editing: ${lockSlides.join(', ')}${why}`,lockSlides});
+      }
     }
     //                 // allow either {op:{...}} or the op inline
     let editDelegation = null;
@@ -5518,7 +5522,10 @@ async function boot() {
 
     const freshness = presentationFreshness();
     if (!freshness.current) {
-      if (!initialDeck) console.error('presentation needs a boot render:', freshness.error);
+      // A missing presentation.pptx is normal after a first start that stopped before its first
+      // render (a client's health check can do that); say what happens next, not ENOENT.
+      if (!fs.existsSync(PPTX_PATH)) console.error('creating the initial presentation.pptx');
+      else if (!initialDeck) console.error('presentation.pptx is out of date, rendering it again:', freshness.error);
       if (!state.paused) scheduleRender();
     } else {
       void refreshThumbsFromDeck(model.rev, 'boot thumbs pass skipped:');
