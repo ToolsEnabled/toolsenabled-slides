@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.6 — 2026-10-13
+
+- README: a "Try it" section gives the shortest path from nothing to a working result: prepare the external runtime from the 0.1.0 wheel bundle, install the plugin with its four settings, then three prompts (show the deck, add a slide with three bullets, export the deck as PPTX), each with the result it shows. No account or API key is needed.
+- SECURITY.md cites this repository's LICENSE (MIT) for "as is". https://toolsenabled.ai/terms/ covers only Fleet and the website.
+- The skill no longer gives the model the path of the log that holds the one-time dashboard link. It tells the human to find the link in the host's MCP log, as the README explains; the rest of the skill is unchanged.
+- `test/js/managed-presentation.test.js` no longer starts a program itself: the helper that writes a deck with python-pptx moved unchanged to `test/helpers/user-deck.js`, so the file that polls the local server over HTTP runs no child process. The test checks exactly what it checked before; `tools/source-files.json` lists the new helper.
+- The server, tools, studio and panes are unchanged.
+
 ## 0.1.5 — 2026-10-13
 
 - `ppt_import` now respects protections on single objects. It used to check only slide protections, so an agent holding every slide lock could replace a deck in which a human had protected an object: the object was lost, its protection could not be removed in the studio, and the next start refused the workspace ("protections[0] names missing element …") until `state.json` was edited by hand. Import is now refused while any slide or object of the deck is protected, and the refusal names it, for example "Protected content must be unlocked by the human before replacing the deck (element e1 on slide s1 is protected)".
