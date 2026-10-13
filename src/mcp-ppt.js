@@ -1238,12 +1238,53 @@ async function call(name, a = {}) {
   return fail(`Unhandled tool: ${name}`);
 }
 
-// Advisory host hints; authorization still comes from schema, locks and human controls.
-const READ_ONLY = new Set(['ppt_show','ppt_search','ppt_board','ppt_lint','ppt_time','ppt_locks','ppt_renderer','ppt_tasks']);
-const ADDITIVE = new Set(['ppt_note','ppt_add_slide','ppt_add_element','ppt_add_image','ppt_add_shape','ppt_add_video','ppt_export','ppt_lock','ppt_unlock','ppt_task_done']);
+// MCP tool annotations (title plus readOnly, destructive, idempotent and openWorld hints), reviewed per handler.
+// Advisory host hints; authorization still comes from schema, locks and human controls. Every deck edit through
+// /api/edit bumps the revision, pushes an undo state (the oldest past UNDO_LIMIT is dropped) and clears redo, so all
+// deck edits are destructive, and only deletes are idempotent (a repeat is refused because the id is gone).
+// Nothing reaches beyond this computer: the only connection is the plugin's own loopback suite server.
+const ANNOTATIONS = Object.freeze(Object.fromEntries(Object.entries({
+  ppt_show: ['Show deck outline', true, false, true],
+  ppt_search: ['Search deck text', true, false, true],
+  ppt_board: ['Read the board', true, false, true],
+  ppt_lint: ['Check deck quality', true, false, true],
+  ppt_time: ['Estimate speaking time', true, false, true],
+  ppt_locks: ['List slide locks', true, false, true],
+  ppt_tasks: ['Read tasks', true, false, true],
+  ppt_renderer: ['Check renderer', true, false, true],
+  ppt_task_done: ['Mark task done', false, true, true],
+  ppt_note: ['Post to the board', false, true, false],
+  ppt_lock: ['Lock slides', false, true, false],
+  ppt_unlock: ['Unlock slides', false, true, true],
+  ppt_set_text: ['Set element text', false, true, false],
+  ppt_set_bullets: ['Set bullet items', false, true, false],
+  ppt_set_notes: ['Set speaker notes', false, true, false],
+  ppt_set_style: ['Set text style', false, true, false],
+  ppt_set_fill: ['Set fill color', false, true, false],
+  ppt_set_outline: ['Set outline color', false, true, false],
+  ppt_set_corners: ['Make corners sharp', false, true, false],
+  ppt_set_box: ['Move or resize', false, true, false],
+  ppt_add_shape: ['Add rectangle', false, true, false],
+  ppt_add_image: ['Add image', false, true, false],
+  ppt_add_video: ['Add video', false, true, false],
+  ppt_set_image: ['Replace image', false, true, false],
+  ppt_set_media: ['Update video', false, true, false],
+  ppt_set_animation: ['Set animation', false, true, false],
+  ppt_delete_shape: ['Delete generated object', false, true, true],
+  ppt_add_slide: ['Add slide', false, true, false],
+  ppt_delete_slide: ['Delete slide', false, true, true],
+  ppt_move_slide: ['Move slide', false, true, false],
+  ppt_set_layout: ['Set slide layout', false, true, false],
+  ppt_set_transition: ['Set slide transition', false, true, false],
+  ppt_add_element: ['Add text element', false, true, false],
+  ppt_delete_element: ['Delete element', false, true, true],
+  ppt_set_presentation_title: ['Set presentation title', false, true, false],
+  ppt_import: ['Import PPTX', false, true, false],
+  ppt_export: ['Export deck', false, true, true],
+}).map(([name, [title, readOnlyHint, destructiveHint, idempotentHint]]) =>
+  [name, Object.freeze({ title, readOnlyHint, destructiveHint, idempotentHint, openWorldHint: false })])));
 function annotations(name) {
-  const readOnlyHint = READ_ONLY.has(name);
-  return {readOnlyHint,destructiveHint:!readOnlyHint && !ADDITIVE.has(name),openWorldHint:false,...(readOnlyHint ? {idempotentHint:true} : {})};
+  return { ...ANNOTATIONS[name] };
 }
 
 // -------------------------------------------------------------- JSON-RPC
