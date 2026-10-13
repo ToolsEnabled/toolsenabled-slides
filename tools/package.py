@@ -3,7 +3,7 @@ import sys, zipfile, hashlib
 from pathlib import Path
 from package_inventory import files as source_files
 root=Path(__file__).resolve().parent.parent
-output=Path(sys.argv[1] if len(sys.argv)>1 else root/'dist/slides-0.1.2.zip')
+output=Path(sys.argv[1] if len(sys.argv)>1 else root/'dist/slides-0.1.3.zip')
 output.parent.mkdir(parents=True,exist_ok=True)
 files=source_files(root)
 with zipfile.ZipFile(output,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as z:

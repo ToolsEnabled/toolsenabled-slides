@@ -28,7 +28,7 @@ def build(inputs, output, pip_wheel):
         payloads[installer['filename']] = installer_data
         payloads['WHEELS.json'] = (json.dumps({'profile': profile, 'wheels': wheels, 'installer': installer}, indent=2) + '\n').encode()
         payloads['SHA256SUMS'] = ''.join(hashlib.sha256(data).hexdigest() + '  ' + name + '\n' for name, data in sorted(payloads.items())).encode()
-        archive = output / f'toolsenabled-slides-0.1.2-{profile}-wheels.zip'
+        archive = output / f'toolsenabled-slides-0.1.3-{profile}-wheels.zip'
         with zipfile.ZipFile(archive, 'w') as bundle:
             for name, data in sorted(payloads.items()):
                 info = zipfile.ZipInfo(profile + '/' + name, date_time=(2026, 1, 1, 0, 0, 0)); info.create_system = 3
