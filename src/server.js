@@ -476,7 +476,7 @@ function sweepStaleTmpFiles() {
   let entries;
   try { entries = fs.readdirSync(DATA); } catch (_) { return; }
   const bases = [
-    'model.json', 'state.json', 'board.json', 'render-state.json',
+    'model.json', 'state.json', 'board.json', 'render-state.json', 'exports.json',
     'element-history.json', 'element-history.pending.json', 'com_host.pid.json',
   ];
   for (const name of entries) {
@@ -2924,48 +2924,7 @@ function runPdfExport() {
 function findSlide(id) { return model.slides.find((s) => s.id === id); }
 function findElement(slide, id) { return slide && slide.elements.find((e) => e.id === id); }
 
-const DASH_RE = /[–—]/; // en dash, em dash
-const LINT_MIN_SIZE = 20;
-
-function lintModel(m) {
-  const issues = [];
-  const flagDash = (slideId, elementId, field, text) => {
-    const s = String(text == null ? '' : text);
-    const hit = s.match(DASH_RE);
-    if (hit) issues.push({ type: 'dash', slideId, elementId, field, detail: `contains "${hit[0]}"`, text: trunc(s) });
-  };
-
-  const headers = []; // size>=28, non-centered text — the slide-title convention
-  for (const slide of m.slides) {
-    flagDash(slide.id, null, 'notes', slide.notes);
-    for (const el of (slide.elements || [])) {
-      const texts = Array.isArray(el.items) ? el.items : [el.text];
-      texts.forEach((t, i) => flagDash(slide.id, el.id, Array.isArray(el.items) ? `items[${i}]` : 'text', t));
-      const st = el.style || {};
-      if (typeof st.size === 'number' && st.size < LINT_MIN_SIZE) {
-        issues.push({ type: 'min-size', slideId: slide.id, elementId: el.id, field: 'style.size',
-          detail: `${st.size}pt is under the ${LINT_MIN_SIZE}pt floor` });
-      }
-      if (typeof st.size === 'number' && st.size >= 28 && st.align !== 'center') {
-        headers.push({ slideId: slide.id, elementId: el.id, align: st.align || 'left' });
-      }
-    }
-  }
-
-  if (headers.length > 1) {
-    const counts = {};
-    for (const h of headers) counts[h.align] = (counts[h.align] || 0) + 1;
-    const majority = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
-    for (const h of headers) {
-      if (h.align !== majority) {
-        issues.push({ type: 'header-align', slideId: h.slideId, elementId: h.elementId, field: 'style.align',
-          detail: `header aligned "${h.align}", ${counts[majority]}/${headers.length} other headers are "${majority}"` });
-      }
-    }
-  }
-
-  return { rev: m.rev, ok: issues.length === 0, count: issues.length, issues };
-}
+const {DASH_RE,LINT_MIN_SIZE,lintModel,estimateTiming}=require('./lib/quality');
 
 function lintFonts(m) {
   return new Promise((resolve) => {
@@ -3075,30 +3034,6 @@ function lintAffected(affected) {
   return msgs;
 }
 
-const TIMING_WPM = 135;
-const TIMING_TARGET_S = 11 * 60;   // default target: 11:00
-const TIMING_CAP_S = 12 * 60;      // default budget: 12:00
-
-function estimateTiming(m) {
-  const perSlide = m.slides.map((slide) => {
-    let words = 0;
-    for (const el of (slide.elements || [])) {
-      const texts = Array.isArray(el.items) ? el.items : [el.text];
-      for (const t of texts) {
-        const s = String(t == null ? '' : t).trim();
-        if (s) words += s.split(/\s+/).length;
-      }
-    }
-    return { slideId: slide.id, words, seconds: Math.round(words / TIMING_WPM * 60) };
-  });
-  const totalWords = perSlide.reduce((n, s) => n + s.words, 0);
-  const totalSeconds = perSlide.reduce((n, s) => n + s.seconds, 0);
-  return {
-    wpm: TIMING_WPM, targetSeconds: TIMING_TARGET_S, capSeconds: TIMING_CAP_S,
-    totalWords, totalSeconds, perSlide,
-    overTarget: totalSeconds > TIMING_TARGET_S, overCap: totalSeconds > TIMING_CAP_S
-  };
-}
 
 function defaultElements(layout) {
   switch (layout) {
@@ -3114,8 +3049,7 @@ function defaultElements(layout) {
   }
 }
 
-const NATIVE_LAYOUTS = new Set(['title', 'content', 'bullets', 'section', 'titleonly', 'blank', 'two', 'compare']);
-const ELEMENT_TYPES = new Set(['title', 'subtitle', 'heading', 'body', 'bullets']);
+const {NATIVE_LAYOUTS,ELEMENT_TYPES}=require('./lib/deck-choices');
 
 function generatedBoxError(box) {
   if (!isRecord(box)) return 'box must be an object';
@@ -4267,6 +4201,7 @@ async function handleRequest(req, res) {
         if(!committed.ok){fs.unlinkSync(base);fs.unlinkSync(base+'.slides-validation.json');throw new Error(committed.error);}
         model=candidate;elementHistory=history.history;
         pushUndo(before,{editor,opType:'import',detail:'Imported '+path.basename(target),rev:model.rev,ts:Date.now()});redoStack=[];
+        addLog({kind:'import',editor,detail:'Imported '+path.basename(target),rev:model.rev});
         locks.clear();dirtyAll=true;scheduleRender();
         broadcast({type:'edit',editor,opType:'import',rev:model.rev,model,undoCount:undoStack.length,redoCount:0,ts:Date.now()});
         return json(res,200,{ok:true,rev:model.rev,slides:model.slides.length,path:b.path});
@@ -4282,14 +4217,17 @@ async function handleRequest(req, res) {
       }
       if(state.paused)throw new RequestError(423,'paused before export publication');
       confined(ROOT,b.path,{write:true});
+      const files=b.format==='png'?fs.readdirSync(output).map(n=>b.path+'/'+n):[b.path];
+      const receiptPath=path.join(DATA,'exports.json');
+      const receipts=require('./lib/export-receipts').nextReceipts(receiptPath,{ts:Date.now(),editor,format:b.format,rev:capturedRev,renderer,files});
       if(b.format==='png'){
         // Reserve a fresh directory; never replace any existing file.
         fs.mkdirSync(target,{mode:0o700});
         try{for(const file of fs.readdirSync(output))fs.copyFileSync(path.join(output,file),path.join(target,file),fs.constants.COPYFILE_EXCL);}
         catch(e){fs.rmSync(target,{recursive:true,force:true});throw e;}
       }else fs.copyFileSync(output,target,fs.constants.COPYFILE_EXCL);
-      const files=b.format==='png'?fs.readdirSync(target).map(n=>b.path+'/'+n):[b.path];
-      return json(res,200,{ok:true,rev:capturedRev,renderer,files});
+      const receiptRecorded=saveJSONAtomic(receiptPath,receipts);
+      return json(res,200,{ok:true,rev:capturedRev,renderer,files,receiptRecorded,...(!receiptRecorded?{warning:'Export succeeded, but its history receipt could not be saved.'}:{})});
     }catch(e){console.error(importing?'Import failed:':'Export failed:',e);const timeout=!importing&&e.code==='RENDERER_TIMEOUT';const safe=timeout?'Export failed: renderer timed out':(e instanceof RequestError ? e.message : (e.message === 'Import refused: invalid or unsupported PPTX content' ? e.message : (importing ? 'Import failed; check the file format, path and package limits' : 'Export failed; check the destination and renderer with npm run doctor')));return json(res,timeout?504:(e instanceof RequestError?e.status:400),{error:safe});}
     finally{pluginJobActive = false;if(stage)fs.rmSync(stage,{recursive:true,force:true});}
   }
@@ -4342,6 +4280,11 @@ async function handleRequest(req, res) {
 
   // ---- quality lint (read-only; not gated by pause, like the board)
   if (req.method === 'GET' && p === '/api/lint') {
+    if(url.searchParams.get('cached')==='1'){
+      let artifact;try{const stat=fs.statSync(PPTX_PATH);artifact=`${stat.mtimeMs}:${stat.size}`;}catch{artifact='missing';}
+      const cached=fullLint.cache?.key===`${model.rev}:${artifact}`?fullLint.cache.value:null;
+      return json(res,200,cached?{...cached,cached:true}:{rev:model.rev,cached:false});
+    }
     return json(res, 200, await fullLint(model));
   }
 
@@ -4674,10 +4617,9 @@ async function handleRequest(req, res) {
     if (!t) return json(res, 404, { ok: false, error: 'no such task' });
     const who = typeof b.by === 'string' ? b.by.trim().slice(0, 60) : '';
     if (!who) return json(res, 400, { ok: false, error: 'missing by' });
-    // The lead and human surfaces can close a task as oversight. A worker,
-    // however, may only close work assigned or claimed by itself; otherwise a
-    // stale/mistyped task id lets one child silently complete another's work.
-    if (isExternalEditor(who)) {
+    // Workers must own the task; other labels need an authenticated dashboard
+    // to close another editor's work as oversight. Labels alone grant no bypass.
+    if (isExternalEditor(who) || !dashboardSession.authenticated(req)) {
       if (t.assignee && t.assignee !== who) {
         return json(res, 409, { ok: false, error: `task is assigned to ${t.assignee}` });
       }
@@ -5273,8 +5215,11 @@ async function handleRequest(req, res) {
     }
     const editor = (b.editor && String(b.editor).slice(0, 60)) || 'anonymous';
     const op = b.op || b;
-    if (process.env.SLIDES_WORKSPACE && isExternalEditor(editor)) {
-      const ids = op.slideId ? [op.slideId] : model.slides.map(s => s.id);
+    // A display name is not proof of a human session. Every client outside
+    // the authenticated dashboard must hold its own current slide locks.
+    if (process.env.SLIDES_WORKSPACE && !dashboardSession.authenticated(req)) {
+      const deckWide = ['add-slide', 'set-theme', 'set-presentation-title'].includes(op.type);
+      const ids = !deckWide && op.slideId ? [op.slideId] : model.slides.map(s => s.id);
       if (ids.some(id => { const held = locks.get(id); return !held || held.by !== editor || Date.now()-held.ts > LOCK_TTL; })) return json(res,409,{error:'Lock the affected slides with ppt_lock before editing'});
     }
     //                 // allow either {op:{...}} or the op inline

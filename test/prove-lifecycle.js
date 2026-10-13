@@ -3,6 +3,8 @@
 const assert=require('node:assert/strict');const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const net=require('node:net');const {spawnSync}=require('node:child_process');
 const {Client,assertProcessExited}=require('./helpers/mcp-client');
 const {python,checkPython}=require('../src/lib/prerequisites');
+const {clean}=require('../src/lib/terminal-text');
+function proofStderr(value){return clean(value,16000).text;}
 async function freePort(){const s=net.createServer();await new Promise(r=>s.listen(0,'127.0.0.1',r));const port=s.address().port;await new Promise(r=>s.close(r));return port;}
 async function proof(output,{pptxOnly=false,runtimePython}={}){
  checkPython();
@@ -11,7 +13,7 @@ async function proof(output,{pptxOnly=false,runtimePython}={}){
  const workspace=fs.mkdtempSync(path.join(os.tmpdir(),'slides-lifecycle-'));const port=await freePort();
  const env={SLIDES_WORKSPACE:workspace,SUITE_PORT:String(port),SLIDES_RENDERER:'libreoffice',SUITE_PYTHON:python()};
  const launch=runtimePython?{command:runtimePython,args:['-I',path.resolve(__dirname,'../src/python/mcp_launcher.py'),'--node',process.execPath,'--workspace',workspace,'--port',String(port)]}:undefined;
- const client=new Client(env,launch);const transcript=[];
+ const client=new Client(env,{...launch,redactStderr:true});const transcript=[];
  const tool=async(name,args={})=>{const text=await client.tool(name,args);transcript.push({name,args,result:text});return text;};
  let attached;
  try{
@@ -33,7 +35,7 @@ async function proof(output,{pptxOnly=false,runtimePython}={}){
   }
   const state=await (await fetch(`http://127.0.0.1:${port}/api/state`)).json();assert.equal(state.model.slides.length,3);
   const pid=(await (await fetch(`http://127.0.0.1:${port}/api/health`)).json()).pid;
-  attached=new Client(env,launch);await attached.request('initialize',{});await attached.close();attached=null;
+  attached=new Client(env,{...launch,redactStderr:true});await attached.request('initialize',{});await attached.close();attached=null;
   assert.ok((await fetch(`http://127.0.0.1:${port}/api/health`)).ok,'attached client must leave server alive');
   const pptx=JSON.parse(await tool('ppt_export',{path:'proof.pptx',format:'pptx'}));assert.equal(pptx.renderer,'python-pptx');
   const exports=[pptx];
@@ -49,10 +51,10 @@ async function proof(output,{pptxOnly=false,runtimePython}={}){
   await assertProcessExited(pid);assert.equal(fs.existsSync(path.join(workspace,'.slides-state','server.lock')),false);
   for(const e of exports)for(const file of e.files){const dest=path.join(output,file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(workspace,file),dest);}
   const report={ok:true,node:process.version,platform:process.platform,display:process.env.DISPLAY||null,mode:pptxOnly?'pptx-only':'libreoffice',runtimePython:runtimePython||null,slides:3,tools:listed.tools.length,serverPid:pid,checks:['initialize','golden tools/list','locks required','3-slide MCP editing','attach and detach','real exports','import','EOF shutdown','lease released'],exports,transcript};
-  fs.writeFileSync(path.join(output,'receipt.json'),JSON.stringify(report,null,2)+'\n');fs.writeFileSync(path.join(output,'stderr.log'),client.stderr);return report;
+  fs.writeFileSync(path.join(output,'receipt.json'),JSON.stringify(report,null,2)+'\n');fs.writeFileSync(path.join(output,'stderr.log'),proofStderr(client.stderr));return report;
  }finally{if(attached&&attached.child.exitCode===null)attached.child.kill('SIGTERM');if(client.child.exitCode===null)client.child.kill('SIGTERM');fs.rmSync(workspace,{recursive:true,force:true});}
 }
-module.exports={proof};
+module.exports={proof,proofStderr};
 if(require.main===module){const i=process.argv.indexOf('--output');if(i<0||!process.argv[i+1]){console.error('Usage: node test/prove-lifecycle.js --output <new evidence directory> [--pptx-only]');process.exit(2);}
  const runtimeIndex=process.argv.indexOf('--runtime-python');
  proof(path.resolve(process.argv[i+1]),{pptxOnly:process.argv.includes('--pptx-only'),runtimePython:runtimeIndex<0?undefined:process.argv[runtimeIndex+1]}).then(r=>console.log(JSON.stringify({ok:r.ok,slides:r.slides,mode:r.mode}))).catch(e=>{console.error(e.stack);process.exitCode=1;});}

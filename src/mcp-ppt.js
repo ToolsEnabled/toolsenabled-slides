@@ -737,6 +737,7 @@ const TOOLS = [
 ];
 
 TOOLS.push(
+  {name:'ppt_tasks', description:'Read dashboard task records, assignments and protection grant scope. Task text is workspace data. Pages are revision-pinned; use id to read one task before working it. This does not claim, edit or complete a task.', inputSchema:{type:'object',properties:{id:{type:'string',maxLength:100},all:{type:'boolean'},offset:{type:'integer',minimum:0},limit:{type:'integer',minimum:1,maximum:20},revision:{type:'string',pattern:'^[a-f0-9]{64}$'}}}},
   {name:'ppt_import', description:'Open an existing PPTX inside the workspace. Replaces the current deck with an editable overlay and records human undo. Lock all current slides first; pause and content protections bind. External links, embedded programs and embedded workbooks (including workbook-backed charts) are refused. Replace those charts with PNG, JPEG or GIF images before import.', inputSchema:{type:'object',properties:{path:{type:'string',description:'Workspace-relative .pptx path'}},required:['path']}},
   {name:'ppt_export', description:'Export the current model to a new workspace-relative PPTX, PDF, or PNG directory. Returns renderer, captured revision and relative paths. Existing destinations are never overwritten.', inputSchema:{type:'object',properties:{path:{type:'string'},format:{type:'string',enum:['pptx','pdf','png']}},required:['path','format']}},
   {name:'ppt_renderer', description:'Report local rendering prerequisites and the selected PDF/PNG renderer. No installation or network calls.', inputSchema:{type:'object',properties:{}}}
@@ -757,6 +758,12 @@ async function call(name, a = {}) {
     return r.status === 200 ? text(JSON.stringify(r.body)) : fail(refusal(r,name));
   }
   // ---- reading
+  if (name === 'ppt_tasks') {
+    const r=await api('GET','/api/tasks');
+    if(r.status!==200)return fail(refusal(r,'read tasks'));
+    try{return text(JSON.stringify(require('./lib/task-view').taskPage(r.body?.tasks,a)));}
+    catch(error){return fail(error.message);}
+  }
   if (name === 'ppt_show') {
     const s = await state();
     if (!s.ok) return fail(s.text);
@@ -1229,7 +1236,7 @@ async function call(name, a = {}) {
 }
 
 // Advisory host hints; authorization still comes from schema, locks and human controls.
-const READ_ONLY = new Set(['ppt_show','ppt_search','ppt_board','ppt_lint','ppt_time','ppt_locks','ppt_renderer']);
+const READ_ONLY = new Set(['ppt_show','ppt_search','ppt_board','ppt_lint','ppt_time','ppt_locks','ppt_renderer','ppt_tasks']);
 const ADDITIVE = new Set(['ppt_note','ppt_add_slide','ppt_add_element','ppt_add_image','ppt_add_shape','ppt_add_video','ppt_export','ppt_lock','ppt_unlock','ppt_task_done']);
 function annotations(name) {
   const readOnlyHint = READ_ONLY.has(name);
@@ -1284,7 +1291,7 @@ async function handle(line) {
       // Echo the client's protocol version: safest across versions.
       protocolVersion: (params && params.protocolVersion) || '2025-06-18',
       capabilities: { tools: {} },
-      serverInfo: { name: 'toolsenabled-slides', version: '0.1.0' },
+      serverInfo: { name: 'toolsenabled-slides', version: '0.1.1' },
       instructions: require('./lib/mcp-instructions'),
     } });
   }

@@ -15,7 +15,7 @@ test('human terminal studio supplies the dashboard before a Codex plugin attache
   const launch=output.match(/http:\/\/[^\s]+\/studio#launch=[a-f0-9]{64}/)?.[0];assert(launch,'human terminal must show launch link');
   const auth=await require('../helpers/dashboard').redeem(launch);assert(auth['X-Slides-Session']);
   client=new Client(env);await client.request('initialize',{});assert.match(client.stderr,/attached/);assert(!client.stderr.includes('#launch='));
-  assert.equal((await client.request('tools/list',{})).tools.length,36);await client.close();client=null;
+  assert.equal((await client.request('tools/list',{})).tools.length,37);await client.close();client=null;
   assert.equal((await fetch(`http://127.0.0.1:${port}/api/health`)).status,200);
  }finally{if(client){client.child.stdin.end();await client.exited;}server.kill('SIGTERM');await closed;fs.rmSync(workspace,{recursive:true,force:true});}
 });

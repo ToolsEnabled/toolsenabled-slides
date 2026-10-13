@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 'use strict';
 
+// Views never register an editor, start a server or write workspace state.
+if (process.argv[2] === 'view') {
+  void require('./cli/view').main(process.argv.slice(3));
+  return;
+}
+
 const http = require('http');
 const os = require('os');
 const crypto = require('crypto');
@@ -806,6 +812,7 @@ ${C.bold}ppt${C.reset} — presentation suite editor
   ${C.cyan}delete-element${C.reset} sID eID
   ${C.cyan}notes${C.reset} sID "speaker notes"
   ${C.cyan}pause${C.reset} | ${C.cyan}resume${C.reset} | ${C.cyan}render${C.reset} | ${C.cyan}watch${C.reset} | ${C.cyan}open${C.reset}
+  ${C.cyan}view${C.reset} <home|slide|board|tasks|history|lint|timing|status|help> [--json]  local read-only view
   ${C.cyan}lint${C.reset} [--json]                  scan for readability and consistency (typographic dashes, sub-20pt, header alignment, font)
   ${C.cyan}time${C.reset} [--json]                  estimate speaking time from visible slide text (rough proxy, not a rehearsal)
   ${C.cyan}export-pdf${C.reset}                     export presentation.pdf via PowerPoint (download at /api/pdf)

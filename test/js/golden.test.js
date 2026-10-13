@@ -4,7 +4,7 @@ test('complete MCP tools/list is frozen and human-only operations are absent',()
  const r=spawnSync(process.execPath,[path.join(__dirname,'../..','src/mcp-ppt.js')],{encoding:'utf8',input:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/list'})+'\n',env:{...process.env,SLIDES_MCP:'1',SUITE_MCP_ROLE:'worker'},timeout:5000});
  assert.equal(r.status,0,r.stderr);const actual=JSON.parse(r.stdout).result;
  assert.deepEqual(actual,JSON.parse(fs.readFileSync(path.join(__dirname,'..','fixtures','tools-list.json'))));
- assert.equal(actual.tools.length,36);assert.ok(!actual.tools.some(t=>/pause|resume|undo|redo/.test(t.name)));
+ assert.equal(actual.tools.length,37);assert.ok(!actual.tools.some(t=>/pause|resume|undo|redo/.test(t.name)));
 });
 
 function assertNoHumanControls(catalog) {

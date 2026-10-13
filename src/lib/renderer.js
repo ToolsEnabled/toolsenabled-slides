@@ -18,7 +18,7 @@ function detectRenderer(){
  const r=probe(soffice,['--version']);
  if(r.status!==0)throw new Error('LibreOffice is required for PDF/PNG. Install LibreOffice Impress (Ubuntu: sudo apt-get install libreoffice-impress), or set SLIDES_SOFFICE to soffice.');
  let raster;let png=false;
- try{raster=require('./prerequisites').python();png=probe(raster,['-I','-c','import pypdfium2']).status===0;}catch{}
+ try{raster=require('./prerequisites').python();png=probe(raster,['-I','-B','-c','import pypdfium2']).status===0;}catch{}
  return {renderer:'libreoffice',version:r.stdout.trim().slice(0,120),soffice,rasterizer:'pypdfium2',raster,png};
 }
 const children=new Set();

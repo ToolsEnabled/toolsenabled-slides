@@ -7,9 +7,9 @@ test('every printed client registration forwards the selected external Python an
   assert(config.includes('SUITE_PYTHON'),client);assert(config.includes('/runtime with space/bin/python'),client);assert(config.includes('53221'),client);
  }
 });
-test('default registration also names its selected interpreter when the variable is absent',()=>{
+test('registration refuses a missing explicit Python with actionable setup guidance',()=>{
  const {spawnSync}=require('node:child_process');const path=require('node:path');
  const env={PATH:process.env.PATH,...(process.env.SystemRoot?{SystemRoot:process.env.SystemRoot}:{})};
  const result=spawnSync(process.execPath,[path.resolve(__dirname,'../../tools/mcp-config.mjs'),'--client','deepseek'],{env,encoding:'utf8'});
- assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/SUITE_PYTHON: ".+"/);
+ assert.notEqual(result.status,0);assert.equal(result.stdout,'');assert.match(result.stderr,/SUITE_PYTHON.*setup-runtime/);
 });

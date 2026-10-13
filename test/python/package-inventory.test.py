@@ -12,7 +12,10 @@ class Inventory(unittest.TestCase):
             (root / 'src/untracked.json').write_text('must not ship')
             (root / 'tools/server.json').write_text('must not ship')
             subprocess.run(['git','-C',str(root),'add','tools/server.json'],check=True)
-            self.assertEqual([name for name, _ in files(root)], ['README.md','src/module.js'])
+            (root / 'tools/source-files.json').write_text(json.dumps(['README.md','src/module.js','tools/server.json','tools/source-files.json']))
+            subprocess.run(['git','-C',str(root),'add','tools/source-files.json'],check=True)
+            subprocess.run(['git','-C',str(root),'-c','user.name=Synthetic','-c','user.email=synthetic@example.invalid','commit','-qm','release fixture'],check=True)
+            self.assertEqual([name for name, _ in files(root)], ['README.md','src/module.js','tools/source-files.json'])
     def test_extracted_mcpb_uses_snapshot_without_discovering_extras(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder); (root / 'tools').mkdir()

@@ -4,7 +4,7 @@ class Client{
  constructor(env,launch){
   this.child=spawn(launch?.command||process.execPath,launch?.args||[path.resolve(__dirname,'..','..','slides-mcp.js')],{cwd:launch?.cwd,env:{...(launch?.inheritEnv===false?{}:process.env),...env},stdio:['pipe','pipe','pipe']});
   this.next=1;this.pending=new Map();this.buffer='';this.stderr='';
-  this.child.stderr.on('data',c=>{this.stderr=(this.stderr+c).slice(-16000);});
+  this.child.stderr.on('data',c=>{const combined=this.stderr+c;this.stderr=(launch?.redactStderr?require('../../src/lib/terminal-text').clean(combined,combined.length).text:combined).slice(-16000);});
   this.child.stdout.setEncoding('utf8');this.child.stdout.on('data',c=>{this.buffer+=c;let i;while((i=this.buffer.indexOf('\n'))>=0){const line=this.buffer.slice(0,i);this.buffer=this.buffer.slice(i+1);try{const msg=JSON.parse(line);const p=this.pending.get(msg.id);if(p){clearTimeout(p.timer);this.pending.delete(msg.id);msg.error?p.reject(new Error(JSON.stringify(msg.error))):p.resolve(msg.result);}}catch(e){this.fail(e);}}});
   this.child.on('error',e=>this.fail(e));this.exited=new Promise(resolve=>this.child.once('exit',(code,signal)=>{this.fail(new Error(`MCP exited ${code}/${signal}: ${this.stderr}`));resolve(code);}));
  }

@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "toolsenabled-slides",
   "display_name": "ToolsEnabled Slides",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Create and edit local PowerPoint decks with a live studio, slide locks, lint and portable exports.",
   "author": {
     "name": "ToolsEnabled, Inc.",
@@ -76,7 +76,7 @@
     "renderer": {
       "type": "string",
       "title": "PDF and PNG renderer",
-      "description": "Use auto, libreoffice or powerpoint. Auto checks PowerPoint on Windows, then LibreOffice.",
+      "description": "Use auto or libreoffice on Linux. Native Windows and the experimental PowerPoint renderer are unsupported in this release.",
       "default": "auto"
     },
     "libreoffice_executable": {
@@ -88,8 +88,6 @@
   },
   "compatibility": {
     "platforms": [
-      "darwin",
-      "win32",
       "linux"
     ],
     "runtimes": {

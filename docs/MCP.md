@@ -2,7 +2,7 @@
 
 Launch `node slides-mcp.js` as a newline-delimited JSON-RPC stdio server. Initialize with an MCP protocol version, send `notifications/initialized`, then use `tools/list` and `tools/call`. The server supports ping and serializes tool calls. Diagnostic output goes to stderr.
 
-The default plugin exposes 36 tools. Pause, resume, undo, redo, lock overrides and dashboard downloads are not available as MCP tools and require the dashboard session. Workspace-copy exports use ppt_export. Read the outline and pinned board rules before working; lock affected slides before mutations and release them when finished. Host registration is described in the README.
+The default plugin exposes 37 tools. Pause, resume, undo, redo, lock overrides and dashboard downloads are not available as MCP tools and require the dashboard session. Workspace-copy exports use ppt_export. Read the outline and pinned board rules before working; lock affected slides before mutations and release them when finished. Host registration is described in the README.
 
 ## ppt_show
 
@@ -1071,4 +1071,6 @@ Tool failures return `isError: true` and bounded readable text. A PAUSED respons
 
 ## Host annotations
 
-All 36 tools declare `openWorldHint: false`: they operate within the local workspace. `ppt_show`, `ppt_search`, `ppt_board`, `ppt_lint`, `ppt_time`, `ppt_locks` and `ppt_renderer` declare read-only and idempotent behavior. Create-only exports, additive content tools, notes and coordination tools declare non-destructive behavior. Replacement, import, reorder, formatting and deletion tools declare destructive behavior conservatively. These are host presentation hints; they grant no permissions. The exact annotations are frozen in `test/fixtures/tools-list.json`.
+All 37 tools declare `openWorldHint: false`: they operate within the local workspace. `ppt_show`, `ppt_search`, `ppt_board`, `ppt_lint`, `ppt_time`, `ppt_locks`, `ppt_renderer` and `ppt_tasks` declare read-only and idempotent behavior. Create-only exports, additive content tools, notes and coordination tools declare non-destructive behavior. Replacement, import, reorder, formatting and deletion tools declare destructive behavior conservatively. These are host presentation hints; they grant no permissions. The exact annotations are frozen in `test/fixtures/tools-list.json`.
+
+`ppt_tasks` reads bounded, revision-pinned task records and grant scope. Use `id` for one task; otherwise pages default to ten records with a maximum of twenty. The read does not claim or complete a task.

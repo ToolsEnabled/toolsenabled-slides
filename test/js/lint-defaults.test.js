@@ -2,9 +2,9 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');const path=require('node:path');
 const src=fs.readFileSync(path.resolve(__dirname,'../../src/server.js'),'utf8');
 const model={rev:1,slides:[{id:'s1',notes:'These are useful speaker notes.',elements:[{id:'e1',text:'Hello',style:{size:24}}]}]};
-const lint=vm.runInNewContext(src.slice(src.indexOf('const DASH_RE ='),src.indexOf('function lintFonts('))+'\nlintModel',{trunc:s=>s});
+const {lintModel:lint}=require('../../src/lib/quality');
 test('default deck with speaker notes has no implicit personal rule',()=>{const result=lint(model);assert.equal(result.count,0,JSON.stringify(result));});
-test('edit feedback does not impose personal notes or dash rules',()=>{const start=src.indexOf('function lintAffected(');const fn=vm.runInNewContext(src.slice(start,src.indexOf('const TIMING_WPM',start))+'\nlintAffected',{findSlide:id=>model.slides[0],DASH_RE:/[–—]/,LINT_MIN_SIZE:20});const result=fn({slideId:'s1',notes:true});assert.equal(result.length,0);});
+test('edit feedback does not impose personal notes or dash rules',()=>{const start=src.indexOf('function lintAffected(');const fn=vm.runInNewContext(src.slice(start,src.indexOf('function defaultElements(',start))+'\nlintAffected',{findSlide:id=>model.slides[0],DASH_RE:/[–—]/,LINT_MIN_SIZE:20});const result=fn({slideId:'s1',notes:true});assert.equal(result.length,0);});
 test('public descriptions do not impose a personal talk length or slide count',()=>{
  const {spawnSync}=require('node:child_process');const result=spawnSync(process.execPath,[path.resolve(__dirname,'../../src/mcp-ppt.js')],{input:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/list'})+'\n',encoding:'utf8'});assert.equal(result.status,0);assert(!/hard cap|hard 12:00|roughly 16 slide|must stay near/.test(result.stdout));
 });

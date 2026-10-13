@@ -12,6 +12,17 @@ const dashboard = require('../helpers/dashboard');
 const {spawn, fetch} = dashboard;
 
 const HERE = SUITE_ROOT;
+function pdfFixtureTimeout(hanging) { return hanging ? 500 : 60000; }
+function serializedPdfJobs(lines) {
+  return Array.isArray(lines) && lines.length === 4 && lines.every(line => typeof line === 'string') &&
+    lines[0].startsWith('start ') && lines[1].startsWith('finish ') &&
+    lines[2].startsWith('start ') && lines[3].startsWith('finish ');
+}
+function inject(source,oldText,newText){
+  const count=source.split(oldText).length-1;
+  if(count!==1)throw new Error('PDF fixture injection requires one target; found '+count);
+  return source.replace(oldText,newText);
+}
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const checks = [];
 function check(description, condition) { checks.push({ description, ok: !!condition }); }
@@ -68,6 +79,8 @@ async function main() {
   const suiteDir = path.join(root, 'suite');
   const data = path.join(suiteDir, 'data');
   const logPath = path.join(data, 'fake-pdf.log');
+  const requestsPath = path.join(data, 'fake-pdf-requests.jsonl');
+  const jobsPath = path.join(data, 'fake-pdf-jobs.log');
   let child = null;
   try {
     fs.cpSync(HERE, suiteDir, { recursive: true });
@@ -118,43 +131,58 @@ if (fs.existsSync(mode) && fs.readFileSync(mode, 'utf8').trim() === 'hang') {
   return;
 }
 fs.appendFileSync(log, 'start ' + path.basename(source) + '\\n');
-setTimeout(() => {
+const release = path.join(__dirname, 'data', 'fake-pdf-release');
+const timer = setInterval(() => {
+  if (!fs.existsSync(release)) return;
+  clearInterval(timer);
   fs.writeFileSync(output, '%PDF-1.4\\nsource=' + path.basename(source));
   fs.appendFileSync(log, 'finish ' + path.basename(source) + '\\n');
-}, 75);
+}, 5);
 `);
 
     // Modify only the disposable server so the test can inject deterministic
     // child processes and avoid COM/background renders.
     const serverPath = path.join(suiteDir, 'src/server.js');
     let source = fs.readFileSync(serverPath, 'utf8');
-    source = source.replace(
+    source = inject(source,
       "const IS_WIN = process.platform === 'win32';",
       'const IS_WIN = true; // pdf race sandbox'
     );
-    source = source.replace(
-      "    if (IS_WIN) startComHost().catch((e) => console.error('COM host warm-start failed (will retry lazily on first thumbs job):', e.message));",
+    source = inject(source,
+      "    if (IS_WIN && !process.env.SLIDES_WORKSPACE) startComHost().catch((e) => console.error('COM host warm-start failed (will retry lazily on first thumbs job):', e.message));",
       '    // pdf race sandbox: never start COM'
     );
-    source = source.replace(
+    source = inject(source,
       "    void refreshThumbsFromDeck(model.rev, 'boot thumbs pass skipped:');",
       '    // pdf race sandbox: no thumbnail export'
     );
-    source = source.replace(
+    source = inject(source,
       'function scheduleRender() {',
       'function scheduleRender() { return; // pdf race sandbox'
     );
-    source = source.replace(
+    source = inject(source,
       "      PY, [RENDER_PY, '-', snapshotPptx],",
       "      process.execPath, [path.join(HERE, 'fake-render.js'), snapshotPptx],"
     );
-    source = source.replace(
+    source = inject(source,
       "      'powershell',\n      ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', PDF_PS1,",
       "      process.execPath,\n      [path.join(HERE, 'fake-powershell.js'),"
     );
-    source = source.replace(
+    source = inject(source,
       "      undefined, 60000\n    );\n    if (!exported.ok)",
-      "      undefined, 500\n    );\n    if (!exported.ok)"
+      "      undefined, (" + pdfFixtureTimeout.toString() + ")(fs.existsSync(path.join(DATA, 'fake-pdf-mode')) && fs.readFileSync(path.join(DATA, 'fake-pdf-mode'), 'utf8').trim() === 'hang')\n    );\n    if (!exported.ok)"
+    );
+    source = inject(source,
+      '  const existing = pdfExportsByRev.get(capturedRev);',
+      "  const existing = pdfExportsByRev.get(capturedRev);\n  fs.appendFileSync(path.join(DATA, 'fake-pdf-requests.jsonl'), JSON.stringify({rev:capturedRev, shared:!!existing}) + '\\n');"
+    );
+    source = inject(source,
+      '    pdfRunning = true;',
+      "    pdfRunning = true;\n    fs.appendFileSync(path.join(DATA, 'fake-pdf-jobs.log'), 'start ' + capturedRev + '\\n');"
+    );
+    source = inject(source,
+      '    pdfRunning = false;',
+      "    pdfRunning = false;\n    fs.appendFileSync(path.join(DATA, 'fake-pdf-jobs.log'), 'finish ' + capturedRev + '\\n');"
     );
     for (const required of ['fake-render.js', 'fake-powershell.js', 'pdf race sandbox']) {
       if (!source.includes(required)) throw new Error(`server injection failed: ${required}`);
@@ -175,6 +203,8 @@ setTimeout(() => {
       try { return (await api(base, '/api/health')).status === 200; } catch (_) { return false; }
     }, 10000, 'server health');
 
+    const requests = () => fs.existsSync(requestsPath)
+      ? fs.readFileSync(requestsPath, 'utf8').trim().split(/\r?\n/).map(line => JSON.parse(line)) : [];
     const before = (await api(base, '/api/state')).body.model;
     const firstExport = api(base, '/api/pdf/export', {
       method: 'POST',
@@ -188,6 +218,11 @@ setTimeout(() => {
     });
     await waitFor(() => fs.existsSync(logPath) && /start/.test(fs.readFileSync(logPath, 'utf8')),
       5000, 'first PDF job');
+    await waitFor(() => {
+      const admitted=requests();
+      return admitted.length===2 && admitted[0].rev===before.rev &&
+        admitted[1].rev===before.rev && admitted[1].shared===true;
+    }, 5000, 'both requests admitted for the captured revision');
 
     const edit = await api(base, '/api/edit', {
       method: 'POST',
@@ -202,12 +237,19 @@ setTimeout(() => {
       headers: { 'Content-Type': 'application/json' },
       body: '{}'
     });
+    await waitFor(() => {
+      const admitted=requests();
+      return admitted.length===3 && admitted[2].rev===before.rev+1 && admitted[2].shared===false;
+    }, 5000, 'newer revision admitted before releasing the first PDF');
+    await api(base, '/api/state'); // let the admitted request's microtasks run before release
+    fs.writeFileSync(path.join(data, 'fake-pdf-release'), 'release');
     const [first, duplicateFirst, second] = await Promise.all([
       firstExport, duplicateFirstExport, secondExport
     ]);
     const finalState = (await api(base, '/api/state')).body;
     const pdfText = fs.readFileSync(path.join(data, 'presentation.pdf'), 'utf8');
     const logLines = fs.readFileSync(logPath, 'utf8').trim().split(/\r?\n/);
+    const jobLines = fs.readFileSync(jobsPath, 'utf8').trim().split(/\r?\n/);
 
     check('the edit between exports committed one newer revision',
       edit.status === 200 && edit.body.rev === before.rev + 1);
@@ -220,8 +262,7 @@ setTimeout(() => {
     check('two different revisions do not share one in-flight promise',
       logLines.filter((line) => line.startsWith('start ')).length === 2);
     check('PowerPoint jobs remain serialized',
-      logLines[0].startsWith('start ') && logLines[1].startsWith('finish ') &&
-      logLines[2].startsWith('start ') && logLines[3].startsWith('finish '));
+      serializedPdfJobs(logLines) && serializedPdfJobs(jobLines));
     check('the final PDF bytes come from the newest captured revision',
       pdfText.includes(`-${before.rev + 1}-`));
     check('the durable PDF revision matches the final bytes',

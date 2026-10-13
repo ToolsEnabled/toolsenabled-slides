@@ -1,6 +1,6 @@
 # MCP tool review
 
-All 36 tools published by the plugin remain. Eight definitions behind the unused internal lead role were removed; none appeared in the plugin golden catalog. Catalog wording changed for `ppt_board`, `ppt_time`, `ppt_locks`, `ppt_add_shape`, `ppt_add_image`, `ppt_add_video`, `ppt_set_image`, `ppt_set_media`, `ppt_delete_slide`. The updates clarify host guidance, required lock ownership, dashboard undo, the default speaking budget and workspace media paths. Names and schema constraints are unchanged; media source field descriptions now name the workspace assets folder.
+The 0.1.0 baseline retained all 36 published tools. Eight definitions behind the unused internal lead role were removed; none appeared in the plugin golden catalog. Catalog wording changed for `ppt_board`, `ppt_time`, `ppt_locks`, `ppt_add_shape`, `ppt_add_image`, `ppt_add_video`, `ppt_set_image`, `ppt_set_media`, `ppt_delete_slide`. The updates clarify host guidance, required lock ownership, dashboard undo, the default speaking budget and workspace media paths. Names and schema constraints are unchanged; media source field descriptions now name the workspace assets folder.
 
 | Retained tool | Evidence and purpose |
 | --- | --- |
@@ -47,7 +47,7 @@ All 36 tools published by the plugin remain. Eight definitions behind the unused
 | --- | --- |
 | `ppt_task` | Removed the hidden lead-role dispatcher; it created tasks and started built-in workers. The dashboard creates shared task records. |
 | `ppt_task_update` | Removed the hidden lead-role dispatch updater and wakeWorker input. The dashboard updates shared task records. |
-| `ppt_tasks` | Removed the unpublished lead-role wrapper; task records remain in the board and ppt tasks CLI. |
+| `ppt_tasks` | The unpublished lead-role wrapper was removed in 0.1.0. Version 0.1.1 restores a bounded, read-only task reader described below. |
 | `ppt_loop` | Removed the unpublished lead-role creation wrapper; the dashboard manages recurring check records for external clients. |
 | `ppt_loop_ran` | Removed the unpublished lead-role wrapper; external clients can record passes through the CLI. |
 | `ppt_pin` | Removed the hidden lead-role human control. Pinning guidance requires the dashboard session. |
@@ -56,4 +56,8 @@ All 36 tools published by the plugin remain. Eight definitions behind the unused
 
 The provider implementations, provider hooks, automatic task dispatch and recovery, automatic loop runner, presence reaper, spend/profile controls and floating provider composer were removed. Tasks and loops persist as records; external clients decide when to work.
 
-Security pass: all 36 tools carry local-scope annotations. Pinned guidance and other workspace text are quoted data, never represented as binding instructions from the human. Speaker notes have no implicit prohibition. Timing values are default estimates. Import/export errors expose fixed messages; detailed helper failures stay in the local log.
+The 0.1.0 security pass: all 36 tools carry local-scope annotations. Pinned guidance and other workspace text are quoted data, never represented as binding instructions from the human. Speaker notes have no implicit prohibition. Timing values are default estimates. Import/export errors expose fixed messages; detailed helper failures stay in the local log.
+
+### 0.1.1 task-read addition
+
+`ppt_tasks` is restored as a bounded read-only tool for the explicit task action. It returns dashboard records, assignee, status and whitelisted protection grant scope, with no human capability or write control. Pages are digest-pinned. The other 36 definitions remain unchanged.

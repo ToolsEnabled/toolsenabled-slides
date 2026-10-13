@@ -1,0 +1,147 @@
+[
+  {
+    "command": "/slides home",
+    "description": "Deck outline, revision, pause state, task count and studio guidance.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" home --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides slide <number-or-id>",
+    "description": "Full slide text, media, builds, notes, locks and protections.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" slide <number-or-id> --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides notes [number-or-id]",
+    "description": "Speaker notes in slide order, or one selected slide.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" notes [number-or-id] --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides search <text>",
+    "description": "Literal search across visible text, bullets and speaker notes.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" search <text> --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides board",
+    "description": "Pinned notes and messages with recorded provenance.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" board --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides tasks [loops]",
+    "description": "Open/all task records and grant scope; Loops shows cadence and last run.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" tasks [loops] --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides history [undo|redo|slide-id element|decor object-id]",
+    "description": "Saved activity, live undo/redo history or selected object versions; dashboard-only restore.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" history [undo|redo|slide-id element|decor object-id] --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides lint",
+    "description": "Local quality findings plus existing full lint only when cached for this revision.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" lint --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides timing",
+    "description": "Speaking estimate, total target/budget, transitions and playback.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" timing --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides status",
+    "description": "Configured runtime, live locks/editors, render receipt and explicit renderer probe.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" status --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides protections",
+    "description": "Protected content, exceptions, decision history and task grants.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" protections --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides assets",
+    "description": "Local assets metadata and slide usage; never follows symbolic links.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" assets --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides layouts",
+    "description": "Native and observed layouts, element types, effects and theme accent.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" layouts --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides exports",
+    "description": "Past successful exports with revision, renderer and file receipts.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" exports --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides studio",
+    "description": "Clean studio URL and human-only launch-link instructions; never reads secrets.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" studio --workspace \"<ws>\" --port <port>"
+  },
+  {
+    "command": "/slides help",
+    "description": "Every view and action with its Codex equivalent.",
+    "codex": "!node \"<plugin>/src/cli/view.js\" help"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-new <brief>",
+    "description": "Build a first presentation from a brief.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides new <brief>"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-add <brief>",
+    "description": "Add requested slides in the current deck style.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides add <brief>"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-edit <slide> <change>",
+    "description": "Make a focused presentation edit and verify it.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides edit <slide> <change>"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-style <instructions>",
+    "description": "Apply requested styles to selected slides.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides style <instructions>"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-import <file.pptx>",
+    "description": "Import a workspace PowerPoint file as the current deck.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides import <file.pptx>"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-preview [slide-or-all]",
+    "description": "Export PNG previews and report the selected pages.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides preview [slide-or-all]"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-export <pptx|pdf|png> [path]",
+    "description": "Export a fresh presentation copy.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides export <pptx|pdf|png> [path]"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-write-notes <slide|all> [guidance]",
+    "description": "Write or revise speaker notes.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides write-notes <slide|all> [guidance]"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-media <slide> <assets/file> [placement]",
+    "description": "Place or update local images and video.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides media <slide> <assets/file> [placement]"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-animate <slide> <instructions>",
+    "description": "Set slide builds and transitions.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides animate <slide> <instructions>"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-fix-lint [slides]",
+    "description": "Resolve relevant quality findings.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides fix-lint [slides]"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-fit <minutes>",
+    "description": "Adjust visible text toward a speaking-time target.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides fit <minutes>"
+  },
+  {
+    "command": "/toolsenabled-slides:slides-task <task-id>",
+    "description": "Carry out a dashboard-assigned task.",
+    "codex": "$toolsenabled-slides:toolsenabled-slides task <task-id>"
+  }
+]

@@ -3,21 +3,29 @@ import json
 import subprocess
 from pathlib import Path, PurePosixPath
 
-ALLOWED = {'.js', '.cjs', '.mjs', '.py', '.ps1', '.md', '.json', '.html', '.css', '.txt', '.base64'}
+ALLOWED = {'.js', '.cjs', '.mjs', '.ts', '.tsx', '.py', '.ps1', '.md', '.json', '.html', '.css', '.txt', '.base64'}
 EXCLUDED = {'.git', '.venv', 'node_modules', 'data', '.slides-state', '.slides-workspace', 'dist', '__pycache__'}
 ROOTS = {'README.md', 'LICENSE', 'SECURITY.md', 'CHANGELOG.md', 'package.json', 'requirements.txt',
          'slides-mcp.js', '.mcp.json', '.gitignore', 'manifest.json'}
-DIRECTORIES = {'src', 'public', 'scripts', 'test', 'docs', 'tools', '.codex-plugin', '.claude-plugin', 'skills'}
+DIRECTORIES = {'src', 'public', 'scripts', 'test', 'docs', 'tools', '.codex-plugin', '.claude-plugin', 'skills', 'hooks', 'commands'}
 
 def files(root):
     root = Path(root).resolve()
-    probe = subprocess.run(['git', '-C', str(root), 'rev-parse', '--show-toplevel'], capture_output=True, text=True)
-    checkout = probe.returncode == 0 and Path(probe.stdout.strip()).resolve() == root
+    try:
+        probe = subprocess.run(['git', '-C', str(root), 'rev-parse', '--show-toplevel'], capture_output=True, text=True)
+        checkout = probe.returncode == 0 and Path(probe.stdout.strip()).resolve() == root
+    except FileNotFoundError:
+        if (root / '.git').exists(): raise ValueError('Git is required to verify a release checkout')
+        checkout = False
+    snapshot = json.loads((root / 'tools/source-files.json').read_text())
     if checkout:
         names = subprocess.check_output(['git', '-C', str(root), 'ls-files', '-z']).decode().rstrip('\0').split('\0')
+        if sorted(names) != snapshot: raise ValueError('Tracked source snapshot does not match the checkout inventory')
+        clean = subprocess.run(['git', '-C', str(root), 'diff-index', '--quiet', 'HEAD', '--'])
+        if clean.returncode: raise ValueError('Release inputs must be clean; commit all tracked source changes first')
     else:
         # Exact source archives carry the tracked-path snapshot; never discover local extras.
-        names = json.loads((root / 'tools/source-files.json').read_text())
+        names = snapshot
     if not isinstance(names, list) or any(not isinstance(name, str) for name in names) or len(set(names)) != len(names):
         raise ValueError('Invalid source file inventory')
     result = []
