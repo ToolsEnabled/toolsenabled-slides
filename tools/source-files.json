@@ -1,4 +1,6 @@
 [
+  ".agents/plugins/marketplace.json",
+  ".claude-plugin/marketplace.json",
   ".claude-plugin/plugin.json",
   ".codex-plugin/plugin.json",
   ".gitignore",
@@ -117,6 +119,7 @@
   "test/js/doctor-hash-hint.test.js",
   "test/js/editor-lock-origin.test.js",
   "test/js/element-history.test.js",
+  "test/js/error-texts.test.js",
   "test/js/findings.test.js",
   "test/js/first-boot.test.js",
   "test/js/frontend-actions.test.js",

@@ -600,6 +600,10 @@ async function main() {
       /target_id is required/i.test(
         missingTarget.result.content[0].text
       ));
+    check('a schema failure is labelled as invalid arguments rather than a crash',
+      missingTarget.result &&
+      /^Invalid arguments: .*target_id is required/.test(missingTarget.result.content[0].text) &&
+      !/Tool crashed/.test(missingTarget.result.content[0].text));
     check('all malformed media calls fail before any HTTP request',
       requests.length === requestCountBeforeMalformedCalls);
   } finally {

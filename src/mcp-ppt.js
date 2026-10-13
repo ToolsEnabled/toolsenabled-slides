@@ -206,8 +206,10 @@ const TOOLS = [
 
     description:
       'Print the deck outline: every slide with its slide id, layout, transition, element ids, text, and current style. ' +
-      'ALWAYS call this before editing. Slide ids (s1, s2, ...) and element ids (e1, e4, ...) are stable, ' +
-      'and they are the ONLY way to name a target in every other tool, so do not guess them. ' +
+      'ALWAYS call this before editing. Slide ids and element ids are stable and are the ONLY way to name a target ' +
+      'in every other tool, so do not guess them: slides and elements created here get an s or e prefix plus 8 hex ' +
+      'characters (for example s88cc6b17 and e7b86222a), the default first slide is s1 with e1 and e2, and imported ' +
+      'decks use s1, s2, ... with element ids like e0_2 (zero-based slide index, underscore, shape id). ' +
       'With no arguments you get the whole deck, terse. Pass slide to get one slide in full, including its ' +
       'full speaker notes and the ids of its decorative shapes.',
     inputSchema: {
@@ -752,7 +754,8 @@ async function call(name, a = {}) {
     return fail(`Unknown tool: ${name}. Available: ${VISIBLE.map(t => t.name).join(', ')}`);
   }
 
-  require('./lib/schema').validate(a, VISIBLE_BY_NAME.get(name).inputSchema);
+  try { require('./lib/schema').validate(a, VISIBLE_BY_NAME.get(name).inputSchema); }
+  catch (error) { return fail(`Invalid arguments: ${error.message}`); }
   if (['ppt_import','ppt_export','ppt_renderer'].includes(name)) {
     const r = await api('POST', '/api/plugin/' + name.slice(4), {...a,editor:EDITOR}, 180000);
     return r.status === 200 ? text(JSON.stringify(r.body)) : fail(refusal(r,name));
@@ -1291,7 +1294,7 @@ async function handle(line) {
       // Echo the client's protocol version: safest across versions.
       protocolVersion: (params && params.protocolVersion) || '2025-06-18',
       capabilities: { tools: {} },
-      serverInfo: { name: 'toolsenabled-slides', version: '0.1.1' },
+      serverInfo: { name: 'toolsenabled-slides', version: '0.1.2' },
       instructions: require('./lib/mcp-instructions'),
     } });
   }

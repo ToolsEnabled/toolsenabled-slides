@@ -16,7 +16,7 @@ function checkPython(){
   if(Number(process.versions.node.split('.')[0])<22)throw new Error('Node.js 22 or newer is required');
   const selected=python();
   const result=spawnSync(selected,['-I','-B',path.join(__dirname,'../python/runtime_contract.py'),'--node',process.execPath,'--workspace',process.env.SLIDES_WORKSPACE||''],{encoding:'utf8',timeout:15000,windowsHide:true,maxBuffer:8192});
-  if(result.status!==0)throw new Error('Prepared runtime check failed: '+String(result.stderr||result.error||'unknown error').trim()+'; use tools/setup-runtime.py');
+  if(result.status!==0){const reason=String(result.stderr||result.error||'unknown error').trim();throw new Error('Prepared runtime check failed: '+reason+(reason.includes('tools/setup-runtime.py')?'':'; use tools/setup-runtime.py'));}
   return JSON.parse(result.stdout);
  }
  const r=spawnSync(python(),['-I','-c','import pptx; print(pptx.__version__)'],{encoding:'utf8',timeout:10000,windowsHide:true,maxBuffer:4096});

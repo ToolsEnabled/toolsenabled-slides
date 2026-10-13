@@ -1,0 +1,18 @@
+{
+  "name": "toolsenabled-slides",
+  "owner": {
+    "name": "ToolsEnabled, Inc.",
+    "email": "support@toolsenabled.ai"
+  },
+  "metadata": {
+    "description": "ToolsEnabled Slides.",
+    "version": "0.1.2"
+  },
+  "plugins": [
+    {
+      "name": "toolsenabled-slides",
+      "source": "./",
+      "description": "Create and edit local PowerPoint decks with a live studio, slide locks, lint and portable exports."
+    }
+  ]
+}

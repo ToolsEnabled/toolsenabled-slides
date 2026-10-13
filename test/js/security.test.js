@@ -40,12 +40,12 @@ test('plugin security boundary, lifecycle and confinement',async t=>{
   });
   await t.test('PPTX export refuses overwrite; import rejects external relationships',async()=>{
    await c.tool('ppt_export',{path:'clean.pptx',format:'pptx'});
-   assert.ok((await c.request('tools/call',{name:'ppt_export',arguments:{path:'clean.pptx',format:'pptx'}})).isError);
+   const overwrite=await c.request('tools/call',{name:'ppt_export',arguments:{path:'clean.pptx',format:'pptx'}});assert.ok(overwrite.isError);assert.match(overwrite.content[0].text,/Output already exists; choose a new destination/,'the confinement reason must reach the tool result');
    const py=spawnSync(python(),['-c',`import zipfile,sys\nsrc,dst=sys.argv[1:]\nwith zipfile.ZipFile(src) as z, zipfile.ZipFile(dst,'w') as w:\n for n in z.namelist():\n  b=z.read(n)\n  if n=='ppt/_rels/presentation.xml.rels': b=b.replace(b'</Relationships>',b'<Relationship Id="external" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="file:///etc/passwd" TargetMode="External"/></Relationships>')\n  w.writestr(n,b)`,path.join(workspace,'clean.pptx'),path.join(workspace,'external.pptx')],{encoding:'utf8'});assert.equal(py.status,0,py.stderr);
    const r=await c.request('tools/call',{name:'ppt_import',arguments:{path:'external.pptx'}});assert.ok(r.isError);assert.match(r.content[0].text,/External links/);
   });
   await t.test('another server cannot mutate the same workspace',async()=>{
-   const p=await port();const duplicate=spawn(process.execPath,[path.resolve(__dirname,'../..','src/server.js')],{env:{...process.env,...env,SUITE_PORT:String(p)},stdio:['ignore','pipe','pipe']});let log='';duplicate.stderr.on('data',x=>log+=x);const code=await new Promise(r=>duplicate.once('exit',r));assert.equal(code,1);assert.match(log,/leased/);assert.equal(JSON.parse((await request(n,'/api/health')).text).pid,originalPid);
+   const p=await port();const duplicate=spawn(process.execPath,[path.resolve(__dirname,'../..','src/server.js')],{env:{...process.env,...env,SUITE_PORT:String(p)},stdio:['ignore','pipe','pipe']});let log='';duplicate.stderr.on('data',x=>log+=x);const code=await new Promise(r=>duplicate.once('exit',r));assert.equal(code,1);assert.match(log,/leased/);assert.equal(log.trim().split('\n').length,1,'a refused lease is one line, not a stack trace: '+log);assert.equal(JSON.parse((await request(n,'/api/health')).text).pid,originalPid);
   });
   await t.test('different workspace cannot attach to an occupied port',async()=>{
    const other=new Client({...env,SLIDES_WORKSPACE:path.join(root,'other')});await assert.rejects(other.request('initialize',{}),/different service or workspace/);assert.equal(await other.exited,1);

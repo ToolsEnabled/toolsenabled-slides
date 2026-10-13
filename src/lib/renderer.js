@@ -35,6 +35,8 @@ async function stop(){
   signalChild(child,'SIGTERM');
  })));
  await Promise.allSettled([...conversions]);
+ // Give each conversion's own awaiter its turn (it reports the cancellation) before the caller exits the process.
+ await new Promise(resolve=>setImmediate(resolve));
 }
 function run(cmd,args){return new Promise((resolve,reject)=>{
  if(stopping)return reject(new Error('Renderer is stopping'));
@@ -44,10 +46,13 @@ function run(cmd,args){return new Promise((resolve,reject)=>{
  for(const stream of [child.stdout,child.stderr])stream.on('data',c=>{log=(log+c).slice(-4096);});
  child.once('error',e=>{children.delete(child);clearTimeout(timer);reject(e);});
  child.once('close',code=>{
-  if(code!==0)console.error('Renderer failed:',log);children.delete(child);clearTimeout(timer);
+  // A child that stop() interrupted did not fail: its partial log (for example LibreOffice's javaldx warning) is not a diagnosis.
+  const cancelled=stopping&&code!==0&&!timedOut;
+  if(code!==0&&!cancelled)console.error('Renderer failed:',log);children.delete(child);clearTimeout(timer);
   if(code===0&&!timedOut)return resolve();
-  const error=new Error(timedOut?'Renderer timed out':`Renderer failed (${code}); see the local suite log`);
+  const error=new Error(timedOut?'Renderer timed out':cancelled?'Renderer cancelled at shutdown':`Renderer failed (${code}); see the local suite log`);
   if(timedOut)error.code='RENDERER_TIMEOUT';
+  if(cancelled)error.code='RENDERER_CANCELLED';
   reject(error);
  });
 });}

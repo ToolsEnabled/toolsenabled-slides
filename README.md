@@ -12,17 +12,23 @@ New decks use a clean white theme with Arial headings and body text, a blue acce
 
 Requirements: Node.js 22 or newer, Python 3.10 or newer, and the Python packages in `requirements.txt`. PDF and PNG on Linux also require LibreOffice Impress. PNG conversion through LibreOffice uses the pinned pypdfium2 wheel.
 
-Works with Claude Code on Linux through the `toolsenabled-slides` plugin. Provides a Claude Desktop bundle; native installation still needs qualification. See [Claude installation](docs/CLAUDE-INSTALL.md) for explicit offline setup into an external CPython 3.12 venv and the separate Linux wheel bundle. Source and Desktop bundles contain no wheels or copied venv. ToolsEnabled is not affiliated with or endorsed by Anthropic. [Privacy](https://toolsenabled.ai/legal/privacy/) · [Support](mailto:support@toolsenabled.ai).
+Works with Claude Code on Linux through the `toolsenabled-slides` plugin; the repository is its own plugin marketplace for Claude Code (`.claude-plugin/marketplace.json`) and Codex (`.agents/plugins/marketplace.json`). See [plugin installation](docs/CLAUDE-INSTALL.md) for the install commands and the explicit offline setup of an external CPython 3.12 venv from the Linux wheel bundle, which was published with 0.1.0 and is unchanged for 0.1.2: [toolsenabled-slides-0.1.0-cp312-linux-x86_64-wheels.zip](https://github.com/ToolsEnabled/toolsenabled-slides/releases/download/v0.1.0/toolsenabled-slides-0.1.0-cp312-linux-x86_64-wheels.zip), SHA-256 `a29454931420b8d9547eeb8d17c389a005cf0343a927d7a275f15eb3cab25fec`. No Claude Desktop bundle (`.mcpb`) is distributed with this release; `manifest.json` is an MCPB manifest kept for future Desktop qualification. The source ZIP contains no wheels or copied venv. ToolsEnabled is not affiliated with or endorsed by Anthropic. [Privacy](https://toolsenabled.ai/legal/privacy/) · [Support](mailto:support@toolsenabled.ai).
 
-Extract the distribution into a directory you own. On Linux:
+Download the source ZIP and its `.sha256` file from the [v0.1.2 release](https://github.com/ToolsEnabled/toolsenabled-slides/releases/tag/v0.1.2), verify the ZIP, and extract it (it unpacks to `slides/`) into a directory you own. On Linux:
 
 ```sh
+curl -LO https://github.com/ToolsEnabled/toolsenabled-slides/releases/download/v0.1.2/toolsenabled-slides-0.1.2.zip
+curl -LO https://github.com/ToolsEnabled/toolsenabled-slides/releases/download/v0.1.2/toolsenabled-slides-0.1.2.zip.sha256
+sha256sum -c toolsenabled-slides-0.1.2.zip.sha256
+unzip toolsenabled-slides-0.1.2.zip && cd slides
 python3 -m venv .venv
 .venv/bin/python -m pip install --require-hashes -r requirements.txt
 node src/cli/doctor.js
 ```
 
 Install LibreOffice with `sudo apt-get install libreoffice-impress` on Ubuntu. Set `SLIDES_SOFFICE` to the executable if it is outside PATH. Doctor reports the selected renderer and missing prerequisites. Nothing installs itself at startup. Helper executables are resolved to absolute paths outside the workspace, with an explicit install-directory working directory. Python prerequisite probes use isolated mode.
+
+Plugin route, which needs the external runtime from [docs/CLAUDE-INSTALL.md](docs/CLAUDE-INSTALL.md): in Claude Code, `claude plugin marketplace add ToolsEnabled/toolsenabled-slides` then `claude plugin install toolsenabled-slides@toolsenabled-slides` (or in one step `/plugin install toolsenabled-slides --marketplace ToolsEnabled/toolsenabled-slides`); in Codex, `codex plugin marketplace add ToolsEnabled/toolsenabled-slides` then `codex plugin add toolsenabled-slides@toolsenabled-slides` or the `/plugins` directory.
 
 Start the stdio MCP server with one command:
 
@@ -46,7 +52,7 @@ node tools/mcp-config.mjs --client claude-desktop
 node tools/mcp-config.mjs --client deepseek
 ```
 
-The helper prints configuration and does not change host settings. `SLIDES_WORKSPACE` overrides its default `slides-workspace` directory. Claude Code and Codex output is a registration command; Cursor and Claude Desktop output is an `mcpServers` JSON entry; DeepSeek Harness output is an extension configuration. Restart the host after adding the configuration. The optional Codex plugin manifest is included; the registration helper also works independently of plugin support.
+The helper prints configuration and does not change host settings. `SLIDES_WORKSPACE` overrides its default `slides-workspace` directory. Claude Code and Codex output is a registration command; Cursor and Claude Desktop output is an `mcpServers` JSON entry; DeepSeek Harness output is an extension configuration. Restart the host after adding the configuration. Plugin installation for Claude Code and Codex is described in [docs/CLAUDE-INSTALL.md](docs/CLAUDE-INSTALL.md); the registration helper also works independently of plugin support.
 
 Try: “Use Slides to make a three-slide project update. Read the board and outline, lock the slides, then export update.pptx and update.pdf.”
 

@@ -33,6 +33,7 @@ test('renderer shutdown joins its child and removes staging before returning',{s
  process.env.SLIDES_SOFFICE=exe;process.env.SLIDES_RENDERER='libreoffice';
  const source=path.join(tmp,'input.pptx');deck(source);
  let outcome;const pending=renderer.convert(source,path.join(tmp,'export.pdf'),'pdf').catch(e=>{outcome=e;});
+ const logged=[];const originalError=console.error;console.error=(...parts)=>logged.push(parts.join(' '));
  try{
   for(let i=0;i<100&&!fs.existsSync(marker);i++)await new Promise(r=>setTimeout(r,20));
   assert.ok(fs.existsSync(marker));
@@ -41,7 +42,10 @@ test('renderer shutdown joins its child and removes staging before returning',{s
   assert.ok(await preparing instanceof Error,'shutdown must also join a conversion still preparing its private copy');
   assert.ok(!fs.readdirSync(tmp).some(n=>n.startsWith('.slides-render-')),'shutdown must join conversion cleanup');
   await pending;assert.ok(outcome);
+  assert.equal(outcome.message,'Renderer cancelled at shutdown','an interrupted child is reported as cancelled, not as a renderer failure');
+  assert.ok(!logged.some(line=>line.startsWith('Renderer failed:')),'shutdown must not log the interrupted child as a renderer failure: '+JSON.stringify(logged));
  }finally{
+  console.error=originalError;
   await renderer.stop();await pending;
   previous===undefined?delete process.env.SLIDES_SOFFICE:process.env.SLIDES_SOFFICE=previous;
   choice===undefined?delete process.env.SLIDES_RENDERER:process.env.SLIDES_RENDERER=choice;

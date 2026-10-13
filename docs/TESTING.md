@@ -6,6 +6,8 @@ Install `requirements.txt` in `.venv` with `python -m pip install --require-hash
 env -u DISPLAY npm test
 ```
 
+The plugin-mode tests check the `slides-runtime.json` receipt that `tools/setup-runtime.py` writes, so point `SUITE_PYTHON` at a runtime prepared that way (see docs/CLAUDE-INSTALL.md) before `npm test`; with only the in-tree `.venv`, four plugin-mode test files fail on the missing receipt.
+
 `test/run.js` discovers every `test/js/*.test.js` and `test/python/*.test.py`. It copies source into a temporary suite, generates an original synthetic deck and local media fixtures, and executes test files sequentially. The suite runs without credentials or model calls. Node has no npm dependency installation step.
 
 The browser smoke test requires Chrome, Chromium or Edge. Set `SLIDES_TEST_BROWSER` when its executable is outside PATH. This explicit override enables sandbox-compatible headless flags for a test-owned profile. Missing browsers are a test failure, not a silent pass.

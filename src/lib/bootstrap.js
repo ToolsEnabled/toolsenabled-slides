@@ -98,6 +98,8 @@ async function start() {
       });
       child.stdout.pipe(process.stderr);
       child.stderr.pipe(process.stderr);
+      let childWroteStderr = false;
+      child.stderr.once('data', () => { childWroteStderr = true; });
       childClosed = new Promise(resolve => child.once('close', resolve));
       let error;
       child.once('error', e => { error = e; });
@@ -106,7 +108,12 @@ async function start() {
         h = await request(port, '/api/health');
         if (matches(h)) break;
         if (h) throw new Error('Unexpected server appeared on the selected port');
-        if (child.exitCode !== null || child.signalCode !== null || error) throw error || new Error('Suite startup failed; see stderr');
+        if (child.exitCode !== null || child.signalCode !== null || error) {
+          // The child already explained itself on our stderr (for example a refused workspace lease); add no second line.
+          let reported = false;
+          if (!error) { await childClosed; reported = childWroteStderr; }
+          throw error || Object.assign(new Error('Suite startup failed; see stderr'), {reported});
+        }
         await new Promise(r => setTimeout(r, 50));
       }
       if (!matches(h)) throw new Error('Suite startup timed out');

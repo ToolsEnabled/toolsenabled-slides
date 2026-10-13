@@ -7,7 +7,7 @@ ALLOWED = {'.js', '.cjs', '.mjs', '.ts', '.tsx', '.py', '.ps1', '.md', '.json', 
 EXCLUDED = {'.git', '.venv', 'node_modules', 'data', '.slides-state', '.slides-workspace', 'dist', '__pycache__'}
 ROOTS = {'README.md', 'LICENSE', 'SECURITY.md', 'CHANGELOG.md', 'package.json', 'requirements.txt',
          'slides-mcp.js', '.mcp.json', '.gitignore', 'manifest.json'}
-DIRECTORIES = {'src', 'public', 'scripts', 'test', 'docs', 'tools', '.codex-plugin', '.claude-plugin', 'skills', 'hooks', 'commands'}
+DIRECTORIES = {'src', 'public', 'scripts', 'test', 'docs', 'tools', '.codex-plugin', '.claude-plugin', '.agents', 'skills', 'hooks', 'commands'}
 
 def files(root):
     root = Path(root).resolve()

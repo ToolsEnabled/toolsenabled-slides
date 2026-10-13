@@ -1,6 +1,17 @@
 # Changelog
 
-## 0.1.1 — unreleased
+## 0.1.2 — 2026-10-13
+
+- Pass the workspace path-confinement reason through to `ppt_import`/`ppt_export` results (for example `Output already exists; choose a new destination`) instead of a generic export failure.
+- Label tool-argument schema failures `Invalid arguments: …` instead of `Tool crashed: …`.
+- Report a refused workspace lease at startup in one line, without a stack trace, from `src/server.js` and `slides-mcp.js`.
+- Log `thumbnail render cancelled at shutdown` when shutdown interrupts the background thumbnail render instead of surfacing LibreOffice's benign javaldx warning as `Renderer failed`.
+- Remove the duplicated `use tools/setup-runtime.py` hint from the prepared-runtime failure message.
+- Describe the real slide and element id formats in `ppt_show` and docs/MCP.md: `s`/`e` plus 8 hex characters for created objects, `s1`/`e1`/`e2` for the default deck, `sN` and `eN_M` for imported decks.
+- Make the repository its own plugin marketplace for Claude Code (`.claude-plugin/marketplace.json`) and Codex (`.agents/plugins/marketplace.json`) and document the literal install commands.
+- README: add the download-and-verify step, state that no Claude Desktop bundle (`.mcpb`) is distributed, and link the 0.1.0 Linux wheel bundle with its SHA-256. docs/CLAUDE-INSTALL.md: verify the asset's `.sha256` file rather than a "SHA256 manifest". docs/TESTING.md: name the prepared runtime the plugin-mode tests need.
+
+## 0.1.1 — 2026-10-13
 
 - Add sixteen read-only Claude Code views under `/slides`, with paging, bounded detail, provenance, help and explicit renderer diagnostics.
 - Add thirteen native action commands for creating, editing, notes, media, animation, task work, lint, timing, import, preview and export.

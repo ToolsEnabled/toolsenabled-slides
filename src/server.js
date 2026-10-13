@@ -12,7 +12,11 @@ const HERE = path.resolve(__dirname, '..');                                  // 
 const ROOT = process.env.SLIDES_WORKSPACE ? path.resolve(process.env.SLIDES_WORKSPACE) : path.resolve(HERE, '..');                  // .../Presentation
 const DATA = process.env.SLIDES_WORKSPACE ? path.join(ROOT, '.slides-state') : path.join(HERE, 'data');
 fs.mkdirSync(DATA, { recursive: true, mode: 0o700 });
-if (process.env.SLIDES_WORKSPACE) require('./lib/workspace').lease(DATA);
+if (process.env.SLIDES_WORKSPACE) {
+  // A refused lease is an expected condition: report it in one line, never as a stack trace.
+  try { require('./lib/workspace').lease(DATA); }
+  catch (error) { console.error(error.message); process.exit(1); }
+}
 const PUBLIC = path.join(HERE, 'public');
 const MODEL_PATH = path.join(DATA, 'model.json');
 const STATE_PATH = path.join(DATA, 'state.json');
@@ -2741,8 +2745,9 @@ function runThumbs(capturedRev) {
       cleanupOrphanedThumbs();
       if (exportAll) dirtyAll = false; else attemptedIds.forEach((id) => dirtySlides.delete(id));
       broadcast({ type: 'thumbs', ok: true, ver: thumbsVer, rev: capturedRev, slides: exportAll ? null : Array.from(attemptedIds), ts: Date.now() });
+    } else if (shuttingDown) {
+      console.error('thumbnail render cancelled at shutdown');
     } else {
-
       console.error('thumbnail export failed:', error);
       broadcast({ type: 'thumbs', ok: false, rev: capturedRev, error: String(error).slice(0, 400), ts: Date.now() });
     }
@@ -4155,7 +4160,12 @@ async function handleRequest(req, res) {
 
   if (req.method === 'POST' && p.startsWith('/api/plugin/') && process.env.SLIDES_WORKSPACE) {
     const b = await readBody(req);
-    const {confined} = require('./lib/workspace');
+    const {confined: confinedPath} = require('./lib/workspace');
+    // Confinement refusals describe the caller's own path argument: pass the reason through to the tool result.
+    const confined = (root, value, options) => {
+      try { return confinedPath(root, value, options); }
+      catch (error) { throw new RequestError(400, error.syscall ? 'Path is not readable inside the workspace; check the relative path' : error.message); }
+    };
     const {checkPython} = require('./lib/prerequisites');
     const {convert,detectRenderer} = require('./lib/renderer');
     if (p === '/api/plugin/renderer') {
