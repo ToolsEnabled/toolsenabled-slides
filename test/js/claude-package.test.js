@@ -10,6 +10,9 @@ const read=file=>JSON.parse(fs.readFileSync(path.join(root,file),'utf8'));
 test('Claude runs the bundled Node entry with plain arguments; Codex resolves its relative Node entry from the plugin cwd',()=>{
  const code=read('.claude-plugin/plugin.json'),desktop=read('manifest.json'),config=read('.mcp.json').mcpServers.slides;
  const codex=read('.codex-plugin/plugin.json');for(const key of ['name','author','homepage','repository','license'])assert.deepEqual(codex[key],code[key]);assert.equal(codex.interface.privacyPolicyURL,'https://toolsenabled.ai/privacy/');assert.equal(code.name,'toolsenabled-slides');assert.equal(desktop.name,code.name);
+ // Codex reads hooks/hooks.json (the Claude Code /slides mod) unless its manifest declares hooks; the empty object turns that off.
+ assert.deepEqual(codex.hooks,{});assert.equal(codex.skills,'./skills/');assert.ok(codex.interface.shortDescription.length<=30);
+ assert.deepEqual([codex.interface.websiteURL,codex.interface.supportURL,codex.interface.termsOfServiceURL],['https://toolsenabled.ai/slides/','https://toolsenabled.ai/support/',undefined]);
  // The directory reads the whole command: the program by name and one plugin file. No setting is in command or argv.
  assert.equal(config.command,'node');assert.deepEqual(config.args,['${CLAUDE_PLUGIN_ROOT}/slides-mcp.js']);assert.equal(desktop.server.type,'python');
  const requiredEnv={SLIDES_WORKSPACE:'${user_config.workspace_directory}',SUITE_PYTHON:'${user_config.python_executable}',SUITE_PORT:'${user_config.port}',SLIDES_RENDERER:'${user_config.renderer}',SLIDES_SOFFICE:'${user_config.libreoffice_executable}',SUITE_ALLOWED_ORIGINS:'',SUITE_HEADERS_TIMEOUT_MS:'10000',SUITE_REQUEST_BODY_TIMEOUT_MS:'15000',SUITE_MCP_HTTP_TIMEOUT_MS:''};

@@ -32,7 +32,7 @@
   },
   "interface": {
     "displayName": "ToolsEnabled Slides",
-    "shortDescription": "Local presentation editing over MCP",
+    "shortDescription": "Local PowerPoint deck editing",
     "longDescription": "Create, import and export PowerPoint decks through a local MCP server. Watch changes in the browser studio, pause editing and undo changes. Supports LibreOffice PDF and PNG export.",
     "defaultPrompt": [
       "Build a three-slide project update, then export it as PowerPoint and PDF."
@@ -44,9 +44,12 @@
       "Write"
     ],
     "websiteURL": "https://toolsenabled.ai/slides/",
+    "supportURL": "https://toolsenabled.ai/support/",
     "privacyPolicyURL": "https://toolsenabled.ai/privacy/"
   },
   "homepage": "https://toolsenabled.ai/slides/",
   "repository": "https://github.com/ToolsEnabled/toolsenabled-slides",
-  "license": "MIT"
+  "license": "MIT",
+  "skills": "./skills/",
+  "hooks": {}
 }

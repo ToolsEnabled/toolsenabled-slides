@@ -23,7 +23,7 @@ Claude Code provides the read-only `/slides` panes (tested with 2.1.296); the ba
 
 Native action commands start ordinary model work with the usual tool permissions. Type the full `/toolsenabled-slides:slides-…` name: unprefixed action names did not resolve when last checked (2.1.287). Panes never put workspace content into model context. Codex has no plugin slash-command registration; its equivalents below are CLI views and the `$toolsenabled-slides:toolsenabled-slides` skill. A Codex `!` command's output enters the next model turn, so the CLI quotes workspace data and applies the same secret/control filters. This mapping is not native slash-command parity.
 
-In CLI examples, replace `<plugin>` with the absolute installed plugin directory (the parent of `src/`, shown by `codex plugin list --json`), `<ws>` with the configured workspace, and `<port>` with its port. Node and workspace settings are literal arguments. `ppt` is not automatically placed on PATH by plugin installation. Optional selectors in brackets are notation, not literal arguments. For object history, pass three words: `history s1 element e1` or `history s1 decor d1`.
+In CLI examples, replace `<plugin>` with the absolute installed plugin directory (the parent of `src/`: a version folder under `~/.codex/plugins/cache/toolsenabled-slides/toolsenabled-slides/`), `<ws>` with the configured workspace, and `<port>` with its port. Node and workspace settings are literal arguments. `ppt` is not automatically placed on PATH by plugin installation. Optional selectors in brackets are notation, not literal arguments. For object history, pass three words: `history s1 element e1` or `history s1 decor d1`.
 
 | Claude command | Kind | Result | Codex equivalent |
 |---|---|---|---|
