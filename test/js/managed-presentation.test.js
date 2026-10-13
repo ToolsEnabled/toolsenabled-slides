@@ -1,10 +1,9 @@
 'use strict';
 // presentation.pptx is Slides' output in the user's workspace. A file there that Slides did not write must be kept
 // under a new name before a render replaces it, and ordinary renders must not leave copies behind.
-const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const net=require('node:net');const {spawnSync}=require('node:child_process');
-const {Client}=require('../helpers/mcp-client');const {python}=require('../../src/lib/prerequisites');
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const net=require('node:net');
+const {Client}=require('../helpers/mcp-client');const {python}=require('../../src/lib/prerequisites');const {deck}=require('../helpers/user-deck');
 async function freePort(){const s=net.createServer();await new Promise(r=>s.listen(0,'127.0.0.1',r));const n=s.address().port;await new Promise(r=>s.close(r));return n;}
-function deck(file,title){const r=spawnSync(python(),['-c','import sys\nfrom pptx import Presentation\np=Presentation()\ns=p.slides.add_slide(p.slide_layouts[0])\ns.shapes.title.text=sys.argv[2]\np.save(sys.argv[1])',file,title],{encoding:'utf8',timeout:30000});assert.equal(r.status,0,r.stderr);return fs.readFileSync(file);}
 async function rendered(port,rev){
  const deadline=Date.now()+90000;let last;
  while(Date.now()<deadline){last=await fetch(`http://127.0.0.1:${port}/api/health`).then(r=>r.json()).catch(()=>null);if(last&&last.presentation&&last.presentation.current&&last.presentation.rev===rev)return;await new Promise(r=>setTimeout(r,100));}

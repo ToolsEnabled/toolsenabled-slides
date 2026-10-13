@@ -40,6 +40,23 @@ The server creates a private workspace at `.slides-workspace` in the current dir
 
 For a persistent studio that outlives individual MCP sessions, set `SLIDES_WORKSPACE` and run `node src/cli/studio.js`. MCP clients with the same workspace and port attach to it. Clients that attach leave the server running on exit. On Linux, a suite started by an MCP client exits with that owning client, including abrupt termination, through a private lifetime pipe; attached clients then need to reconnect. If a launch link expires or a dashboard tab loses its session, stop and restart the owning client or persistent studio to receive a fresh launch URL. Saved workspace edits remain.
 
+## Try it
+
+No account or API key is needed: Slides runs on your computer and makes no model calls. You need Node.js 22 or newer on the PATH, CPython 3.12 and the verified 0.1.0 wheel bundle extracted to `/absolute/downloads/cp312-linux-x86_64` (see [plugin installation](docs/CLAUDE-INSTALL.md)). From the folder where you will start `claude`, prepare the runtime from the extracted release ZIP at `/absolute/slides`, make a workspace folder and install the plugin with its four settings:
+
+```sh
+mkdir -p /absolute/private "/absolute/decks/Project Update"
+python3.12 /absolute/slides/tools/setup-runtime.py --runtime "/absolute/private/Slides Runtime" --wheels "/absolute/downloads/cp312-linux-x86_64" --pip-wheel "/absolute/downloads/cp312-linux-x86_64/pip-24.3.1-py3-none-any.whl"
+claude plugin marketplace add ToolsEnabled/toolsenabled-slides
+claude plugin install -s local toolsenabled-slides@toolsenabled-slides --config python_executable="/absolute/private/Slides Runtime/bin/python" --config node_executable=/absolute/node --config workspace_directory="/absolute/decks/Project Update" --config port=4599
+```
+
+Start `claude` there, open the one-time studio link from its MCP log to watch the deck (see above), approve each Slides tool call when asked, and try these three prompts:
+
+1. `Show me the deck.` Claude calls `ppt_show`: "Untitled Presentation" at revision 0, with one title slide, `s1`.
+2. `Add a slide titled "Quarterly results" with the bullets "Revenue up 12%", "Two new customers" and "Next: hiring".` Claude locks `s1` (adding a slide changes the whole deck), adds the slide, locks it and sets the three bullets: two slides at revision 2, and the studio shows the new slide.
+3. `Export the deck as quarterly-results.pptx.` `ppt_export` writes `quarterly-results.pptx`, a two-slide PowerPoint file, in the workspace folder. PDF and PNG export also need LibreOffice.
+
 ## What this plugin runs, sends and reads
 
 This covers the Claude Code plugin in this repository: the MCP server that `.mcp.json` starts and the mod in `hooks/register.tsx` that adds the `/slides` panes. Slides has no account, telemetry or update check. It opens no network connection except to its own server on 127.0.0.1, and it sends nothing to ToolsEnabled.

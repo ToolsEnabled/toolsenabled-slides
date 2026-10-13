@@ -37,7 +37,7 @@ This safe harbor covers ToolsEnabled's own code and releases. It cannot grant pe
 
 ToolsEnabled is a small, self-funded company. We do not pay rewards for reports. We are grateful for every one, and we will credit you publicly if you want that.
 
-Like every ToolsEnabled release, Slides is provided "as is", without warranty of any kind, as https://toolsenabled.ai/terms/ says. This policy says how we handle reports, not that any release is free of problems.
+Like every ToolsEnabled release, Slides is provided "as is", without warranty of any kind, as this repository's [LICENSE](LICENSE) (MIT) says. This policy says how we handle reports, not that any release is free of problems.
 
 ## Security boundaries of this release
 

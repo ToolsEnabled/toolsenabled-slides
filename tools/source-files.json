@@ -96,6 +96,7 @@
   "test/helpers/dashboard.js",
   "test/helpers/fixtures.py",
   "test/helpers/mcp-client.js",
+  "test/helpers/user-deck.js",
   "test/js/absolute-paths.test.js",
   "test/js/action-commands.test.js",
   "test/js/animation-preview.test.js",
