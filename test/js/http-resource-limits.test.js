@@ -10,6 +10,11 @@ test('browser fetch metadata blocks cross-origin lint and image probes',async()=
 test('20 concurrent lint reads share one helper and cache only the same revision/artifact',async()=>{
  const s=fs.readFileSync(path.join(root,'src/server.js'),'utf8');const begin=s.indexOf('async function fullLint(');const end=s.indexOf('// Scoped version',begin);let calls=0;
  const context={require:id=>require(path.resolve(root,'src',id)),model:{rev:1},PPTX_PATH:'synthetic',fs:{statSync:()=>({mtimeMs:1,size:20})},lintModel:m=>({rev:m.rev,ok:true,count:0,issues:[]}),lintFonts:async()=>{calls++;await new Promise(r=>setTimeout(r,30));return [];}};
- const code=s.slice(begin,end)+'\nfullLint';const lint=vm.runInNewContext(code,context);await Promise.all(Array.from({length:20},()=>lint(context.model)));assert.equal(calls,1);await lint(context.model);assert.equal(calls,1);await lint({rev:2});assert.equal(calls,2);
+ let rendered={current:true,rev:1,error:null};context.presentationFreshness=()=>rendered;
+ const code=s.slice(begin,end)+'\nfullLint';const lint=vm.runInNewContext(code,context);await Promise.all(Array.from({length:20},()=>lint(context.model)));assert.equal(calls,1);await lint(context.model);assert.equal(calls,1);rendered={current:true,rev:2,error:null};await lint({rev:2});assert.equal(calls,2);
+ // Until presentation.pptx is the render of the linted revision, font lint does not run and nothing is cached.
+ rendered={current:false,error:'presentation.pptx is at rev 2, model is rev 3'};
+ for(let i=0;i<2;i++){const pending=await lint({rev:3});assert.equal(calls,2);assert.deepEqual(pending.issues.map(x=>x.type),['font-lint-pending']);assert.equal(pending.rev,3);assert.equal(pending.ok,false);}
+ rendered={current:true,rev:3,error:null};await lint({rev:3});assert.equal(calls,3);
 });
 test('Python render work has a bounded queue and concurrency',async()=>{const {run}=require('../../src/lib/python-jobs');let active=0,peak=0;await Promise.all(Array.from({length:12},()=>run(async()=>{active++;peak=Math.max(peak,active);await new Promise(r=>setTimeout(r,5));active--;})));assert(peak<=2);});
