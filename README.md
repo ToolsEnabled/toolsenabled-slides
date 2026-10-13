@@ -12,15 +12,15 @@ New decks use a clean white theme with Arial headings and body text, a blue acce
 
 Requirements: Node.js 22 or newer, Python 3.10 or newer, and the Python packages in `requirements.txt`. PDF and PNG on Linux also require LibreOffice Impress. PNG conversion through LibreOffice uses the pinned pypdfium2 wheel.
 
-Works with Claude Code on Linux through the `toolsenabled-slides` plugin; the repository is its own plugin marketplace for Claude Code (`.claude-plugin/marketplace.json`) and Codex (`.agents/plugins/marketplace.json`). See [plugin installation](docs/CLAUDE-INSTALL.md) for the install commands and the explicit offline setup of an external CPython 3.12 venv from the Linux wheel bundle, which was published with 0.1.0 and is unchanged for 0.1.6: [toolsenabled-slides-0.1.0-cp312-linux-x86_64-wheels.zip](https://github.com/ToolsEnabled/toolsenabled-slides/releases/download/v0.1.0/toolsenabled-slides-0.1.0-cp312-linux-x86_64-wheels.zip), SHA-256 `a29454931420b8d9547eeb8d17c389a005cf0343a927d7a275f15eb3cab25fec`. No Claude Desktop bundle (`.mcpb`) is distributed with this release; `manifest.json` is an MCPB manifest kept for future Desktop qualification. The source ZIP contains no wheels or copied venv. ToolsEnabled is not affiliated with or endorsed by Anthropic. [Privacy](https://toolsenabled.ai/privacy/) · [Support](mailto:support@toolsenabled.ai).
+Works with Claude Code on Linux through the `toolsenabled-slides` plugin; the repository is its own plugin marketplace for Claude Code (`.claude-plugin/marketplace.json`) and Codex (`.agents/plugins/marketplace.json`). See [plugin installation](docs/CLAUDE-INSTALL.md) for the install commands and the explicit offline setup of an external CPython 3.12 venv from the Linux wheel bundle, which was published with 0.1.0 and is unchanged for 0.1.7: [toolsenabled-slides-0.1.0-cp312-linux-x86_64-wheels.zip](https://github.com/ToolsEnabled/toolsenabled-slides/releases/download/v0.1.0/toolsenabled-slides-0.1.0-cp312-linux-x86_64-wheels.zip), SHA-256 `a29454931420b8d9547eeb8d17c389a005cf0343a927d7a275f15eb3cab25fec`. No Claude Desktop bundle (`.mcpb`) is distributed with this release; `manifest.json` is an MCPB manifest kept for future Desktop qualification. The source ZIP contains no wheels or copied venv. ToolsEnabled is not affiliated with or endorsed by Anthropic. [Privacy](https://toolsenabled.ai/privacy/) · [Support](mailto:support@toolsenabled.ai).
 
-Download the source ZIP and its `.sha256` file from the [v0.1.6 release](https://github.com/ToolsEnabled/toolsenabled-slides/releases/tag/v0.1.6), verify the ZIP, and extract it (it unpacks to `slides/`) into a directory you own. On Linux:
+Download the source ZIP and its `.sha256` file from the [v0.1.7 release](https://github.com/ToolsEnabled/toolsenabled-slides/releases/tag/v0.1.7), verify the ZIP, and extract it (it unpacks to `slides/`) into a directory you own. On Linux:
 
 ```sh
-curl -LO https://github.com/ToolsEnabled/toolsenabled-slides/releases/download/v0.1.6/toolsenabled-slides-0.1.6.zip
-curl -LO https://github.com/ToolsEnabled/toolsenabled-slides/releases/download/v0.1.6/toolsenabled-slides-0.1.6.zip.sha256
-sha256sum -c toolsenabled-slides-0.1.6.zip.sha256
-unzip toolsenabled-slides-0.1.6.zip && cd slides
+curl -LO https://github.com/ToolsEnabled/toolsenabled-slides/releases/download/v0.1.7/toolsenabled-slides-0.1.7.zip
+curl -LO https://github.com/ToolsEnabled/toolsenabled-slides/releases/download/v0.1.7/toolsenabled-slides-0.1.7.zip.sha256
+sha256sum -c toolsenabled-slides-0.1.7.zip.sha256
+unzip toolsenabled-slides-0.1.7.zip && cd slides
 python3 -m venv .venv
 .venv/bin/python -m pip install --require-hashes -r requirements.txt
 node src/cli/doctor.js

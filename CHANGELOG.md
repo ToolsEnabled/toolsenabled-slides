@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.7 — 2026-10-13
+
+Codex self-distribution fixes; the server, tools, studio, panes and mod are unchanged:
+
+- Codex no longer tries to read `hooks/hooks.json`, the Claude Code `/slides` mod, as a Codex hook file, which it cannot parse. `.codex-plugin/plugin.json` declares `"hooks": {}`; an explicit `hooks` value replaces Codex's default hooks-file discovery, and an empty one adds no hooks. Claude Code is unaffected.
+- `.codex-plugin/plugin.json` declares `"skills": "./skills/"`, which OpenAI's documentation requires for Codex-format packages with skills (Codex already fell back to `skills/`).
+- The Codex listing gains `interface.supportURL` (https://toolsenabled.ai/support/); `websiteURL` and `privacyPolicyURL` were already set. `shortDescription` is "Local PowerPoint deck editing", within the 30-character limit.
+- README, docs/CLAUDE-INSTALL.md and the skill use only Codex commands that OpenAI documents: add the marketplace with `codex plugin marketplace add ToolsEnabled/toolsenabled-slides`, then install from Codex's `/plugins` browser. For the CLI views, the installed plugin folder is named as a version folder under `~/.codex/plugins/cache/toolsenabled-slides/toolsenabled-slides/`. They used to name `codex plugin add` and `codex plugin list --json`, which OpenAI's documentation does not list.
+- `test/js/claude-package.test.js` now also pins the empty `hooks` object, the skills path, the description length and the listing links; the suite runs the same tests as 0.1.6.
+
 ## 0.1.6 — 2026-10-13
 
 - README: a "Try it" section gives the shortest path from nothing to a working result: prepare the external runtime from the 0.1.0 wheel bundle, install the plugin with its four settings, then three prompts (show the deck, add a slide with three bullets, export the deck as PPTX), each with the result it shows. No account or API key is needed.
