@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5 — 2026-10-13
+
+- `ppt_import` now respects protections on single objects. It used to check only slide protections, so an agent holding every slide lock could replace a deck in which a human had protected an object: the object was lost, its protection could not be removed in the studio, and the next start refused the workspace ("protections[0] names missing element …") until `state.json` was edited by hand. Import is now refused while any slide or object of the deck is protected, and the refusal names it, for example "Protected content must be unlocked by the human before replacing the deck (element e1 on slide s1 is protected)".
+- A workspace left in that state starts again. At startup, a protection that names an object the deck no longer has is removed, the previous `state.json` is kept as `.slides-state/state-before-protection-repair-<time>-<id>.json`, and the log says, for example, "Removed 1 protection for objects no longer in the deck (element e1 on slide s1); the previous state.json is kept as …". Any other mismatch between `state.json` and the deck still stops the start.
+- An MCP edit or import refused because content is protected now answers "PROTECTED." with the reason, instead of "PAUSED. The human has paused all editing …", which told the agent to wait for a Resume that would never come. The CLI already told the two apart.
+- `presentation.pptx` in the workspace is the deck as Slides renders it. A `presentation.pptx` that Slides did not write (your own deck with that name, or changes saved over the render in PowerPoint) is now copied to `presentation.user-<time>.pptx` before a render replaces it, and the log names the copy; before, it was overwritten without a copy. README now says to give imported decks another name.
+- `ppt_lint` right after an edit reports font lint as pending ("Font lint waits for the render of rev N …; run lint again after it") until `presentation.pptx` has been rendered for that revision. It used to check the fonts of the previous render and report them against the new slide order and revision, so after a slide move it named the wrong slide. The studio now refreshes its lint panel when a render is published.
+
 ## 0.1.4 — 2026-10-13
 
 - A lock refusal now names the slides to lock. For example, `ppt_add_slide` with a slide still unlocked returns "Lock the affected slides with ppt_lock before editing: s2 (add-slide changes the whole deck, so it needs every current slide locked)" instead of the bare instruction; the HTTP response also lists them as `lockSlides`.
