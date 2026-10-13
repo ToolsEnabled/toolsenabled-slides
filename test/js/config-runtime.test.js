@@ -13,3 +13,16 @@ test('registration refuses a missing explicit Python with actionable setup guida
  const result=spawnSync(process.execPath,[path.resolve(__dirname,'../../tools/mcp-config.mjs'),'--client','deepseek'],{env,encoding:'utf8'});
  assert.notEqual(result.status,0);assert.equal(result.stdout,'');assert.match(result.stderr,/SUITE_PYTHON.*setup-runtime/);
 });
+test('registration names node by its PATH entry, not the resolved version-manager target',{skip:process.platform==='win32'?'POSIX symlink':false},async()=>{
+ const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+ const {clientConfig}=await import('../../tools/mcp-config.mjs');
+ const bin=fs.mkdtempSync(path.join(os.tmpdir(),'slides-path-node-'));const link=path.join(bin,'node');
+ fs.symlinkSync(process.execPath,link);const saved=process.env.PATH;process.env.PATH=bin+path.delimiter+saved;
+ try{
+  const options={root:'/opt/slides',dataDir:'/decks/project',python:'/runtime/bin/python'};
+  assert.ok(clientConfig('claude',options).includes(`-- '${link}' '/opt/slides/slides-mcp.js'`),'claude mcp add names the PATH entry');
+  assert.equal(JSON.parse(clientConfig('cursor',options)).mcpServers.slides.command,link);
+  process.env.PATH=fs.mkdtempSync(path.join(os.tmpdir(),'slides-no-node-'));
+  assert.equal(JSON.parse(clientConfig('cursor',options)).mcpServers.slides.command,process.execPath,'without a PATH entry for this node, the running executable is named');
+ }finally{process.env.PATH=saved;fs.rmSync(bin,{recursive:true,force:true});}
+});
