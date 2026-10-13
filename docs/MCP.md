@@ -1067,7 +1067,7 @@ Report local rendering prerequisites and the selected PDF/PNG renderer. No insta
 
 ## Errors and limits
 
-Tool failures return `isError: true` and bounded readable text. A PAUSED response means stop editing and wait for the human; do not poll in a loop. Import/export replies include revision and relative paths. Files are never sent to a model service by this server. Refer to README limits for static-render fidelity, Windows-only animation/media authoring, input size, output bounds and the single-user trust boundary.
+Tool failures return `isError: true` and bounded readable text. A PAUSED response means stop editing and wait for the human; do not poll in a loop. A PROTECTED response names a slide or object the human has protected; only the human can unprotect it in the studio, so do not retry that change. Import/export replies include revision and relative paths. Files are never sent to a model service by this server. Refer to README limits for static-render fidelity, Windows-only animation/media authoring, input size, output bounds and the single-user trust boundary.
 
 ## Host annotations
 
