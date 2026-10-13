@@ -41,7 +41,7 @@ Security regressions cover split UTF-8 HTTP frames, renamed active parts and rel
 
 ## Command qualification
 
-Run `claude plugin test /absolute/plugin` with Claude Code 2.1.287 and a fresh, unsigned-in scratch `CLAUDE_CONFIG_DIR`. It executes the hook engine, not a model turn. The tests cover local child binding, paging, stale revisions, untrusted text, late responses, help, navigation and explicit diagnostics. They do not establish real terminal painting or composer restoration: qualify those separately in the real TUI, including Esc/q, detail-only markers, pagination, transcript absence and zero permission prompts.
+Run `claude plugin test /absolute/plugin` with Claude Code 2.1.296 and a fresh, unsigned-in scratch `CLAUDE_CONFIG_DIR`. It executes the hook engine, not a model turn. The tests cover local child binding, paging, stale revisions, untrusted text, late responses, help, navigation and explicit diagnostics. They do not establish real terminal painting or composer restoration: qualify those separately in the real TUI, including Esc/q, detail-only markers, pagination, transcript absence and zero permission prompts.
 
 The hook test engine has no process implementation, so `test/js/pane-environment.test.js` covers pane children directly: it builds each reader and renderer-probe launch with the hook's own launch builders, starts it as Claude Code 2.1.287 starts `$.process.run` (the init environment set over the client's own), and requires the real Node child to report only its allowlisted variable names. Values are never printed.
 
