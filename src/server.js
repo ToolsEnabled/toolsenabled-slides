@@ -3060,6 +3060,19 @@ async function fullLint(m) {
   let artifact;
   try { const stat = fs.statSync(PPTX_PATH); artifact = `${stat.mtimeMs}:${stat.size}`; }
   catch { artifact = 'missing'; }
+  // Font lint reads presentation.pptx. Until the render of this revision is published, that file has
+  // an older slide order and text, and its findings would be reported against the wrong slides under
+  // the new revision. Report the model checks with one pending note instead, and cache nothing.
+  if (artifact !== 'missing') {
+    const freshness = presentationFreshness();
+    if (!freshness.current || freshness.rev !== m.rev) {
+      const issues = lintModel(m).issues.concat([{
+        type: 'font-lint-pending', slideId: null, elementId: null, field: 'font',
+        detail: `Font lint waits for the render of rev ${m.rev} (${freshness.error || 'presentation.pptx is not current'}); run lint again after it`
+      }]);
+      return {rev:m.rev,ok:false,count:issues.length,issues};
+    }
+  }
   const key = `${m.rev}:${artifact}`;
   if (fullLint.cache?.key === key) return fullLint.cache.value;
   if (fullLint.pending) { await fullLint.pending; return fullLint(m); }
