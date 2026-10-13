@@ -547,12 +547,46 @@ function commitStagedPptx(staged) {
   throw lastError || new Error('could not replace presentation.pptx');
 }
 
+// presentation.pptx is Slides' own output, but it sits in the user's workspace. A file there that
+// Slides did not write (a deck of the user's that happens to have this name, or PowerPoint edits
+// saved over the render) is copied aside under a new name before a render replaces it. If the copy
+// cannot be made, the render is not published and the file stays as it is.
+let lastPublishedPptxSha = null;
+let lastKeptPptxSha = null;   // kept once, even if the replacement then fails (e.g. Windows holds the file open)
+function keepPresentationNotWrittenBySlides() {
+  let bytes;
+  try { bytes = fs.readFileSync(PPTX_PATH); }
+  catch (error) {
+    if (error && error.code === 'ENOENT') return null;
+    throw error;
+  }
+  const hash = crypto.createHash('sha256').update(bytes).digest('hex');
+  if (hash === lastPublishedPptxSha || hash === lastKeptPptxSha) return null;
+  try {
+    if (JSON.parse(fs.readFileSync(RENDER_STATE_PATH, 'utf8')).sha256 === hash) return null;
+  } catch (_) {}
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  for (let n = 1; ; n++) {
+    const name = `presentation.user-${stamp}${n > 1 ? `-${n}` : ''}.pptx`;
+    try { fs.writeFileSync(path.join(ROOT, name), bytes, { flag: 'wx' }); }
+    catch (error) {
+      if (error && error.code === 'EEXIST' && n < 100) continue;
+      throw new Error(`presentation.pptx was not written by Slides and could not be kept: ${error && (error.code || error.message)}`);
+    }
+    lastKeptPptxSha = hash;
+    console.error(`presentation.pptx was not written by Slides; kept it as ${name} before rendering the deck`);
+    return name;
+  }
+}
+
 function persistRenderMarker(rev) {
   const bytes = fs.readFileSync(PPTX_PATH);
+  const sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
+  lastPublishedPptxSha = sha256;
   return saveJSONAtomic(RENDER_STATE_PATH, {
     rev,
     size: bytes.length,
-    sha256: crypto.createHash('sha256').update(bytes).digest('hex'),
+    sha256,
     renderedAt: new Date().toISOString()
   });
 }
@@ -2678,6 +2712,7 @@ async function runRender() {
             renderAgain = true;
             return;
           }
+          keepPresentationNotWrittenBySlides();
           commitStagedPptx(stagedPptx);
           if (!persistRenderMarker(capturedRev)) throw new Error('could not save the render revision marker');
           published = true;
