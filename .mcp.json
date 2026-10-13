@@ -1,18 +1,12 @@
 {
   "mcpServers": {
     "slides": {
-      "command": "${user_config.python_executable}",
+      "command": "node",
       "args": [
-        "-I",
-        "${CLAUDE_PLUGIN_ROOT}/src/python/mcp_launcher.py",
-        "--node",
-        "${user_config.node_executable}",
-        "--workspace",
-        "${user_config.workspace_directory}",
-        "--port",
-        "${user_config.port}"
+        "${CLAUDE_PLUGIN_ROOT}/slides-mcp.js"
       ],
       "env": {
+        "SLIDES_PLUGIN_MODE": "1",
         "SLIDES_WORKSPACE": "${user_config.workspace_directory}",
         "SUITE_PYTHON": "${user_config.python_executable}",
         "SUITE_PORT": "${user_config.port}",

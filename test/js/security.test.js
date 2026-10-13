@@ -1,6 +1,6 @@
 'use strict';
 const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const net=require('node:net');const http=require('node:http');const {spawn,spawnSync}=require('node:child_process');
-const {Client}=require('../helpers/mcp-client');const {python}=require('../../src/lib/prerequisites');
+const {Client}=require('../helpers/mcp-client');const {python}=require('../../src/lib/prerequisites');const {childEnv}=require('../helpers/child-env');
 async function port(){const s=net.createServer();await new Promise(r=>s.listen(0,'127.0.0.1',r));const n=s.address().port;await new Promise(r=>s.close(r));return n;}
 function request(p,route,{method='GET',body,headers={}}={}){return new Promise((resolve,reject)=>{const req=http.request({host:'127.0.0.1',port:p,path:route,method,headers:{...headers,...(body?{'Content-Type':'application/json'}:{})}},res=>{let s='';res.on('data',c=>s+=c);res.on('end',()=>resolve({status:res.statusCode,text:s}));});req.on('error',reject);req.end(body?JSON.stringify(body):undefined);});}
 test('plugin security boundary, lifecycle and confinement',async t=>{
@@ -45,7 +45,7 @@ test('plugin security boundary, lifecycle and confinement',async t=>{
    const r=await c.request('tools/call',{name:'ppt_import',arguments:{path:'external.pptx'}});assert.ok(r.isError);assert.match(r.content[0].text,/External links/);
   });
   await t.test('another server cannot mutate the same workspace',async()=>{
-   const p=await port();const duplicate=spawn(process.execPath,[path.resolve(__dirname,'../..','src/server.js')],{env:{...process.env,...env,SUITE_PORT:String(p)},stdio:['ignore','pipe','pipe']});let log='';duplicate.stderr.on('data',x=>log+=x);const code=await new Promise(r=>duplicate.once('exit',r));assert.equal(code,1);assert.match(log,/leased/);assert.equal(log.trim().split('\n').length,1,'a refused lease is one line, not a stack trace: '+log);assert.equal(JSON.parse((await request(n,'/api/health')).text).pid,originalPid);
+   const p=await port();const duplicate=spawn(process.execPath,[path.resolve(__dirname,'../..','src/server.js')],{env:childEnv({...env,SUITE_PORT:String(p)}),stdio:['ignore','pipe','pipe']});let log='';duplicate.stderr.on('data',x=>log+=x);const code=await new Promise(r=>duplicate.once('exit',r));assert.equal(code,1);assert.match(log,/leased/);assert.equal(log.trim().split('\n').length,1,'a refused lease is one line, not a stack trace: '+log);assert.equal(JSON.parse((await request(n,'/api/health')).text).pid,originalPid);
   });
   await t.test('different workspace cannot attach to an occupied port',async()=>{
    const other=new Client({...env,SLIDES_WORKSPACE:path.join(root,'other')});await assert.rejects(other.request('initialize',{}),/different service or workspace/);assert.equal(await other.exited,1);

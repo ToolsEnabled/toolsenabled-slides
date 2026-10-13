@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const { spawnSync } = require('child_process');
 const dashboard = require('../helpers/dashboard');
 const {spawn, fetch} = dashboard;
+const { childEnv } = require('../helpers/child-env');
 
 const HERE = SUITE_ROOT;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -264,7 +265,7 @@ function startServer(suiteDir, port, capture) {
   const child = spawn(process.execPath, ['src/server.js'], {
     cwd: suiteDir,
     windowsHide: true,
-    env: Object.assign({}, process.env, {
+    env: childEnv({
       SUITE_PORT: String(port),
       SUITE_HOST: '127.0.0.1',
       SUITE_PROTECTION_TEST: '1'
@@ -283,7 +284,7 @@ function runCli(suiteDir, port, editor, args) {
   return spawnSync(process.execPath, ['src/ppt.js', ...args], {
     cwd: suiteDir,
     windowsHide: true,
-    env: Object.assign({}, process.env, {
+    env: childEnv({
       SUITE_PORT: String(port),
       SUITE_HOST: '127.0.0.1',
       SUITE_EDITOR: editor,

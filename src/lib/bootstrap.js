@@ -38,7 +38,7 @@ async function stopChild(child, closed) {
 }
 
 function pluginWorkspace(value) {
-  const error = () => new Error('Set SLIDES_WORKSPACE to an absolute external workspace before starting the Codex plugin');
+  const error = () => new Error('Set SLIDES_WORKSPACE to an absolute external workspace before starting the plugin');
   if (!require('./helper-paths').absolutePath(value)) throw error();
   const resolved = path.resolve(value), root = fs.realpathSync(path.resolve(__dirname, '../..'));
   let ancestor = resolved;

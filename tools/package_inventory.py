@@ -3,11 +3,17 @@ import json
 import subprocess
 from pathlib import Path, PurePosixPath
 
-ALLOWED = {'.js', '.cjs', '.mjs', '.ts', '.tsx', '.py', '.ps1', '.md', '.json', '.html', '.css', '.txt', '.base64'}
+ALLOWED = {'.js', '.cjs', '.mjs', '.ts', '.tsx', '.py', '.ps1', '.md', '.json', '.html', '.css', '.txt', '.base64', '.png'}
 EXCLUDED = {'.git', '.venv', 'node_modules', 'data', '.slides-state', '.slides-workspace', 'dist', '__pycache__'}
 ROOTS = {'README.md', 'LICENSE', 'SECURITY.md', 'CHANGELOG.md', 'package.json', 'requirements.txt',
          'slides-mcp.js', '.mcp.json', '.gitignore', 'manifest.json'}
 DIRECTORIES = {'src', 'public', 'scripts', 'test', 'docs', 'tools', '.codex-plugin', '.claude-plugin', '.agents', 'skills', 'hooks', 'commands'}
+
+def listing_image(name):
+    # Directory listing art: a PNG directly in .claude-plugin/. It is tracked and packed from a checkout, but the
+    # text snapshot leaves it out, because the plugin directory reviews any code or data file that names an image.
+    rel = PurePosixPath(name)
+    return rel.parent == PurePosixPath('.claude-plugin') and rel.suffix == '.png'
 
 def files(root):
     root = Path(root).resolve()
@@ -20,11 +26,11 @@ def files(root):
     snapshot = json.loads((root / 'tools/source-files.json').read_text())
     if checkout:
         names = subprocess.check_output(['git', '-C', str(root), 'ls-files', '-z']).decode().rstrip('\0').split('\0')
-        if sorted(names) != snapshot: raise ValueError('Tracked source snapshot does not match the checkout inventory')
+        if sorted(name for name in names if not listing_image(name)) != snapshot: raise ValueError('Tracked source snapshot does not match the checkout inventory')
         clean = subprocess.run(['git', '-C', str(root), 'diff-index', '--quiet', 'HEAD', '--'])
         if clean.returncode: raise ValueError('Release inputs must be clean; commit all tracked source changes first')
     else:
-        # Exact source archives carry the tracked-path snapshot; never discover local extras.
+        # Exact source archives carry the tracked-path snapshot; never discover local extras (listing art included).
         names = snapshot
     if not isinstance(names, list) or any(not isinstance(name, str) for name in names) or len(set(names)) != len(names):
         raise ValueError('Invalid source file inventory')

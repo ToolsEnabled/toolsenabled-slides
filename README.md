@@ -28,7 +28,7 @@ node src/cli/doctor.js
 
 Install LibreOffice with `sudo apt-get install libreoffice-impress` on Ubuntu. Set `SLIDES_SOFFICE` to the executable if it is outside PATH. Doctor reports the selected renderer and missing prerequisites. Nothing installs itself at startup. Helper executables are resolved to absolute paths outside the workspace, with an explicit install-directory working directory. Python prerequisite probes use isolated mode.
 
-Plugin route, which needs the external runtime from [docs/CLAUDE-INSTALL.md](docs/CLAUDE-INSTALL.md): in Claude Code, `claude plugin marketplace add ToolsEnabled/toolsenabled-slides`, then install it with the four settings it requires (the paths are examples): `claude plugin install -s local toolsenabled-slides@toolsenabled-slides --config python_executable="/absolute/private/Slides Runtime/bin/python" --config node_executable=/absolute/node --config workspace_directory="/absolute/decks/Project Update" --config port=4599`. Without these settings the plugin installs but starts no server. In Codex, `codex plugin marketplace add ToolsEnabled/toolsenabled-slides` then `codex plugin add toolsenabled-slides@toolsenabled-slides` or the `/plugins` directory.
+Plugin route, which needs the external runtime from [docs/CLAUDE-INSTALL.md](docs/CLAUDE-INSTALL.md) and Node.js 22 or newer on the PATH that Claude Code runs with: in Claude Code, `claude plugin marketplace add ToolsEnabled/toolsenabled-slides`, then install it with the four settings it requires (the paths are examples): `claude plugin install -s local toolsenabled-slides@toolsenabled-slides --config python_executable="/absolute/private/Slides Runtime/bin/python" --config node_executable=/absolute/node --config workspace_directory="/absolute/decks/Project Update" --config port=4599`. Claude Code starts the MCP server as `node ${CLAUDE_PLUGIN_ROOT}/slides-mcp.js` and passes the settings to it as environment variables; `node_executable` is the Node.js that the `/slides` panes run. Without the Python and workspace settings the plugin installs but starts no server. In Codex, `codex plugin marketplace add ToolsEnabled/toolsenabled-slides` then `codex plugin add toolsenabled-slides@toolsenabled-slides` or the `/plugins` directory.
 
 Start the stdio MCP server with one command:
 
@@ -39,6 +39,51 @@ node slides-mcp.js
 The server creates a private workspace at `.slides-workspace` in the current directory, starts the local suite, and prints its studio address to stderr. MCP messages alone use stdout. Open the one-time dashboard URL printed at startup to watch and control editing. A bare `/studio` page can display the deck, but does not authorize human controls. In Claude Code, the human finds startup stderr at `~/.cache/claude-cli-nodejs/<cwd-slug>/mcp-logs-plugin-toolsenabled-slides-slides/<timestamp>.jsonl` (XDG settings may change the base), or in a private absolute `--debug-file` they select. Same-user agent file tools can read an unused link, even from mode-600 logs: open it before assigning agent work and never ask the agent to retrieve it.
 
 For a persistent studio that outlives individual MCP sessions, set `SLIDES_WORKSPACE` and run `node src/cli/studio.js`. MCP clients with the same workspace and port attach to it. Clients that attach leave the server running on exit. On Linux, a suite started by an MCP client exits with that owning client, including abrupt termination, through a private lifetime pipe; attached clients then need to reconnect. If a launch link expires or a dashboard tab loses its session, stop and restart the owning client or persistent studio to receive a fresh launch URL. Saved workspace edits remain.
+
+## What this plugin runs, sends and reads
+
+This covers the Claude Code plugin in this repository: the MCP server that `.mcp.json` starts and the mod in `hooks/register.tsx` that adds the `/slides` panes. Slides has no account, telemetry or update check. It opens no network connection except to its own server on 127.0.0.1, and it sends nothing to ToolsEnabled.
+
+### MCP server
+
+- **Command.** Claude Code runs `node ${CLAUDE_PLUGIN_ROOT}/slides-mcp.js` with no other arguments. `node` comes from the PATH that Claude Code runs with and must be Node.js 22 or newer. The settings arrive as environment variables: `SLIDES_PLUGIN_MODE=1`, `SLIDES_WORKSPACE` (`workspace_directory`), `SUITE_PYTHON` (`python_executable`), `SUITE_PORT` (`port`), `SLIDES_RENDERER` (`renderer`), `SLIDES_SOFFICE` (`libreoffice_executable`), and fixed values for the allowed origins and the HTTP timeouts.
+- **Checks before anything is created.** The workspace must be an absolute path outside the plugin cache. The configured Python runs `src/python/runtime_contract.py`, which requires a CPython 3.12 venv outside the plugin and the workspace, a `slides-runtime.json` receipt that matches this release's `requirements.txt`, the locked package versions, and a Node.js 22 or newer that is outside the workspace and the plugin cache. If a check fails, the server prints the reason to stderr and exits.
+- **Programs it starts.** The local suite, `node src/server.js`, which listens on 127.0.0.1 at the configured port and serves the studio. The configured Python, running the plugin's own scripts in `src/python/` to build the PPTX, import a deck and read shape details from it, check fonts, prepare render copies and turn PDF pages into PNG. LibreOffice `soffice` (the configured path, or `soffice` on PATH): `soffice --version` to detect it, and a headless conversion to PDF with a new private profile in a temporary folder inside the workspace, for PDF and PNG exports and for the studio thumbnails that are rendered at startup and after edits. Nothing is downloaded or installed at launch. The install commands that `src/cli/doctor.js` and some error messages print are advice for you; Slides never runs them.
+- **What it reads and writes.** It reads the workspace (deck files, the images and videos you put in `assets/`, and its own state in `.slides-state/`), the plugin's files, the runtime receipt and the variables above, and it writes only in the workspace. LibreOffice and the system libraries it loads also keep their usual caches in your home directory, such as fontconfig and dconf under `~/.cache`.
+- **What it sends, and where.** Tool results (slide text, IDs, lint findings, export paths) go to Claude Code over stdio, and Claude Code may send them to its model provider under its own terms. The studio and its data go only to a browser on this machine at `http://127.0.0.1:<port>/studio`, and human controls need the one-time launch link. Startup messages, including that link, go to stderr, which Claude Code keeps in its MCP log file. Decks with external links are refused before import and rendering, so rendering fetches nothing.
+- **Environment.** The server passes its environment on to the programs it starts. Slides itself reads only its own `SLIDES_*` and `SUITE_*` variables, PATH (to find programs), NO_COLOR and, on Windows, SystemRoot, and it sends none of them anywhere.
+
+### The `/slides` mod
+
+`hooks/register.tsx` adds one command, `/slides`, which opens a read-only pane. It changes no permission, setting, agent or other command. It handles five events:
+
+| Event | What the handler does |
+| --- | --- |
+| `session.start` | Clears the pane's state, registers the `/slides` command with `$.command.register`, then passes the event on unchanged with `return next(e)`. |
+| `session.end` | Clears the pane's state and passes the event on unchanged. |
+| `ui.close`, for its own pane `slides-view` only | Clears the pane's state and passes the event on unchanged. `ui.close` is also the name of a call: the mod calls `$.ui.close` on its own pane when you press `q` or Close. |
+| `command.run`, for the `slides` command only | Opens the pane and loads the requested view. As that command's handler it returns its own empty result, so nothing from the workspace enters the transcript or the model's context. |
+| `ui.render`, for its own pane only | Draws the pane. |
+
+**Programs it starts.** Each view load (opening `/slides`, paging, reload, home, help and the view filters) runs this through `$.process.run`, with the plugin folder as the working directory and a 7-second limit:
+
+```
+/usr/bin/env -i -- PATH=… HOME=… LANG=… SLIDES_WORKSPACE=… SUITE_PYTHON=… SUITE_PORT=… SLIDES_RENDERER=… SLIDES_SOFFICE=… <node_executable> --max-old-space-size=384 <plugin>/src/cli/view.js <view> [<selector>] --json --offset <n> --limit <n> [--all] [--revision <hash>]
+```
+
+Pressing `v` in the status view, and nothing else, runs the renderer probe with a 45-second limit:
+
+```
+/usr/bin/env -i -- PATH=… HOME=… LANG=… SLIDES_PLUGIN_MODE=1 SLIDES_WORKSPACE=… SUITE_PYTHON=… SLIDES_RENDERER=… SLIDES_SOFFICE=… <node_executable> <plugin>/src/cli/doctor.js
+```
+
+The pane's data comes from the same reader as the command-line views, `src/cli/view.js`, run as a separate Node process with a 384 MB memory cap and a time limit. The mod assembles the command when it runs, because it contains your configured paths and the view you asked for. `env -i` starts the child with an empty environment, so the child receives only the variables written after it: PATH, HOME and LANG, which the mod reads from Claude Code with `$.env.get`, and the plugin settings. `node_executable` must be an absolute path without `=`, and the pane never falls back to `node` on PATH. The probe's `doctor.js` runs the configured Python (the runtime check and the pypdfium2 version) and `soffice --version`.
+
+**What it reads and sends.** `view.js` reads the workspace's saved state: outline, board, tasks, history, export receipts and asset metadata. For the home, slide, status, studio, history and lint views it also asks the running Slides server on `127.0.0.1:<port>` for live state (`GET /api/health`, `/api/state`, `/api/history`, `/api/lint?cached=1`). The pane shows the result in the terminal only. The mod sends nothing over the network.
+
+### Tests and the credential checks
+
+The `test/` folder is the repository's test suite; the plugin never runs it. Tests use placeholder hosts such as `evil.example` and `example.invalid` as hostile `Origin` and `Host` values, to prove the local server refuses cross-origin requests, and decks in tests and in `src/python/` contain XML namespace names such as `schemas.openxmlformats.org`, which are part of the PowerPoint file format, not addresses. Names such as `t.test(…)` and `pkg.scripts.test` are JavaScript calls and properties, not hosts. The tests that start the server or the CLI in files with such hosts give the child only the operating-system basics and the suite's own `SUITE_*` and `SLIDES_*` settings (`test/helpers/child-env.js`). `test/js/pane-environment.test.js` deliberately sets synthetic values for `ANTHROPIC_API_KEY`, `GITHUB_TOKEN` and similar names, to prove that the pane's children never receive them. `src/python/render_pptx.py` reads one variable, `SLIDES_WORKSPACE`. Nothing in this repository reads a real credential or sends one anywhere. The only secrets Slides handles are the dashboard launch link and session token that it creates for its own local dashboard.
 
 ## Connect your host
 

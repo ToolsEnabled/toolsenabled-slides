@@ -21,4 +21,16 @@ class InventoryTests(unittest.TestCase):
   with self.assertRaisesRegex(ValueError,'clean|uncommitted'):mod.files(root)
  def test_archive_extras_not_discovered(self):
   root=self.fixture();(root/'private.txt').write_text('never packaged');self.assertNotIn('private.txt',[n for n,p in mod.files(root)])
+ def test_listing_art_is_packed_from_a_checkout_without_a_snapshot_entry(self):
+  temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup);root=Path(temp.name);png=b'\x89PNG\r\n\x1a\n'
+  for folder in ('tools','.claude-plugin','src'):(root/folder).mkdir()
+  (root/'README.md').write_text('Synthetic release\n');(root/'.claude-plugin/art.png').write_bytes(png);(root/'tools/source-files.json').write_text(json.dumps(['README.md','tools/source-files.json']))
+  self.assertEqual([n for n,p in mod.files(root)],['README.md','tools/source-files.json'],'an archive packs only its snapshot')
+  def run(*args):return subprocess.run(['git','-C',str(root),*args],capture_output=True,text=True,check=True)
+  commit=lambda message:run('-c','user.name=Synthetic','-c','user.email=synthetic@example.invalid','commit','-qm',message)
+  run('init','-q');run('add','.');commit('fixture')
+  self.assertEqual([n for n,p in mod.files(root)],['.claude-plugin/art.png','README.md','tools/source-files.json'])
+  # An image anywhere else is not listing art: it still needs a reviewed snapshot entry.
+  (root/'src/stray.png').write_bytes(png);run('add','.');commit('stray')
+  with self.assertRaisesRegex(ValueError,'inventory|snapshot'):mod.files(root)
 if __name__=='__main__':unittest.main()

@@ -27,7 +27,7 @@
     "node_executable": {
       "type": "file",
       "title": "Node.js executable",
-      "description": "Absolute path to an existing Node.js 22+ executable outside the workspace and plugin.",
+      "description": "Absolute path to an existing Node.js 22+ executable outside the workspace and plugin. The /slides panes run it; the MCP server runs node from PATH.",
       "required": true
     },
     "workspace_directory": {

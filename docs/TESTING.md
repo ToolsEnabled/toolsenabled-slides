@@ -10,6 +10,8 @@ The plugin-mode tests check the `slides-runtime.json` receipt that `tools/setup-
 
 `test/run.js` discovers every `test/js/*.test.js` and `test/python/*.test.py`. It copies source into a temporary suite, generates an original synthetic deck and local media fixtures, and executes test files sequentially. The suite runs without credentials or model calls. Node has no npm dependency installation step.
 
+Tests that start the server or the CLI next to placeholder hosts give the child only the operating-system basics and the suite's `SUITE_*` and `SLIDES_*` settings, through `test/helpers/child-env.js`. `test/js/claude-package.test.js` starts the server the way `.mcp.json` describes, with `${CLAUDE_PLUGIN_ROOT}` and the options substituted, and checks the runtime receipt, the workspace, the full tool list and the refusals when the Python or workspace setting is missing; `test/js/plugin-readonly.test.js` checks that this launch never writes into the installed plugin.
+
 The browser smoke test requires Chrome, Chromium or Edge. Set `SLIDES_TEST_BROWSER` when its executable is outside PATH. This explicit override enables sandbox-compatible headless flags for a test-owned profile. Missing browsers are a test failure, not a silent pass.
 
 For a targeted rerun: `node test/run.js test/js/applyop.test.js test/js/backend-robustness.test.js`. Set `SLIDES_KEEP_TESTS=1` to retain the generated fixture tree for diagnosis.

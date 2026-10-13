@@ -92,6 +92,7 @@
   "test/fixtures/tools-list.json",
   "test/helpers/browser-model.js",
   "test/helpers/cdp.js",
+  "test/helpers/child-env.js",
   "test/helpers/dashboard.js",
   "test/helpers/fixtures.py",
   "test/helpers/mcp-client.js",

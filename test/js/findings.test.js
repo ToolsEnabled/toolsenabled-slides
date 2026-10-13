@@ -5,12 +5,13 @@ const fs=require('node:fs');
 const os=require('node:os');
 const path=require('node:path');
 const {spawn,spawnSync}=require('node:child_process');
+const {childEnv}=require('../helpers/child-env');
 const root=path.resolve(__dirname,'../..');
 test('fresh install creates private state and starts with a neutral deck',async()=>{
  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'slides-fresh-'));
  const suite=path.join(tmp,'suite');
  fs.cpSync(root,suite,{recursive:true,filter:p=>!['.git','data','.venv'].includes(path.basename(p))});
- const proc=spawn(process.execPath,['src/server.js'],{cwd:suite,env:{...process.env,SUITE_PORT:'47983'},stdio:['ignore','pipe','pipe']});
+ const proc=spawn(process.execPath,['src/server.js'],{cwd:suite,env:childEnv({SUITE_PORT:'47983'}),stdio:['ignore','pipe','pipe']});
  let logs='';proc.stdout.on('data',c=>logs+=c);proc.stderr.on('data',c=>logs+=c);
  try{
   const deadline=Date.now()+5000;let healthy=false;
@@ -21,7 +22,7 @@ test('fresh install creates private state and starts with a neutral deck',async(
  }finally{proc.kill('SIGKILL');await new Promise(r=>proc.exitCode!==null?r():proc.once('exit',r));fs.rmSync(tmp,{recursive:true,force:true});}
 });
 test('missing python-pptx explains the exact isolated install command',()=>{
- const r=spawnSync(process.execPath,['src/cli/doctor.js'],{cwd:root,env:{...process.env,SUITE_PYTHON:'not-a-python-executable'},encoding:'utf8'});
+ const r=spawnSync(process.execPath,['src/cli/doctor.js'],{cwd:root,env:childEnv({SUITE_PYTHON:'not-a-python-executable'}),encoding:'utf8'});
  assert.equal(r.status,1);assert.match(r.stdout+r.stderr,/python3 -m venv .venv/);assert.match(r.stdout+r.stderr,/pip install --require-hashes -r requirements.txt/);
 });
 test('Linux PDF and all-page PNG exports use a detected LibreOffice renderer',()=>{

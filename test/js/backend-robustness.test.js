@@ -11,6 +11,7 @@ const crypto = require('crypto');
 const { spawnSync } = require('child_process');
 const dashboard = require('../helpers/dashboard');
 const {spawn} = dashboard;
+const { childEnv } = require('../helpers/child-env');
 
 const HERE = SUITE_ROOT;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -251,7 +252,7 @@ async function startupFailure(mutator, expectedText) {
     const before = fs.readFileSync(observed, 'utf8');
     child = spawn(process.execPath, ['src/server.js'], {
       cwd: sandbox.suiteDir,
-      env: Object.assign({}, process.env, { SUITE_PORT: String(await freePort()) }),
+      env: childEnv({ SUITE_PORT: String(await freePort()) }),
       stdio: ['ignore', 'ignore', 'pipe']
     });
     let stderr = '';
@@ -279,7 +280,7 @@ async function startupSuccess(mutator) {
     const port = await freePort();
     child = spawn(process.execPath, ['src/server.js'], {
       cwd: sandbox.suiteDir,
-      env: Object.assign({}, process.env, { SUITE_PORT: String(port) }),
+      env: childEnv({ SUITE_PORT: String(port) }),
       stdio: ['ignore', 'ignore', 'pipe']
     });
     await waitForHealth(child, port);
@@ -305,7 +306,7 @@ async function main() {
   try {
     child = spawn(process.execPath, ['src/server.js'], {
       cwd: sandbox.suiteDir,
-      env: Object.assign({}, process.env, {
+      env: childEnv({
         SUITE_PORT: String(port),
         SUITE_REQUEST_BODY_TIMEOUT_MS: '150'
       }),

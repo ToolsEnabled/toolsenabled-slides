@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const zlib = require('zlib');
 const dashboard = require('../helpers/dashboard');
 const {spawn} = dashboard;
+const { childEnv } = require('../helpers/child-env');
 
 const HERE = SUITE_ROOT;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -326,7 +327,7 @@ function startServer(suiteDir, port, capture = true) {
   const child = spawn(process.execPath, ['src/server.js'], {
     cwd: suiteDir,
     windowsHide: true,
-    env: Object.assign({}, process.env, {
+    env: childEnv({
       SUITE_PORT: String(port),
       SUITE_HOST: '127.0.0.1',
       SUITE_OBJECT_HISTORY_TEST: '1'
