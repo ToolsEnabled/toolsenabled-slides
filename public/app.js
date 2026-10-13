@@ -580,7 +580,7 @@ function connect() {
       case 'pause': setPaused(true, ev.by); feedItem(ev); break;
       case 'resume': setPaused(false); feedItem(ev); break;
       case 'editors': renderEditors(ev.editors); break;
-      case 'render': feedItem(ev); if (!ev.ok) toast('Render failed', true); break;
+      case 'render': feedItem(ev); if (!ev.ok) toast('Render failed', true); else fetchLint(); break;
       // A disk write for model.json genuinely failed (AV lock, full disk,
       // permissions): the server keeps serving its in-memory model, so
       // nothing else would ever tell a human their edit did not actually

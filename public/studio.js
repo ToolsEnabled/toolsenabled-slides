@@ -2018,7 +2018,8 @@ function connect() {
         break;
       case 'pause': setPaused(true, ev.by); feedItem(ev); tick(`paused by ${ev.by || 'someone'}`); break;
       case 'resume': setPaused(false); feedItem(ev); tick(`resumed by ${ev.by || 'someone'}`); break;
-      case 'render': if (ev.ok === false) setStale('amber'); feedItem(ev); break;
+      // Font lint waits for the render of the current revision, so a published render is when it can complete.
+      case 'render': if (ev.ok === false) setStale('amber'); else fetchLint(); feedItem(ev); break;
       case 'persist':
         setStale('red');
         toast(`Save failed (${ev.file || 'disk'}): ${ev.error || 'unknown error'}`, true);
