@@ -40,6 +40,7 @@ test('fresh workspace initializes quietly and rejects agent controls',async t=>{
  try{
   await t.test('first boot has no missing-artifact error',()=>{
    assert.doesNotMatch(run.stderr,/presentation needs a boot render:.*ENOENT/);
+   assert.match(run.stderr,/creating the initial presentation\.pptx/);
    const model=JSON.parse(fs.readFileSync(path.join(workspace,'.slides-state','model.json')));
    assert.equal(model.slides.length,1);
   });
@@ -52,8 +53,9 @@ test('fresh workspace initializes quietly and rejects agent controls',async t=>{
 });
 
 // A client's health check (claude mcp list) can stop the first start before its first render
-// writes presentation.pptx. The next start must say it is creating the deck, not report ENOENT.
-test('a start after an interrupted first start creates the deck with a neutral message',async()=>{
+// writes presentation.pptx. The next start must say it renders the existing deck model again,
+// not report ENOENT and not call a deck that already has a revision "initial".
+test('a start after an interrupted first start renders the missing deck with a neutral message',async()=>{
  const workspace=fs.mkdtempSync(path.join(os.tmpdir(),'slides-first-boot-'));
  try{
   const first=await start(workspace);await first.stop();
@@ -61,8 +63,8 @@ test('a start after an interrupted first start creates the deck with a neutral m
   assert.ok(fs.existsSync(path.join(workspace,'.slides-state','model.json')));
   const second=await start(workspace);
   try{
-   assert.doesNotMatch(second.stderr,/ENOENT|boot render/);
-   assert.match(second.stderr,/creating the initial presentation\.pptx/);
+   assert.doesNotMatch(second.stderr,/ENOENT|boot render|creating the initial/);
+   assert.match(second.stderr,/presentation\.pptx is missing, rendering it for rev \d+/);
   }finally{await second.stop();}
  }finally{fs.rmSync(workspace,{recursive:true,force:true});}
 });

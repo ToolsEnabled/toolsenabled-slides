@@ -6,7 +6,7 @@ const net=require('node:net');const http=require('node:http');const {spawn}=requ
 const {Client}=require('../helpers/mcp-client');const {python}=require('../../src/lib/prerequisites');
 const {openTarget,evalJs}=require('../helpers/cdp');
 async function port(){const s=net.createServer();await new Promise(r=>s.listen(0,'127.0.0.1',r));const n=s.address().port;await new Promise(r=>s.close(r));return n;}
-async function until(fn){const end=Date.now()+10000;while(Date.now()<end){try{if(await fn())return;}catch{}await new Promise(r=>setTimeout(r,50));}throw new Error('Browser session did not reach expected state');}
+const {until}=require('../helpers/until');
 test('real browser redeems the fragment, controls the deck and isolates another port',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'slides-browser-session-'));
  const p=await port(),debug=await port();const origin=`http://127.0.0.1:${p}`;
@@ -20,17 +20,17 @@ test('real browser redeems the fragment, controls the deck and isolates another 
   const binary=[process.env.SLIDES_TEST_BROWSER,'/usr/bin/chromium','/usr/bin/google-chrome','/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',path.join(process.env.ProgramFiles||'C:\\Program Files','Google/Chrome/Application/chrome.exe')].find(x=>x&&fs.existsSync(x));
   assert.ok(binary,'Set SLIDES_TEST_BROWSER to an installed Chromium browser');
   browser=spawn(binary,['--headless=new',...(process.env.SLIDES_TEST_BROWSER?['--no-sandbox','--no-zygote','--disable-dev-shm-usage']:[]),'--disable-background-networking','--disable-component-update','--no-first-run','--no-default-browser-check',`--remote-debugging-port=${debug}`,'--remote-debugging-address=127.0.0.1',`--user-data-dir=${path.join(root,'profile')}`,'about:blank'],{stdio:'ignore'});
-  await until(async()=>(await fetch(`http://127.0.0.1:${debug}/json/version`)).ok);
+  await until(async()=>(await fetch(`http://127.0.0.1:${debug}/json/version`)).ok,'the browser answers on its DevTools port');
   target=await openTarget(debug,'about:blank',0);
   await target.send('Page.navigate',{url:launch});
-  await until(()=>evalJs(target,"Boolean(sessionStorage.getItem('slidesDashboardSession')) && location.hash === '' && Boolean(document.getElementById('pauseBtn'))"));
+  await until(()=>evalJs(target,"Boolean(sessionStorage.getItem('slidesDashboardSession')) && location.hash === '' && Boolean(document.getElementById('pauseBtn'))"),'the launch link is redeemed, the fragment cleared and the pause button shown');
   assert.equal(await evalJs(target,"document.cookie.includes('slides_dashboard_')"),false,'cookie is HttpOnly');
   await evalJs(target,"document.getElementById('pauseBtn').click()");
-  await until(async()=>(await (await fetch(origin+'/api/state')).json()).paused===true);
+  await until(async()=>(await (await fetch(origin+'/api/state')).json()).paused===true,'the deck is paused after the click');
   await target.send('Page.reload');
-  await until(()=>evalJs(target,"Boolean(sessionStorage.getItem('slidesDashboardSession')) && document.getElementById('pauseBtn').textContent.includes('Resume')"));
+  await until(()=>evalJs(target,"Boolean(sessionStorage.getItem('slidesDashboardSession')) && document.getElementById('pauseBtn').textContent.includes('Resume')"),'the reloaded page keeps the session and offers Resume');
   await evalJs(target,"document.getElementById('pauseBtn').click()");
-  await until(async()=>(await (await fetch(origin+'/api/state')).json()).paused===false);
+  await until(async()=>(await (await fetch(origin+'/api/state')).json()).paused===false,'the deck resumes after the click');
   otherTarget=await openTarget(debug,`http://127.0.0.1:${other.address().port}`,300);
   assert.equal(await evalJs(otherTarget,"sessionStorage.getItem('slidesDashboardSession')"),null,'sessionStorage includes the port in its origin');
   assert.match(leakedCookie,/slides_dashboard_/,'a second local port receives the cookie');

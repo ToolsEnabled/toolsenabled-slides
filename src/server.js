@@ -5611,8 +5611,9 @@ async function boot() {
     const freshness = presentationFreshness();
     if (!freshness.current) {
       // A missing presentation.pptx is normal after a first start that stopped before its first
-      // render (a client's health check can do that); say what happens next, not ENOENT.
-      if (!fs.existsSync(PPTX_PATH)) console.error('creating the initial presentation.pptx');
+      // render (a client's health check can do that); say what happens next, not ENOENT. Only a
+      // new deck is "initial": an existing model is rendered again at its revision.
+      if (!fs.existsSync(PPTX_PATH)) console.error(initialDeck ? 'creating the initial presentation.pptx' : `presentation.pptx is missing, rendering it for rev ${model.rev}`);
       else if (!initialDeck) console.error('presentation.pptx is out of date, rendering it again:', freshness.error);
       if (!state.paused) scheduleRender();
     } else {
