@@ -1350,7 +1350,7 @@ async function handle(line) {
   if (method === 'ping') return send({jsonrpc:'2.0',id,result:{}});
   if (method === 'tools/list') {
     return send({ jsonrpc: '2.0', id, result: {
-      tools: VISIBLE.map(({ name, description, inputSchema }) => ({ name, description, inputSchema, annotations: annotations(name) })),
+      tools: VISIBLE.map(({ name, description, inputSchema }) => ({ name, title: ANNOTATIONS[name].title, description, inputSchema, annotations: annotations(name) })),
     } });
   }
   if (method === 'tools/call') {

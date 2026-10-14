@@ -69,3 +69,7 @@ test('the 37 tools carry exactly the reviewed annotation values',()=>{
   }
   const titles=tools.map(t=>t.annotations.title);assert.equal(new Set(titles).size,titles.length,'titles are unique');
 });
+
+test('each tool also carries its title at the top level, as MCP 2025-06-18 clients read it first',()=>{
+  for(const tool of listTools())assert.equal(tool.title,PINNED[tool.name][0],tool.name);
+});

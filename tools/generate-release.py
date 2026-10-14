@@ -5,10 +5,13 @@ import hashlib
 import io
 import json
 import re
+import runpy
 import subprocess
-import urllib.request
 import zipfile
 from pathlib import Path
+
+# The HTTPS read lives in tools/release_fetch.py beside this file; this file runs only git.
+read_release = runpy.run_path(str(Path(__file__).resolve().parent / 'release_fetch.py'))['read_release']
 
 
 def generate(source, repository, tag, commit, signed, release_url, output, description=None):
@@ -44,8 +47,7 @@ def generate(source, repository, tag, commit, signed, release_url, output, descr
             raise ValueError('Registry sidecar must not be bundled')
     if not release_url.startswith(repository + '/releases/download/' + tag + '/') or not release_url.endswith('.mcpb'):
         raise ValueError('Expected exact tagged HTTPS mcpb release URL')
-    with urllib.request.urlopen(release_url, timeout=30) as response:
-        downloaded = response.read(64 * 1024 * 1024 + 1)
+    downloaded = read_release(release_url, 64 * 1024 * 1024 + 1)
     if downloaded != payload:
         raise ValueError('Downloaded release bytes differ from supplied signed artifact')
     digest = hashlib.sha256(payload).hexdigest()

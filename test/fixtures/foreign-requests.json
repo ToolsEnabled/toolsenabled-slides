@@ -1,0 +1,9 @@
+{
+  "comment": "Requests from another site, for test/js/security.test.js: the server must refuse each one with 403. evil.example is a reserved placeholder name, never contacted.",
+  "readHeaders": [
+    {"Host": "evil.example"},
+    {"Origin": "https://evil.example"},
+    {"Origin": "null"}
+  ],
+  "writeHeaders": {"Origin": "http://evil.example"}
+}

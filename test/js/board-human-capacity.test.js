@@ -1,9 +1,9 @@
 'use strict';
-const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const net=require('node:net');const {Client}=require('../helpers/mcp-client');const {redeem}=require('../helpers/dashboard');
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const net=require('node:net');const {Client}=require('../helpers/mcp-client');const {redeem,launchLink}=require('../helpers/dashboard');
 test('agent volume cannot consume human board capacity or impersonate its provenance',async()=>{
  const workspace=fs.mkdtempSync(path.join(os.tmpdir(),'slides-capacity-'));const socket=net.createServer();await new Promise(r=>socket.listen(0,'127.0.0.1',r));const port=socket.address().port;await new Promise(r=>socket.close(r));const env={SLIDES_WORKSPACE:workspace,SUITE_PORT:String(port)};let c=new Client(env);const origin=`http://127.0.0.1:${port}`;
  const post=async(route,body,auth={})=>{const r=await fetch(origin+route,{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...auth},body:JSON.stringify(body)});return {status:r.status,body:await r.json()};};
- try{await c.tool('ppt_show');const auth=await redeem(c.stderr.match(/http:\/\/[^\s]+\/studio#launch=[a-f0-9]{64}/)[0]);
+ try{await c.tool('ppt_show');const auth=await redeem(launchLink(c.stderr));
   const protectedNote=await post('/api/board',{text:'Human note survives agent floods',author:'human'},auth);assert.equal(protectedNote.status,200);
   for(let i=0;i<60;i++)await post('/api/board',{text:'漢'.repeat(4000),author:i<10?'human':'mcp-'+i,humanOrigin:true});
   for(const pinned of [false,true]){const r=await post('/api/board',{text:'Human can still write '+pinned,author:'human',pinned},auth);assert.equal(r.status,200,JSON.stringify(r));}

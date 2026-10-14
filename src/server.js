@@ -39,6 +39,7 @@ const PORT = parseInt(process.env.SUITE_PORT || '4599', 10);
 const HOST = process.env.SUITE_HOST || '127.0.0.1';
 if (!['127.0.0.1', 'localhost', '::1'].includes(HOST)) throw new Error('Slides must bind to loopback');
 const dashboardSession = require('./lib/dashboard-session').createDashboardSession(PORT);
+const { httpOrigin } = require('./lib/origins');
 const PY = require('./lib/prerequisites').python();
 const EDITOR_TTL = 15000;      // ms before a silent editor is considered gone
 const LOCK_TTL = 20 * 60 * 1000;   // ms before an unrefreshed slide lock auto-expires
@@ -3935,7 +3936,7 @@ function requireControlJson(req, res) {
   }
   const origin = String(req.headers.origin || '');
   const configured = new Set([
-    `http://${HOST}:${PORT}`,
+    httpOrigin(`${HOST}:${PORT}`),
     `http://127.0.0.1:${PORT}`,
     `http://localhost:${PORT}`,
   ]);
@@ -4219,7 +4220,7 @@ async function handleRequest(req, res) {
   if (req.headers['x-slides-instance'] && req.headers['x-slides-instance'] !== INSTANCE_ID) return json(res,409,{error:'Suite instance changed; restart the MCP client'});
   const allowedHosts = new Set([`127.0.0.1:${PORT}`, `localhost:${PORT}`, `[::1]:${PORT}`]);
   if (!allowedHosts.has(req.headers.host)) return json(res, 403, {error:'Invalid Host header'});
-  if (req.headers.origin && !Array.from(allowedHosts).some(h => req.headers.origin === `http://${h}`)) return json(res, 403, {error:'Cross-origin request refused'});
+  if (req.headers.origin && !Array.from(allowedHosts).some(h => req.headers.origin === httpOrigin(h))) return json(res, 403, {error:'Cross-origin request refused'});
 
   if (await dashboardSession.handle(req, res, url, readBody)) return;
 
@@ -4286,7 +4287,7 @@ async function handleRequest(req, res) {
       if(importing){
         const source=path.join(stage,'source.pptx');fs.copyFileSync(target,source);
         const base=path.join(DATA,'import-'+crypto.randomBytes(12).toString('hex')+'.pptx');
-        const candidate=await require('./lib/python-jobs').run(() => new Promise((resolve,reject)=>execFile(PY,[path.join(HERE,'src','python','import-model.py'),source,base],{cwd:HERE,encoding:'utf8',timeout:60000,maxBuffer:2*1024*1024,windowsHide:true},(err,out,stderr)=>{if(err){console.error('Import helper failed:',err);const known = ['Unsupported active content: embedded workbooks and objects are not supported. Replace workbook-backed charts with PNG, JPEG or GIF images before import','External links must be removed before import','Unsupported active content: macros, OLE or ActiveX','Unsupported active content: package content type','Unsupported active content: package relationship','Unsupported active content: embedded object or control','Unsupported image: only PNG, JPEG and GIF raster content is accepted','XML byte budget exceeded','XML element/attribute/depth budget exceeded'];const reason = known.find(message => String(stderr).split('\n').includes('ValueError: '+message));return reject(new RequestError(400,reason || 'Import refused: invalid or unsupported PPTX content'));}try{resolve(JSON.parse(out));}catch(e){reject(e);}})));
+        const candidate=await require('./lib/python-jobs').run(() => new Promise((resolve,reject)=>execFile(PY,[path.join(HERE,'src','python','import-model.py'),source,base],{cwd:HERE,encoding:'utf8',timeout:60000,maxBuffer:2*1024*1024,windowsHide:true},(err,out,stderr)=>{if(err){const known = ['Unsupported active content: embedded workbooks and objects are not supported. Replace workbook-backed charts with PNG, JPEG or GIF images before import','External links must be removed before import','Unsupported active content: macros, OLE or ActiveX','Unsupported active content: package content type','Unsupported active content: package relationship','Unsupported active content: embedded object or control','Unsupported image: only PNG, JPEG and GIF raster content is accepted','XML byte budget exceeded','XML element/attribute/depth budget exceeded'];const reason = known.find(message => String(stderr).split('\n').includes('ValueError: '+message));if(!reason)console.error('Import helper failed:',err);return reject(new RequestError(400,reason || 'Import refused: invalid or unsupported PPTX content'));}try{resolve(JSON.parse(out));}catch(e){reject(e);}})));
         candidate.title=path.basename(target,'.pptx');
         for(const slide of candidate.slides)(slide.decor||[]).forEach((d,i)=>{if(!d.id)d.id=`${slide.id}_d${i}`;});
         const invalid=validateModelDocument(candidate,true);if(invalid)throw new RequestError(400,invalid);
@@ -4326,7 +4327,11 @@ async function handleRequest(req, res) {
       }else fs.copyFileSync(output,target,fs.constants.COPYFILE_EXCL);
       const receiptRecorded=saveJSONAtomic(receiptPath,receipts);
       return json(res,200,{ok:true,rev:capturedRev,renderer,files,receiptRecorded,...(!receiptRecorded?{warning:'Export succeeded, but its history receipt could not be saved.'}:{})});
-    }catch(e){console.error(importing?'Import failed:':'Export failed:',e);const timeout=!importing&&e.code==='RENDERER_TIMEOUT';const safe=timeout?'Export failed: renderer timed out':(e instanceof RequestError ? e.message : (e.message === 'Import refused: invalid or unsupported PPTX content' ? e.message : (importing ? 'Import failed; check the file format, path and package limits' : 'Export failed; check the destination and renderer with npm run doctor')));return json(res,timeout?504:(e instanceof RequestError?e.status:400),{error:safe,...(e instanceof RequestError&&e.protection?{protection:e.protection}:{})});}
+    }catch(e){
+      // A refusal (a 4xx RequestError: an existing destination, a path outside the workspace, a lock, a pause) is the
+      // caller's to fix: one line, not a stack trace, in the host's MCP log. A message that already says "Import refused"
+      // (the import helper's unknown refusal) is logged as it is, not as "Import refused: Import refused: ...".
+      if(e instanceof RequestError&&e.status<500)console.error(/^(Import|Export) refused\b/.test(e.message) ? e.message : `${importing?'Import':'Export'} refused: ${e.message}`);else console.error(importing?'Import failed:':'Export failed:',e);const timeout=!importing&&e.code==='RENDERER_TIMEOUT';const safe=timeout?'Export failed: renderer timed out':(e instanceof RequestError ? e.message : (e.message === 'Import refused: invalid or unsupported PPTX content' ? e.message : (importing ? 'Import failed; check the file format, path and package limits' : 'Export failed; check the destination and renderer with npm run doctor')));return json(res,timeout?504:(e instanceof RequestError?e.status:400),{error:safe,...(e instanceof RequestError&&e.protection?{protection:e.protection}:{})});}
     finally{pluginJobActive = false;if(stage)fs.rmSync(stage,{recursive:true,force:true});}
   }
 
@@ -5620,7 +5625,7 @@ async function boot() {
       void refreshThumbsFromDeck(model.rev, 'boot thumbs pass skipped:');
     }
     console.log(`\n  ToolsEnabled Slides`);
-    console.log(`  ├─ dashboard : http://${HOST === '::1' ? '[::1]' : HOST}:${PORT}${dashboardSession.launchPath}`);
+    console.log(`  ├─ dashboard : ${httpOrigin(`${HOST === '::1' ? '[::1]' : HOST}:${PORT}`)}${dashboardSession.launchPath}`);
     console.log(`  ├─ model     : ${MODEL_PATH}`);
     console.log(`  ├─ pptx      : ${PPTX_PATH}`);
     console.log(`  └─ paused    : ${state.paused}\n`);

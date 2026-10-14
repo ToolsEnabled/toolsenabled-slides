@@ -13,9 +13,14 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { execFile } = require('./lib/helper-paths');
+const { httpOrigin } = require('./lib/origins');
 
 const PORT = parseInt(process.env.SUITE_PORT || '4599', 10);
 const HOST = process.env.SUITE_HOST || '127.0.0.1';
+// Like src/server.js, which binds only to loopback, the CLI talks only to a Slides server on this computer.
+if (!['127.0.0.1', 'localhost', '::1'].includes(HOST)) {
+  die(`✗ SUITE_HOST is ${safeDisplay(HOST)}: the ppt CLI connects only to a Slides server on this computer (127.0.0.1, localhost or ::1)`, 2);
+}
 
 let EDITOR = process.env.SUITE_EDITOR;
 
@@ -103,8 +108,8 @@ async function setStatus(status, task) {
 
 async function ensureUp() {
   try { const r = await api('GET', '/api/health'); if (r.status === 200) return true; } catch (_) {}
-  die(`${C.red}✗ suite server not reachable at http://${safeDisplay(HOST)}:${PORT}${C.reset}\n` +
-      `  Start it with:  ${C.bold}npm start${C.reset}  (in the suite folder)  or  node suite/server.js`, 2);
+  die(`${C.red}✗ suite server not reachable at ${server()}${C.reset}\n` +
+      `  Start a persistent studio with:  ${C.bold}node src/cli/studio.js${C.reset}  (npm run studio, in the Slides folder, with SLIDES_WORKSPACE set),  or start Slides from your MCP host`, 2);
 }
 
 // ---- parse "--flag value" pairs and positional args
@@ -270,7 +275,7 @@ async function cmdStatus() {
   const b = requireReadResult(r, 'state', (x) =>
     isObject(x.model) && Array.isArray(x.model.slides) && Array.isArray(x.editors));
   console.log('');
-  console.log(`  ${C.bold}ToolsEnabled Slides${C.reset}  ${C.gray}http://${safeDisplay(HOST)}:${PORT}${C.reset}`);
+  console.log(`  ${C.bold}ToolsEnabled Slides${C.reset}  ${C.gray}${server()}${C.reset}`);
   console.log(`  state    : ${b.paused ? C.yellow + C.bold + 'PAUSED' + C.reset + C.gray + ' by ' + safeDisplay(b.pausedBy || '?') + C.reset : C.green + 'live' + C.reset}`);
   if (b.bootedAt) {
     const staleFiles = ['server.js'].filter((f) => {
@@ -312,6 +317,11 @@ function safeJson(value, replacer, space) {
   return encoded === undefined ? undefined : encoded.replace(/[\u007f-\u009f\u061c\u200e\u200f\u2028-\u202e\u2066-\u2069]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
 }
 function quoteBoard(value) { return safeJson(String(value == null ? '' : value)); }
+// The local suite server's address, as the CLI prints it.
+function server() {
+  return httpOrigin(`${safeDisplay(HOST)}:${PORT}`);
+}
+
 function safeDisplay(value) {
   const text = String(value == null ? '' : value);
   return /[\u0000-\u001f\u007f-\u009f\u061c\u200e\u200f\u2028-\u202e\u2066-\u2069]/.test(text) ? quoteBoard(text) : text;
@@ -324,7 +334,7 @@ async function cmdBoard(flags) {
   const pins = notes.filter((n) => n.pinned);
   const msgs = notes.filter((n) => !n.pinned);
   console.log('');
-  console.log(`  ${C.bold}Message Board${C.reset}  ${C.gray}http://${safeDisplay(HOST)}:${PORT}${C.reset}`);
+  console.log(`  ${C.bold}Message Board${C.reset}  ${C.gray}${server()}${C.reset}`);
   if (pins.length) {
     console.log(`\n  ${C.yellow}${C.bold}📌 PINNED GUIDANCE${C.reset} ${C.gray}(quoted board text)${C.reset}`);
     pins.forEach((n) => console.log(`     ${C.yellow}•${C.reset} ${C.bold}${quoteBoard(n.text)}${C.reset}  ${C.gray}— ${quoteBoard(n.author)} · ${quoteBoard(n.id)}${C.reset}`));
@@ -345,7 +355,7 @@ async function cmdWho(flags) {
   const eds = requireReadResult(r, 'state', (x) => Array.isArray(x.editors)).editors;
   if (flags && flags.json) { console.log(safeJson(eds, null, 2)); return; }
   console.log('');
-  console.log(`  ${C.bold}Sessions${C.reset}  ${C.gray}http://${safeDisplay(HOST)}:${PORT}${C.reset}`);
+  console.log(`  ${C.bold}Sessions${C.reset}  ${C.gray}${server()}${C.reset}`);
   if (!eds.length) { console.log(`     ${C.gray}(none connected)${C.reset}\n`); return; }
   eds.forEach((e) => {
     const dot = e.status === 'busy' ? C.yellow : e.status === 'free' ? C.green : C.gray;
@@ -365,7 +375,7 @@ async function cmdTasks(flags) {
   const active = tasks.filter((t) => t.status !== 'done');
   const done = tasks.filter((t) => t.status === 'done');
   console.log('');
-  console.log(`  ${C.bold}Tasks${C.reset}  ${C.gray}http://${safeDisplay(HOST)}:${PORT}${C.reset}`);
+  console.log(`  ${C.bold}Tasks${C.reset}  ${C.gray}${server()}${C.reset}`);
   if (!active.length) console.log(`     ${C.gray}(no open tasks${mine ? ' for you' : ''})${C.reset}`);
   active.forEach((t) => {
     const box = t.status === 'claimed' ? `${C.yellow}◐${C.reset}` : `${C.cyan}○${C.reset}`;
@@ -386,7 +396,7 @@ async function cmdLoops(flags) {
   if (flags && flags.on) loops = loops.filter((l) => l.enabled);
   if (flags && flags.json) { console.log(safeJson(loops, null, 2)); return; }
   console.log('');
-  console.log(`  ${C.bold}Standing Loops${C.reset}  ${C.gray}recurring checks — run with an external client · http://${safeDisplay(HOST)}:${PORT}${C.reset}`);
+  console.log(`  ${C.bold}Standing Loops${C.reset}  ${C.gray}recurring checks — run with an external client · ${server()}${C.reset}`);
   if (!loops.length) {
     console.log(`     ${C.gray}(none yet — add one with: ppt loop "continuously check …")${C.reset}\n`);
     return;
@@ -574,7 +584,7 @@ async function protectionObjectKind(slideId, objectId, requestedKind) {
   const isElement = Array.isArray(slide.elements) && slide.elements.some((item) => item.id === objectId);
   const isDecor = Array.isArray(slide.decor) && slide.decor.some((item) => item.id === objectId);
   if (isElement && isDecor) {
-    die(`object id ${safeDisplay(objectId)} is ambiguous; pass --kind element or --kind decor`);
+    die(`object id ${safeDisplay(objectId)} is ambiguous; use --kind element or --kind decor`);
   }
   if (!isElement && !isDecor) {
     die(`no such element or decor id: ${safeDisplay(objectId)} on slide ${safeDisplay(slideId)}`);
@@ -633,7 +643,7 @@ async function cmdLocks(flags) {
   const locks = requireReadResult(r, 'locks', (x) => Array.isArray(x.locks)).locks;
   if (flags && flags.json) { console.log(safeJson(locks, null, 2)); return; }
   console.log('');
-  console.log(`  ${C.bold}Slide Locks${C.reset}  ${C.gray}advisory claims, not enforced — ppt lock/unlock · http://${safeDisplay(HOST)}:${PORT}${C.reset}`);
+  console.log(`  ${C.bold}Slide Locks${C.reset}  ${C.gray}advisory claims, not enforced — ppt lock/unlock · ${server()}${C.reset}`);
   if (!locks.length) { console.log(`     ${C.gray}(none claimed — claim one with: ppt lock s4)${C.reset}\n`); return; }
   locks.forEach((l) => {
     const age = Math.round((Date.now() - l.ts) / 60000);
@@ -650,7 +660,7 @@ async function cmdHistory(flags) {
   const redo = body.redo;
   if (flags && flags.json) { console.log(safeJson({ undo, redo }, null, 2)); return; }
   console.log('');
-  console.log(`  ${C.bold}Edit History${C.reset}  ${C.gray}most recent first · ppt undo/redo · http://${safeDisplay(HOST)}:${PORT}${C.reset}`);
+  console.log(`  ${C.bold}Edit History${C.reset}  ${C.gray}most recent first · ppt undo/redo · ${server()}${C.reset}`);
   console.log(`\n  ${C.cyan}undoable${C.reset} ${C.gray}(ppt undo reverts the top one)${C.reset}`);
   if (!undo.length) console.log(`     ${C.gray}(nothing to undo)${C.reset}`);
   undo.slice(0, 15).forEach((h, i) => {
@@ -716,7 +726,7 @@ async function cmdTiming(flags) {
 }
 
 async function cmdWatch() {
-  console.log(`${C.gray}watching http://${safeDisplay(HOST)}:${PORT} … (Ctrl+C to stop)${C.reset}`);
+  console.log(`${C.gray}watching ${server()} … (Ctrl+C to stop)${C.reset}`);
   const hb = setInterval(heartbeat, 5000); heartbeat();
 
   let backoff = 1000;
@@ -891,7 +901,7 @@ ${C.bold}ppt${C.reset} — presentation suite editor
     case 'search': case 'find': return cmdSearch(pos[0], flags);
     // /studio explicitly, not '/': the root redirects there anyway, but naming
     // it keeps the printed URL honest about where you actually land.
-    case 'open': { openBrowser(`http://${safeDisplay(HOST)}:${PORT}/studio`); console.log(`opening http://${safeDisplay(HOST)}:${PORT}/studio`); return; }
+    case 'open': { openBrowser(`${server()}/studio`); console.log(`opening ${server()}/studio`); return; }
     case 'watch': return cmdWatch();
     case 'lint': return cmdLint(flags);
     case 'time': case 'timing': return cmdTiming(flags);
@@ -1071,7 +1081,7 @@ ${C.bold}ppt${C.reset} — presentation suite editor
       // reassigned), so this always renders the same message; no live path
       // produces a conflict entry that isn't a refusal.
       (r.body.conflicts || []).forEach((c) => console.log(
-        `${C.red}✗ ${safeDisplay(c.slideId)} is held by ${safeDisplay(c.heldBy)} (${Math.round(c.heldForMs / 60000)}m ago), not taken: coordinate on the board, or pass --force to take it anyway${C.reset}`));
+        `${C.red}✗ ${safeDisplay(c.slideId)} is held by ${safeDisplay(c.heldBy)} (${Math.round(c.heldForMs / 60000)}m ago), not taken: coordinate on the board, or use --force to take it anyway${C.reset}`));
       (r.body.unknown || []).forEach((id) => console.log(`${C.red}✗ no such slide: ${safeDisplay(id)}${C.reset}`));
       return;
     }
@@ -1118,7 +1128,7 @@ ${C.bold}ppt${C.reset} — presentation suite editor
       console.log(`${C.gray}exporting PDF via PowerPoint (a few seconds)…${C.reset}`);
       const r = await api('POST', '/api/pdf/export', {}, 180000);
       if (r.status !== 200 || !r.body.ok) die(`${C.red}✗ ${safeDisplay(r.body.error || 'pdf export failed')}${C.reset}`, 1);
-      console.log(`${C.green}✓ exported${C.reset} ${C.gray}(deck rev ${safeDisplay(r.body.rev)})${C.reset}  ${C.cyan}http://${safeDisplay(HOST)}:${PORT}/api/pdf${C.reset}`);
+      console.log(`${C.green}✓ exported${C.reset} ${C.gray}(deck rev ${safeDisplay(r.body.rev)})${C.reset}  ${C.cyan}${server()}/api/pdf${C.reset}`);
       return;
     }
 

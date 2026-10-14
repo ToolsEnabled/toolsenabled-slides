@@ -1,5 +1,6 @@
 'use strict';
 const crypto = require('node:crypto');
+const {httpOrigin} = require('./origins');
 
 const humanPosts = new Set([
   '/api/pause', '/api/resume', '/api/undo', '/api/redo', '/api/pdf/export', '/api/render',
@@ -24,7 +25,7 @@ function createDashboardSession(port) {
   const launchPath = `/studio#launch=${launchToken}`;
   function authenticated(req) {
     const cookies = (req.headers.cookie || '').split(';').map(s => s.trim());
-    const originValid = req.method !== 'POST' || req.headers.origin === `http://${req.headers.host}`;
+    const originValid = req.method !== 'POST' || req.headers.origin === httpOrigin(req.headers.host);
     return originValid && equal(req.headers['x-slides-session'], session) &&
       cookies.some(s => s.startsWith(cookieName + '=') && equal(s.slice(cookieName.length + 1), cookie));
   }
@@ -36,7 +37,7 @@ function createDashboardSession(port) {
   }
   async function handle(req, res, url, readBody) {
     if (req.method === 'POST' && url.pathname === '/api/dashboard/session') {
-      if (req.headers.origin !== `http://${req.headers.host}`) {
+      if (req.headers.origin !== httpOrigin(req.headers.host)) {
         res.writeHead(403, {'Content-Type':'application/json', 'Cache-Control':'no-store'});
         res.end(JSON.stringify({error:'Dashboard exchange requires the same Origin'}));
         return true;

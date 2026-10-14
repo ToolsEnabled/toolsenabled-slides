@@ -1,6 +1,10 @@
 'use strict';
 const {spawn: spawnChild} = require('node:child_process');
 const sessions = new Map();
+// The one-time studio link a Slides server prints at startup. Tests find it with launchLink(output), so this
+// pattern lives in one place.
+const LAUNCH_LINK = /http:\/\/[^\s]+\/studio#launch=[a-f0-9]{64}/;
+function launchLink(text) { return String(text).match(LAUNCH_LINK)?.[0]; }
 
 // Control tests read the server's launch output and redeem it over HTTP, just
 // as a browser does. Security tests use bare HTTP instead of this helper.
@@ -17,7 +21,7 @@ function spawn(command, args, options = {}) {
   let output = '';
   child.stdout.on('data', chunk => {
     output += chunk;
-    const launch = output.match(/http:\/\/[^\s]+\/studio#launch=[a-f0-9]{64}/)?.[0];
+    const launch = launchLink(output);
     if (launch) resolveLaunch(launch);
     output = output.slice(-16000);
   });
@@ -50,4 +54,4 @@ async function fetch(url, options = {}) {
   const auth = await headers(parsed.port);
   return globalThis.fetch(url, {...options, headers:{...auth, ...options.headers}});
 }
-module.exports = {spawn, fetch, headers, redeem};
+module.exports = {spawn, fetch, headers, redeem, launchLink};

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """No-model host gate; reserves a NEW isolated Codex profile and refuses existing paths."""
-import argparse, errno, hashlib, json, os, select, socket, subprocess, tempfile, time, urllib.request, zipfile
+import argparse, errno, hashlib, json, os, runpy, select, socket, subprocess, tempfile, time, zipfile
 from pathlib import Path
+# The loopback health read lives in tools/local_health.py beside this file.
+read_health=runpy.run_path(str(Path(__file__).resolve().parent/'local_health.py'))['read_health']
 
 def reserve_profile(candidate):
     assert candidate.is_absolute(), 'Profile must be an absolute new path'
@@ -80,8 +82,7 @@ def inspect_held_runtime(call, scratch, workspace, port, python):
     deadline=time.monotonic()+20
     while True:
         try:
-            with urllib.request.urlopen('http://127.0.0.1:'+str(port)+'/api/health',timeout=1) as response:
-                health=json.load(response)
+            health=read_health(port)
             assert health['workspace']==str(workspace.resolve()), 'Configured workspace was not selected'
             assert health['service']=='toolsenabled-slides', 'Wrong service at selected port'
             assert isinstance(health['pid'],int) and health['pid']>1

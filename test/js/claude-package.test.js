@@ -77,7 +77,7 @@ test('launcher refuses relative and tilde paths before creating workspace state'
  try{
   for(const value of ['', 'relative','~/deck','~','C:deck'])for(const option of ['node','workspace']){
    const values={node:process.execPath,workspace:path.join(scratch,'unused'),[option]:value};
-   const result=spawnSync(python,['-I',path.join(root,'src/python/mcp_launcher.py'),'--node',values.node,'--workspace',values.workspace],{encoding:'utf8',cwd:scratch});
+   const result=spawnSync(python,['-I',path.join(root,'src/python/mcp_launcher.py'),'--node',values.node,'--workspace',values.workspace],{encoding:'utf8',cwd:scratch,env:childEnv()});
    assert.notEqual(result.status,0);assert.match(result.stderr,/must be absolute/);
    assert.deepEqual(fs.readdirSync(scratch),[],'Refusal must precede all state creation');
   }

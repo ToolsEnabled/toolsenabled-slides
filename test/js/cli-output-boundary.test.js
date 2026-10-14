@@ -8,6 +8,12 @@ test('every CLI view escapes untrusted fields, including JSON bidi characters',a
  try{for(const args of [['show'],['search','FORGED'],['status'],['who'],['tasks'],['loops'],['locks'],['history'],['lint'],['timing'],['board'],['who','--json']]){const result=await cli(server.address().port,args);assert.equal(result.code,0,args+' '+result.out);assert(!/[\x1b\u202e\u2028]/.test(result.out)&&!result.out.includes('\nFORGED ROW'),args+' '+result.out);if(args.includes('--json'))assert.equal(JSON.parse(result.out)[0].name,payload);}failing=true;for(const args of [['note','hello'],['lock','s1'],['set-text','s1','e1','hello'],['task','hello'],['loop','hello']]){const result=await cli(server.address().port,args);assert.notEqual(result.code,0);assert(!/[\x1b\u202e\u2028]/.test(result.out)&&!result.out.includes('\nFORGED ROW'),args+' '+result.out);}}
  finally{server.closeAllConnections();await new Promise(r=>server.close(r));}
 });
+test('protect asks for --kind when an object id is both an element and a decor',async()=>{
+ const state={ok:true,model:{title:'Deck',rev:1,slides:[{id:'s1',layout:'title',elements:[{id:'x1',type:'title',text:''}],decor:[{id:'x1',type:'picture'}]}]}};let posted=0;
+ const server=http.createServer((req,res)=>{if(req.url==='/api/protections/toggle')posted++;res.setHeader('Content-Type','application/json');res.end(JSON.stringify(state));});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ try{const result=await cli(server.address().port,['protect','s1','x1']);assert.notEqual(result.code,0,result.out);assert.match(result.out,/object id x1 is ambiguous; use --kind element or --kind decor/);assert.equal(posted,0,'nothing is protected');}
+ finally{server.closeAllConnections();await new Promise(r=>server.close(r));}
+});
 test('session-less identity fields reject controls, bidi, wrong types and oversized names',async()=>{
  const workspace=fs.mkdtempSync(path.join(os.tmpdir(),'slides-identities-'));const sock=net.createServer();await new Promise(r=>sock.listen(0,'127.0.0.1',r));const port=sock.address().port;await new Promise(r=>sock.close(r));const client=new Client({SLIDES_WORKSPACE:workspace,SUITE_PORT:String(port)});const origin=`http://127.0.0.1:${port}`;
  const post=async(route,body)=>fetch(origin+route,{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify(body)});

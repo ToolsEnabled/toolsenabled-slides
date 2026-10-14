@@ -2,7 +2,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),net=require('node:net');
 const {spawn,spawnSync}=require('node:child_process');
-const {redeem}=require('../helpers/dashboard');
+const {redeem,launchLink}=require('../helpers/dashboard');const {childEnv}=require('../helpers/child-env');
 const suite=path.resolve(__dirname,'../..');
 function fixture(prefix='slides-swarm-lock-'){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),prefix)),data=path.join(root,'.slides-state');fs.mkdirSync(data);
@@ -12,9 +12,9 @@ function fixture(prefix='slides-swarm-lock-'){
 }
 async function runtime(){
  const f=fixture(),socket=net.createServer();await new Promise((resolve,reject)=>{socket.once('error',reject);socket.listen(0,'127.0.0.1',resolve);});const port=socket.address().port;await new Promise(r=>socket.close(r));
- const env={...process.env,SLIDES_WORKSPACE:f.root,SUITE_PORT:String(port),SLIDES_OWNER_STDIN:'1'};delete env.DISPLAY;
+ const env=childEnv({SLIDES_WORKSPACE:f.root,SUITE_PORT:String(port),SLIDES_OWNER_STDIN:'1'});delete env.DISPLAY;
  const child=spawn(process.execPath,[path.join(suite,'src/server.js')],{env,stdio:['pipe','pipe','pipe']});
- let launch='',output='';child.stdout.on('data',b=>{output=(output+b).slice(-16000);launch=output.match(/http:\/\/[^\s]+\/studio#launch=[a-f0-9]{64}/)?.[0]||launch;});child.stderr.resume();
+ let launch='',output='';child.stdout.on('data',b=>{output=(output+b).slice(-16000);launch=launchLink(output)||launch;});child.stderr.resume();
  const exited=new Promise(resolve=>child.once('exit',(code,signal)=>resolve({code,signal}))),origin=`http://127.0.0.1:${port}`;
  const close=async()=>{child.stdin.end();const result=await exited;f.close();assert.equal(result.code,0,'Isolated runtime must shut down cleanly');};
  try{
@@ -96,7 +96,7 @@ test('F6 JSON selector echo is escaped while lookup, revision and pane binding r
   for(const [selector,display] of cases){
    f.model.slides[0].notes=selector;f.model.slides[1].notes=selector===display?'Different notes':display;
    fs.writeFileSync(path.join(f.data,'model.json'),JSON.stringify(f.model));const before=fs.readFileSync(path.join(f.data,'model.json'));
-   const run=(extra=[])=>spawnSync(process.execPath,[path.join(suite,'src/cli/view.js'),'search',selector,'--workspace',f.root,'--json',...extra],{env:process.env,encoding:'utf8',timeout:5000});
+   const run=(extra=[])=>spawnSync(process.execPath,[path.join(suite,'src/cli/view.js'),'search',selector,'--workspace',f.root,'--json',...extra],{env:childEnv(),encoding:'utf8',timeout:5000});
    const result=run();assert.equal(result.status,0,result.stderr);assert.equal(result.stderr,'');
    assert(!/[\x80-\x9f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u.test(result.stdout),'JSON stdout must not echo C1 or bidi controls');
    const page=JSON.parse(result.stdout);assert.equal(page.total,1);assert.equal(page.records.length,1);assert.match(page.records[0].label,/s1/);assert.equal(page.selector,selector);assert.equal(parsePage(page,{workspace:f.root,view:'search',selector,all:false,offset:0}).selector,selector);
@@ -112,7 +112,7 @@ test('F6 JSON workspace echo is escaped without changing filesystem or pane bind
  try{
   f.model.slides[0].notes='Bound workspace';fs.writeFileSync(path.join(f.data,'model.json'),JSON.stringify(f.model));
   const before=fs.readFileSync(path.join(f.data,'model.json'));
-  const r=spawnSync(process.execPath,[path.join(suite,'src/cli/view.js'),'search','Bound workspace','--workspace',f.root,'--json'],{env:process.env,encoding:'utf8',timeout:5000});
+  const r=spawnSync(process.execPath,[path.join(suite,'src/cli/view.js'),'search','Bound workspace','--workspace',f.root,'--json'],{env:childEnv(),encoding:'utf8',timeout:5000});
   assert.equal(r.status,0,r.stderr);assert.equal(r.stderr,'');
   assert(!/[\x80-\x9f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u.test(r.stdout),'JSON stdout must not echo workspace C1 or bidi controls');
   const page=JSON.parse(r.stdout);assert.equal(page.workspace,f.root);assert.equal(page.title,'Before');assert.equal(parsePage(page,{workspace:f.root,view:'search',selector:'Bound workspace',all:false,offset:0}).workspace,f.root);assert.equal(page.total,1);assert.match(page.records[0].label,/s1/);
@@ -126,7 +126,7 @@ test('F6 refuses secret-shaped selector or workspace metadata without echoing it
  for(const key of ['selector','workspace'])for(const value of values){
   const f=fixture(key==='workspace'?'slides-'+value+'-':'slides-secret-selector-');try{
    f.model.slides[0].notes=key==='selector'?value:'Secret metadata';fs.writeFileSync(path.join(f.data,'model.json'),JSON.stringify(f.model));const before=fs.readFileSync(path.join(f.data,'model.json'));
-   const r=spawnSync(process.execPath,[path.join(suite,'src/cli/view.js'),'search',key==='selector'?value:'Secret metadata','--workspace',f.root,'--json'],{env:process.env,encoding:'utf8',timeout:5000});
+   const r=spawnSync(process.execPath,[path.join(suite,'src/cli/view.js'),'search',key==='selector'?value:'Secret metadata','--workspace',f.root,'--json'],{env:childEnv(),encoding:'utf8',timeout:5000});
    assert(r.status===1,'Secret-shaped metadata must be refused');assert(r.stdout==='','Refusal must emit no JSON metadata');assert(!r.stderr.includes(value),'Refusal must not echo secret-shaped input');assert.match(r.stderr,/VIEW_QUERY: Selector or workspace contains session secrets; JSON view unavailable/);assert.deepEqual(fs.readFileSync(path.join(f.data,'model.json')),before);
   }finally{f.close();}
  }
