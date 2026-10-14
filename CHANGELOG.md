@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.8 — 2026-10-13
+
+Fixes from the 2026-10-13 fresh-user re-test of 0.1.7; the tools, studio, panes and mod are unchanged:
+
+- A start of a workspace whose deck model exists but whose `presentation.pptx` is missing (a client's health check can stop the first start before its first render) now says `presentation.pptx is missing, rendering it for rev N`. `creating the initial presentation.pptx` is printed only when the deck itself is new. `test/js/first-boot.test.js` pins both lines.
+- README no longer says that agent file tools can read the one-time studio link "even from mode-600 logs". The log's mode depends on the MCP host and your umask: Claude Code 2.1.296 wrote it as mode 644 under umask 022, readable by every local account. Open the link promptly, before assigning agent work. `test/js/readme-studio-link.test.js` pins the wording.
+- `test/js/dashboard-browser-session.test.js` failed on a busy machine and passed alone: each of its waits (a real Chromium start, page loads, server state) allowed 10 s. The waits now go through `test/helpers/until.js`, 30 s each by default; `SLIDES_TEST_WAIT_MS` sets another deadline, and a wait that never holds names what it waited for. The checks are unchanged. `test/js/until-helper.test.js` covers the helper, and docs/TESTING.md describes the setting.
+- `tools/source-files.json` lists the three new test files; the source ZIP gains them.
+
 ## 0.1.7 — 2026-10-13
 
 Codex self-distribution fixes; the server, tools, studio, panes and mod are unchanged:
