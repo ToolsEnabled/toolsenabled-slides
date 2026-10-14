@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.9 — 2026-10-14
+
+Fixes from the 2026-10-14 fresh-user verification of 0.1.8 and from the plugin directory's review of 0.1.8; the tools, studio, panes and mod work as before:
+
+- A refused import or export (an existing destination, a path outside the workspace, a lock, a pause, or a deck the import helper refuses, such as one with external links) now logs one line to stderr, and so to the host's MCP log, for example `Export refused: Output already exists; choose a new destination`, instead of a stack trace. An import the helper refuses for an unknown reason also keeps the helper's diagnostics and logs `Import refused: invalid or unsupported PPTX content` once, not as "Import refused: Import refused: …". Other failures keep their full diagnostics. `test/js/security.test.js` pins all three.
+- `tools/list` gives each tool a top-level `title`, the same text as its `annotations.title`, which clients of MCP 2025-06-18 show first. `test/js/tool-annotations.test.js` pins it; the golden `test/fixtures/tools-list.json` gains the 37 titles.
+- The `ppt` CLI refuses a `SUITE_HOST` other than 127.0.0.1, localhost or ::1, as the server does, and when no server answers it names `node src/cli/studio.js` (`npm run studio`) instead of `npm start` and a `suite/server.js` that does not exist. Its hints say "use --kind" and "use --force". `test/js/ppt-cli-host.test.js` covers them.
+- The MCP test client (`test/helpers/mcp-client.js`) gives the Slides child it starts only the operating-system basics and the suite's `SUITE_*` and `SLIDES_*` settings, as README already said; two tests that handed their children the whole environment now do the same. `test/js/test-client-env.test.js` checks it.
+- The plugin directory read some files as pairing a remote address with a credential. None sends anything off the machine: the studio's loopback origin is now built by one helper, `src/lib/origins.js`, and the files the directory listed spell no address other than loopback; in four tests the startup-link pattern, the hostile `Host` and `Origin` values and the deck with an external link moved into `test/helpers/dashboard.js`, `test/fixtures/foreign-requests.json` and `test/helpers/external_link_deck.py`. The release tools' network reads moved into `tools/release_fetch.py` and `tools/local_health.py`, and a test's source-slice loader into `test/helpers/mcp-api-slice.js`. The checks are unchanged; `test/js/directory-pairs.test.js` and `test/python/release-helpers.test.py` pin the layout.
+- README's "What this plugin runs, sends and reads" answers each directory hold that stays in one sentence, and names `hooks/views.test.ts` as a test with synthetic credential names. docs/CLAUDE-INSTALL.md says to use a fresh extract for the local marketplace route, since Claude Code copies the whole folder into its plugin cache.
+- `tools/source-files.json` lists the ten new files; the source ZIP gains them.
+
 ## 0.1.8 — 2026-10-13
 
 Fixes from the 2026-10-13 fresh-user re-test of 0.1.7; the tools, studio, panes and mod are unchanged:
