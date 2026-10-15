@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "ce10bbe858c54bcb1dd73bef2942b4c15081ef81",
+  "sourceCommit": "955e05eb7675448f28127d2ba6eb4a452148e949",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -165,8 +165,8 @@
     },
     {
       "path": "docs/WINDOWS.md",
-      "bytes": 8269,
-      "sha256": "3a06cd437f7b721abf5a4209052bbc31da520aa32c5e545327e95b0e15fad882"
+      "bytes": 8381,
+      "sha256": "4e521182a667dfe64545f8e6ad7bd01243955e09b2d7b9e71b16dac7e27c089f"
     },
     {
       "path": "hooks/hooks.json",
