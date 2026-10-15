@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "30d7c8f1ac13e45539ca6072f689cceb63ce3a04",
+  "sourceCommit": "c84851000d757c8bd94c1b92180eb93c7712b7cf",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -45,8 +45,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 19417,
-      "sha256": "6650e98bbc867f0abbedb0e7bcab1a6a8f01e340905c5d3b2d7dc375552fc227"
+      "bytes": 19891,
+      "sha256": "e251956ca37b13397535ea816ea17e5cc95d282623d8a8989543a5c27bfb447e"
     },
     {
       "path": "LICENSE",
@@ -170,8 +170,8 @@
     },
     {
       "path": "docs/WINDOWS.md",
-      "bytes": 12002,
-      "sha256": "919ca6af79f61a760680e996d8fd66b28e4e92c7ddf22aadedc8f41822cd545b"
+      "bytes": 12299,
+      "sha256": "f73183a84facb427afe56a3eae0991ad75b28dc6958e24a76e58356b298d2a31"
     },
     {
       "path": "hooks/hooks.json",
@@ -400,8 +400,8 @@
     },
     {
       "path": "src/lib/workspace.js",
-      "bytes": 3104,
-      "sha256": "b8ef4e65374fdc743161eb3fa99ae39bc692cbc35de56272812873524949c4c1"
+      "bytes": 3788,
+      "sha256": "feb66e7cca16eb1b889dbfe96a68045d5bff424d676d44b19430b2884feadfaa"
     },
     {
       "path": "src/mcp-ppt.js",
@@ -502,6 +502,11 @@
       "path": "test/fixtures/h264-blue-32x32.mp4.base64",
       "bytes": 2066,
       "sha256": "9501de61170e4a88f9264c7e1af0fa213e0bd1e2da59537365c2b566bf7f0978"
+    },
+    {
+      "path": "test/fixtures/lease-owner.cjs",
+      "bytes": 379,
+      "sha256": "95ad294846c558ea04c0b558693bdecf5f0f1d71430780dcb3e6f6e67b95a327"
     },
     {
       "path": "test/fixtures/tools-list.json",
@@ -1009,6 +1014,11 @@
       "sha256": "8ecfa04c73410c6794447ae46b29269b5dab82213f5fc595c9fb32fab2860ef4"
     },
     {
+      "path": "test/js/windows-workspace-lease.test.js",
+      "bytes": 3942,
+      "sha256": "69530ad340f8f314823521ecb3a6e2f00df8db3ae6cacb2ea941afdda946de23"
+    },
+    {
       "path": "test/js/windows-workspace.test.js",
       "bytes": 6899,
       "sha256": "318e063a0c2c6a5299f31b5d3bc515cf185b1aa7c4af9e6abea557eb09e9fcc4"
@@ -1295,8 +1305,8 @@
     },
     {
       "path": "tools/source-files.json",
-      "bytes": 8779,
-      "sha256": "bd5f9d9f316194102699c56672bea0ebbafbd2951e1bc751f07d47be5e208e69"
+      "bytes": 8859,
+      "sha256": "296d5e50ccef1403f96d4e1e69d60afa4d9d603ae59e00ce6522ccc9b20fef12"
     },
     {
       "path": "tools/update-source-files.py",
