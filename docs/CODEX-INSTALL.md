@@ -4,6 +4,8 @@ Use Node.js 22+, CPython 3.12 and the explicit offline runtime setup in `docs/CL
 
 Set absolute `SLIDES_WORKSPACE` and `SUITE_PYTHON` (the prepared runtime interpreter) before launching Codex. Choose a free local `SUITE_PORT` for concurrent workspaces. Optional renderer and LibreOffice settings are documented in the installation guide; PDF/PNG rendering needs an available qualified renderer. Opening a plugin does not prove render availability.
 
+Unreleased branch change: Codex installation and authority guidance; no independent product release.
+
 ## Install a reviewed branch
 
 ```sh
