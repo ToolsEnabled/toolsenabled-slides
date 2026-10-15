@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "77c26fa274ef2529d985e64b11fd851ca46896f5",
+  "sourceCommit": "2811666a7cdd9080b0a0a0371c017d15d85d3812",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -405,8 +405,8 @@
     },
     {
       "path": "src/mcp-ppt.js",
-      "bytes": 66638,
-      "sha256": "51795d649bd0cfb766a42ea93e4148d8357754e368601c639b9eca2023bbfdcb"
+      "bytes": 66665,
+      "sha256": "e99ffb621b2e49423eeeecb20b682be1a583151b32da019a7c6c89612c17ce50"
     },
     {
       "path": "src/ppt.js",
@@ -785,8 +785,8 @@
     },
     {
       "path": "test/js/mcp-ppt-media.test.js",
-      "bytes": 21993,
-      "sha256": "c1b53e853b78e22acdcfe3cf49fb438f83ac2428b4dfbe6bda2f60c18548cc94"
+      "bytes": 22092,
+      "sha256": "d688ed834b336490af59f7190846249fa8fedd00c3370704ea828bd4af1688a9"
     },
     {
       "path": "test/js/model-limits.test.js",
