@@ -57,3 +57,10 @@ Installer path hardening follow-up: raw spelling is checked before normalization
 The exact Windows TrustedInstaller service SID `S-1-5-80-956008885-3418522649-1831038044-1853292631-2271478464`, measured as this test host's C: owner, is additionally accepted only for existing ancestor ownership. It is not a trusted writer and cannot own a final private directory. All existing reparse, raw ACL and dangerous-grant refusals remain in force.
 
 Authored file-right masks use explicit numeric SDDL and assert the parsed raw ACE mask before testing policy. In particular FILE_DELETE_CHILD is0x00000040; directory-service mnemonic DC is not used as a file-right assertion. The real filesystem fixture tests both DELETE_CHILD and DELETE.
+
+The installer verifies a fixed local NTFS volume through one retained root
+handle. Its exact DOS name and complete native physical-volume root must
+agree; mapped or substituted directory roots refuse. This avoids relying on
+a drive-map query unavailable to some restricted ordinary-user tokens. The
+current candidate still requires measured native installer, ACL, alias and
+lifetime acceptance; a portable policy test is not Windows qualification.

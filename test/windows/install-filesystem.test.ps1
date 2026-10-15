@@ -1,4 +1,4 @@
-$ErrorActionPreference='Stop'
+﻿$ErrorActionPreference='Stop'
 $sourceRoot=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
 $tokens=$null;$errors=$null;$ast=[Management.Automation.Language.Parser]::ParseFile((Join-Path $sourceRoot 'install.ps1'),[ref]$tokens,[ref]$errors)
 if($errors.Count){throw 'Installer does not parse'}
@@ -13,6 +13,13 @@ $root=Join-Path ([IO.Path]::GetTempPath()) ('te-native-filesystem-'+[guid]::NewG
 function Refuse([scriptblock]$Action){$denied=$false;try{&$Action}catch{$denied=$true};if(-not$denied){throw 'Unsafe actual filesystem fixture accepted'};$script:passed++}
 New-PrivateFolder $root;$passed++
 if((Full-LocalPath $root)-ne$root){throw 'Native local NTFS volume spelling changed'};$passed++
+# Exercise the actual compiled volume-root predicate, including substituted
+# subdirectory spellings; the actual junction negative remains below.
+$physical='\Device\HarddiskVolume3\';$volumeCases=0
+foreach($candidate in @($physical,'\Device\HarddiskVolume0\')){if(-not[TEInstallVolume]::IsPhysicalRoot($candidate)){throw 'Physical volume root rejected'};$volumeCases++}
+foreach($candidate in @($null,'',$physical.TrimEnd('\'),($physical+'sub\'),($physical+"`n"),'\Device\Mup\','\??\C:\','C:\','\\?\C:\','\Device\HarddiskVolume3suffix\','Device\HarddiskVolume3\','\Device\HarddiskVolume-3\')){if([TEInstallVolume]::IsPhysicalRoot($candidate)){throw 'Aliased or malformed physical root accepted'};$volumeCases++}
+Write-Output ('VOLUME_ROOT_POLICY_PASS '+$volumeCases)
+
 # Restrict fixture mutations to owner + DACL. Set-Acl can request SACL
 # privileges even for this ordinary-user fixture; no audit section is needed.
 $fixtureSections=[Security.AccessControl.AccessControlSections]([int][Security.AccessControl.AccessControlSections]::Access-bor[int][Security.AccessControl.AccessControlSections]::Owner)
