@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "4eaceb7199c66c8094d7fe022c7c13cecb300e09",
+  "sourceCommit": "a842f2fdd9bbdda3fb7a67beaec68549abb265fa",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -200,8 +200,8 @@
     },
     {
       "path": "install.ps1",
-      "bytes": 12305,
-      "sha256": "ba4d11ca477b2801a5c69e43bab4461fa643d42523474d33fd5a3be283067cb9"
+      "bytes": 12269,
+      "sha256": "2fe2825106fe5e37c3eb42cd974169740010ae6c7bcb34edc1a8da3b3a5420c1"
     },
     {
       "path": "manifest.json",
@@ -1190,8 +1190,8 @@
     },
     {
       "path": "test/windows/install-acl.test.ps1",
-      "bytes": 3477,
-      "sha256": "b189aa7a39aab6fb95ceba3e211e47432fd3360522332108f33db72d1b143ca8"
+      "bytes": 4424,
+      "sha256": "ebdaaa19269ee788785e797576f8df365ec2a81e2ba0678363a2408ac2ca6b0a"
     },
     {
       "path": "test/windows/install-filesystem.test.ps1",
