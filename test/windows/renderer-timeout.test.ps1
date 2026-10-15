@@ -38,5 +38,6 @@ try{
 }finally{
  if($child-and-not$child.HasExited){$child.Kill();$null=$child.WaitForExit(5000)}
  foreach($entry in $handles){if([SlidesFixtureJob]::WaitForSingleObject($entry.handle,0)-eq258){$null=[SlidesFixtureJob]::TerminateProcess($entry.handle,1)};$entry.process.Dispose()}
+ if($child){if($out.IsCompleted){[IO.File]::WriteAllText((Join-Path $root 'stdout.log'),$out.GetAwaiter().GetResult())};if($err.IsCompleted){[IO.File]::WriteAllText((Join-Path $root 'stderr.log'),$err.GetAwaiter().GetResult())}}
  if($child){$child.Dispose()}
 }

@@ -45,7 +45,7 @@ function Assert-DirectPath([string]$Value) {
         $cursor = Join-Path $cursor $part
         if (-not (Test-Path -LiteralPath $cursor)) { break }
         $item = Get-Item -Force -LiteralPath $cursor
-        if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or -not $item.PSIsContainer) { throw ('Path crosses a reparse point or file: ' + $cursor) }
+        if (([int]$item.Attributes -band [int][IO.FileAttributes]::ReparsePoint) -ne 0 -or -not $item.PSIsContainer) { throw ('Path crosses a reparse point or file: ' + $cursor) }
         Assert-AccountAccess $cursor $false
     }
 }
@@ -62,8 +62,8 @@ function Assert-AccountAccess([string]$Value, [bool]$Private) {
     # account replace/delete an existing path or change its attributes, owner or DACL.
     $dangerous = [Security.AccessControl.FileSystemRights]0x500D0140
     foreach ($rule in $acl.GetAccessRules($true, $true, [Security.Principal.SecurityIdentifier])) {
-        $appliesHere = ($rule.PropagationFlags -band [Security.AccessControl.PropagationFlags]::InheritOnly) -eq 0
-        if ($rule.AccessControlType -eq [Security.AccessControl.AccessControlType]::Allow -and $trustedSids -notcontains $rule.IdentityReference.Value -and ($Private -or ($appliesHere -and (($rule.FileSystemRights -band $dangerous) -ne 0)))) {
+        $appliesHere = ([int]$rule.PropagationFlags -band [int][Security.AccessControl.PropagationFlags]::InheritOnly) -eq 0
+        if ($rule.AccessControlType -eq [Security.AccessControl.AccessControlType]::Allow -and $trustedSids -notcontains $rule.IdentityReference.Value -and ($Private -or ($appliesHere -and (([int]$rule.FileSystemRights -band [int]$dangerous) -ne 0)))) {
             throw ('Folder grants another account access incompatible with this install: ' + $Value)
         }
     }
