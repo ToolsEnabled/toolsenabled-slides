@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "955e05eb7675448f28127d2ba6eb4a452148e949",
+  "sourceCommit": "d8dda0044e549494aa56fade2a1887f628d93ac1",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -995,8 +995,8 @@
     },
     {
       "path": "test/js/windows-lifetime.test.js",
-      "bytes": 1911,
-      "sha256": "c874de9b7ed1840add0a0f89e75b06f851bbc8e00dc1a71a29f58a4d23dce34d"
+      "bytes": 2063,
+      "sha256": "80efa022ff598ffd46c1551b34f7609967daf0411e43d78a16644abeb238fab9"
     },
     {
       "path": "test/js/workspace-alias.test.js",
