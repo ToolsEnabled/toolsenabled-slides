@@ -130,6 +130,10 @@ def timing_alternate_content():
     return alternate
 
 
+# These six methods exercise the real PowerPoint/pywin32 path, not portable OOXML.
+# The public Windows guide keeps that unqualified path closed in unattended runs.
+POWERPOINT_COM = os.name == 'nt' and os.environ.get('SLIDES_TEST_POWERPOINT_COM') == '1'
+
 class ImportSafetyTests(unittest.TestCase):
     def test_corrupt_source_does_not_replace_any_destination(self):
         with tempfile.TemporaryDirectory(prefix="suite-import-invalid-") as td:
@@ -367,7 +371,7 @@ class PowerPointOwnershipTests(unittest.TestCase):
         attached.Quit.assert_not_called()
         owned.Quit.assert_called_once_with()
 
-    @unittest.skipUnless(os.name == "nt", "PowerPoint COM is Windows-only")
+    @unittest.skipUnless(POWERPOINT_COM, 'Real PowerPoint COM requires Windows, qualified owned PowerPoint/pywin32 and explicit SLIDES_TEST_POWERPOINT_COM=1')
     def test_animation_postprocessor_closes_deck_but_not_attached_app(self):
         import pythoncom
 
@@ -407,7 +411,7 @@ class PowerPointOwnershipTests(unittest.TestCase):
         quit_if_owned.assert_called_once_with(application, False)
         application.Quit.assert_not_called()
 
-    @unittest.skipUnless(os.name == "nt", "PowerPoint COM is Windows-only")
+    @unittest.skipUnless(POWERPOINT_COM, 'Real PowerPoint COM requires Windows, qualified owned PowerPoint/pywin32 and explicit SLIDES_TEST_POWERPOINT_COM=1')
     def test_media_postprocessor_closes_deck_but_not_attached_app(self):
         import pythoncom
 
@@ -604,7 +608,7 @@ class OverlayRenderingTests(unittest.TestCase):
             self.assertEqual(str(shape.fill.fore_color.rgb), "00FF00")
             self.assertAlmostEqual(shape.left / rendered.slide_width, 0.25, places=5)
 
-    @unittest.skipUnless(os.name == "nt", "native PowerPoint builds require Windows")
+    @unittest.skipUnless(POWERPOINT_COM, 'Real PowerPoint COM requires Windows, qualified owned PowerPoint/pywin32 and explicit SLIDES_TEST_POWERPOINT_COM=1')
     def test_sharp_corner_roundtrip_preserves_shape_style_order_and_animation_identity(self):
         with tempfile.TemporaryDirectory(prefix="suite-sharp-corners-") as td:
             root = Path(td)
@@ -831,7 +835,7 @@ class OverlayRenderingTests(unittest.TestCase):
                 len(Presentation(deleted).slides[0].shapes), 0
             )
 
-    @unittest.skipUnless(os.name == "nt", "native PowerPoint builds require Windows")
+    @unittest.skipUnless(POWERPOINT_COM, 'Real PowerPoint COM requires Windows, qualified owned PowerPoint/pywin32 and explicit SLIDES_TEST_POWERPOINT_COM=1')
     def test_generated_picture_and_native_animation_render_into_pptx(self):
         with tempfile.TemporaryDirectory(prefix="suite-generated-picture-") as td:
             root = Path(td)
@@ -891,7 +895,7 @@ class OverlayRenderingTests(unittest.TestCase):
             )
             self.assertTrue(effects)
 
-    @unittest.skipUnless(os.name == "nt", "embedded MP4 media requires Windows")
+    @unittest.skipUnless(POWERPOINT_COM, 'Real PowerPoint COM requires Windows, qualified owned PowerPoint/pywin32 and explicit SLIDES_TEST_POWERPOINT_COM=1')
     def test_generated_video_is_embedded_with_persistent_playback_settings(self):
         import pythoncom
         import win32com.client
@@ -1001,7 +1005,7 @@ class OverlayRenderingTests(unittest.TestCase):
                     application.Quit()
                 pythoncom.CoUninitialize()
 
-    @unittest.skipUnless(os.name == "nt", "embedded MP4 media requires Windows")
+    @unittest.skipUnless(POWERPOINT_COM, 'Real PowerPoint COM requires Windows, qualified owned PowerPoint/pywin32 and explicit SLIDES_TEST_POWERPOINT_COM=1')
     def test_native_generated_video_embeds_in_model_order_behind_text(self):
         import pythoncom
         import win32com.client

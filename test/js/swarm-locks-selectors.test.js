@@ -124,10 +124,14 @@ test('F6 refuses secret-shaped selector or workspace metadata without echoing it
  const {randomBytes}=require('node:crypto');
  const values=['#launch='+randomBytes(32).toString('hex'),'X-Slides-Session\t'+randomBytes(32).toString('hex'),'slides_dashboard_1='+randomBytes(32).toString('hex'),'instanceId '+randomBytes(24).toString('hex')];
  for(const key of ['selector','workspace'])for(const value of values){
-  const f=fixture(key==='workspace'?'slides-'+value+'-':'slides-secret-selector-');try{
+  // A TAB cannot be a Windows directory component. The actual selector keeps
+  // its TAB; the native workspace counterpart uses the same sensitive header
+  // with a legal space separator. POSIX retains its original literal TAB.
+  const actual=key==='workspace'&&process.platform==='win32'?value.replace('\t',' '):value;
+  const f=fixture(key==='workspace'?'slides-'+actual+'-':'slides-secret-selector-');try{
    f.model.slides[0].notes=key==='selector'?value:'Secret metadata';fs.writeFileSync(path.join(f.data,'model.json'),JSON.stringify(f.model));const before=fs.readFileSync(path.join(f.data,'model.json'));
    const r=spawnSync(process.execPath,[path.join(suite,'src/cli/view.js'),'search',key==='selector'?value:'Secret metadata','--workspace',f.root,'--json'],{env:childEnv(),encoding:'utf8',timeout:5000});
-   assert(r.status===1,'Secret-shaped metadata must be refused');assert(r.stdout==='','Refusal must emit no JSON metadata');assert(!r.stderr.includes(value),'Refusal must not echo secret-shaped input');assert.match(r.stderr,/VIEW_QUERY: Selector or workspace contains session secrets; JSON view unavailable/);assert.deepEqual(fs.readFileSync(path.join(f.data,'model.json')),before);
+   assert(r.status===1,'Secret-shaped metadata must be refused');assert(r.stdout==='','Refusal must emit no JSON metadata');assert(!r.stderr.includes(actual),'Refusal must not echo secret-shaped input');assert.match(r.stderr,/VIEW_QUERY: Selector or workspace contains session secrets; JSON view unavailable/);assert.deepEqual(fs.readFileSync(path.join(f.data,'model.json')),before);
   }finally{f.close();}
  }
 });

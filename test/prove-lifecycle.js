@@ -7,10 +7,14 @@ const {clean}=require('../src/lib/terminal-text');
 function proofStderr(value){return clean(value,16000).text;}
 async function freePort(){const s=net.createServer();await new Promise(r=>s.listen(0,'127.0.0.1',r));const port=s.address().port;await new Promise(r=>s.close(r));return port;}
 async function proof(output,{pptxOnly=false,runtimePython}={}){
- checkPython();
- if(!pptxOnly){const d=require('../src/lib/renderer').detectRenderer();assert.equal(d.renderer,'libreoffice');assert.ok(d.png,'pypdfium2 required');}
  fs.mkdirSync(output,{recursive:true});
  const workspace=fs.mkdtempSync(path.join(os.tmpdir(),'slides-lifecycle-'));const port=await freePort();
+ const previousWorkspace=process.env.SLIDES_WORKSPACE;
+ try{
+  process.env.SLIDES_WORKSPACE=workspace;checkPython();
+  if(!pptxOnly){const d=require('../src/lib/renderer').detectRenderer();assert.equal(d.renderer,'libreoffice');assert.ok(d.png,'pypdfium2 required');}
+ }catch(error){if(process.env.SLIDES_KEEP_TESTS==='1')console.log('Retained preflight workspace: '+JSON.stringify(workspace));else fs.rmSync(workspace,{recursive:true,force:true});throw error;}
+ finally{if(previousWorkspace===undefined)delete process.env.SLIDES_WORKSPACE;else process.env.SLIDES_WORKSPACE=previousWorkspace;}
  const env={SLIDES_WORKSPACE:workspace,SUITE_PORT:String(port),SLIDES_RENDERER:'libreoffice',SUITE_PYTHON:python()};
  const launch=runtimePython?{command:runtimePython,args:['-I',path.resolve(__dirname,'../src/python/mcp_launcher.py'),'--node',process.execPath,'--workspace',workspace,'--port',String(port)]}:undefined;
  const client=new Client(env,{...launch,redactStderr:true});const transcript=[];

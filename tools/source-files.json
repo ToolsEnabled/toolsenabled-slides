@@ -147,6 +147,7 @@
   "test/js/helper-paths.test.js",
   "test/js/http-resource-limits.test.js",
   "test/js/import-protections.test.js",
+  "test/js/import-refusal-lines.test.js",
   "test/js/instance-pin.test.js",
   "test/js/isolated-launcher.test.js",
   "test/js/lifecycle.test.js",

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """No-model host gate; reserves a NEW isolated Codex profile and refuses existing paths."""
-import argparse, errno, hashlib, json, os, runpy, select, socket, subprocess, tempfile, time, zipfile
+import argparse, errno, hashlib, json, os, runpy, select, socket, subprocess, sys, tempfile, time, zipfile
 from pathlib import Path
 # The loopback health read lives in tools/local_health.py beside this file.
 read_health=runpy.run_path(str(Path(__file__).resolve().parent/'local_health.py'))['read_health']
 
 def reserve_profile(candidate):
+    assert sys.platform == 'linux', 'This no-model host proof is Linux-only; native Windows client/profile qualification is separate'
     assert candidate.is_absolute(), 'Profile must be an absolute new path'
     assert '.openshell-logins' not in candidate.parts, 'Never use a signed-in profile'
     assert not candidate.exists() and not candidate.is_symlink(), 'Refusing any existing profile path without reading it'

@@ -3,8 +3,9 @@ const {test}=require('node:test');const assert=require('node:assert/strict');
 test('every printed client registration forwards the selected external Python and port',async()=>{
  const {clientConfig}=await import('../../tools/mcp-config.mjs');
  for(const client of ['claude','codex','deepseek','cursor','claude-desktop']){
-  const config=clientConfig(client,{root:'/opt/slides',node:'/opt/node',dataDir:'/decks/project',python:'/runtime with space/bin/python',port:'53221'});
-  assert(config.includes('SUITE_PYTHON'),client);assert(config.includes('/runtime with space/bin/python'),client);assert(config.includes('53221'),client);
+  const windows=process.platform==='win32',python=windows?'C:/runtime with space/Scripts/python.exe':'/runtime with space/bin/python';
+  const config=clientConfig(client,{root:windows?'C:/opt/slides':'/opt/slides',node:windows?'C:/opt/node.exe':'/opt/node',dataDir:windows?'C:/decks/project':'/decks/project',python,port:'53221'});
+  assert(config.includes('SUITE_PYTHON'),client);assert(config.includes(python),client);assert(config.includes('53221'),client);
  }
 });
 test('registration refuses a missing explicit Python with actionable setup guidance',()=>{

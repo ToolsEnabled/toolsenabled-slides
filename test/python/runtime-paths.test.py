@@ -3,12 +3,13 @@ from pathlib import Path
 from unittest import mock
 ROOT = Path(__file__).resolve().parents[2]; sys.path.insert(0, str(ROOT / 'src/python'))
 import runtime_contract as contract
+NODE = Path('C:/synthetic-node/node.exe') if sys.platform == 'win32' else Path('/usr/local/bin/node')
 class Paths(unittest.TestCase):
     def test_relative_interpreter_invocation_is_refused_before_receipt_reads(self):
         for value in ('python3', './bin/python', '~/runtime/python'):
             with self.subTest(value=value), mock.patch.object(sys, 'orig_argv', [value]), mock.patch.object(Path, 'read_text', side_effect=AssertionError('Receipt reached')):
                 with self.assertRaisesRegex(ValueError, 'Python executable.*absolute'):
-                    contract.validate_runtime(Path('/usr/local/bin/node'), Path('/tmp/example-deck'))
+                    contract.validate_runtime(NODE, Path('/tmp/example-deck'))
 
     def test_workspace_runtime_and_plugin_cache_never_overlap(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -17,8 +18,8 @@ class Paths(unittest.TestCase):
             with mock.patch.object(contract, 'ROOT', plugin):
                 for workspace in (plugin, plugin.parent, base / 'plugins/cache/sibling', runtime, runtime / 'deck', base):
                     with self.subTest(workspace=workspace), self.assertRaisesRegex(ValueError, 'outside|overlap'):
-                        contract.check_locations(workspace, runtime, Path('/usr/local/bin/node'))
-                contract.check_locations(base / 'decks/project', runtime, Path('/usr/local/bin/node'))
+                        contract.check_locations(workspace, runtime, NODE)
+                contract.check_locations(base / 'decks/project', runtime, NODE)
 
     def test_runtime_receipt_and_installed_versions_fail_closed(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -30,10 +31,10 @@ class Paths(unittest.TestCase):
                 for value in ([], {}, {**valid, 'requirementsSha256': '0' * 64}):
                     receipt.write_text(json.dumps(value))
                     with self.subTest(receipt=value), self.assertRaises(ValueError):
-                        contract.validate_runtime(Path('/usr/local/bin/node'), runtime.parent / 'deck')
+                        contract.validate_runtime(NODE, runtime.parent / 'deck')
                 receipt.write_text(json.dumps(valid))
                 with mock.patch('importlib.metadata.version', return_value='0.0.0'):
                     with self.assertRaisesRegex(ValueError, 'package versions'):
-                        contract.validate_runtime(Path('/usr/local/bin/node'), runtime.parent / 'deck')
+                        contract.validate_runtime(NODE, runtime.parent / 'deck')
 
 if __name__ == '__main__': unittest.main()

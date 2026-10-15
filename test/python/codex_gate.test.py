@@ -134,8 +134,13 @@ class GateTests(unittest.TestCase):
         transport = {'command': '${user_config.python_executable}', 'cwd': None}
         result = gate.probe_transport(transport, {'PATH': str(self.scratch)}, self.scratch)
         self.assertIsNone(result['exit'])
-        self.assertEqual(result['spawnError'], {'errno': errno.ENOENT, 'filename': transport['command']})
-        self.assertTrue(gate.expected_refusal('root-only', self.hidden_error, result))
+        if sys.platform == 'win32':
+            self.assertEqual(result['spawnError'], {'errno': errno.ENOENT, 'filename': None})
+            with self.assertRaisesRegex(AssertionError, 'unresolved command'):
+                gate.expected_refusal('root-only', self.hidden_error, result)
+        else:
+            self.assertEqual(result['spawnError'], {'errno': errno.ENOENT, 'filename': transport['command']})
+            self.assertTrue(gate.expected_refusal('root-only', self.hidden_error, result))
 
     def test_probe_timeout_is_not_a_reasoned_refusal(self):
         with patch.object(gate.subprocess, 'run', side_effect=subprocess.TimeoutExpired('test-command', 30)):
@@ -179,6 +184,11 @@ class GateTests(unittest.TestCase):
 
     def test_profile_is_new_and_reserved_without_reading_existing_contents(self):
         path = self.scratch / 'new'
+        if sys.platform != 'linux':
+            with patch.object(Path, 'exists', side_effect=AssertionError('Existing profile read reached')):
+                with self.assertRaisesRegex(AssertionError, 'Linux-only'):
+                    gate.reserve_profile(path)
+            return
         self.assertEqual(gate.reserve_profile(path), path)
         self.assertTrue(path.is_dir())
         self.assertEqual(path.stat().st_mode & 0o777, 0o700)
