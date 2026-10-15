@@ -17,6 +17,12 @@ $own = $accountSid.Value
 $script:descriptor = $null
 function Get-Acl { param([string]$LiteralPath) return $script:descriptor }
 function Descriptor([string]$Sddl) { $value=New-Object Security.AccessControl.DirectorySecurity; $value.SetSecurityDescriptorSddlForm($Sddl); return $value }
+# File-specific rights are numeric: SDDL directory-service mnemonics have different masks.
+foreach($mask in @(0x2,0x4,0x20,0x40)){
+ $sddl='O:'+$own+'D:(A;;0x'+$mask.ToString('x8')+';;;WD)'
+ $raw=[Security.AccessControl.RawSecurityDescriptor]::new($sddl)
+ if($raw.DiscretionaryAcl[0].AccessMask-ne$mask){throw 'Authored SDDL file-right mask changed while parsing'}
+}
 $passed=0
 function Accept([string]$Sddl, [bool]$Private) { $script:descriptor=Descriptor $Sddl; Assert-AccountAccess 'C:\synthetic' $Private; $script:passed++ }
 function Refuse([string]$Sddl, [bool]$Private) {
@@ -27,12 +33,12 @@ function Refuse([string]$Sddl, [bool]$Private) {
     $script:passed++
 }
 Accept ('O:'+$own+'D:P(A;OICI;FA;;;'+$own+')(A;OICI;FA;;;SY)') $true
-Accept ('O:SYD:(A;;FR;;;WD)(A;;AD;;;AU)') $false
+Accept ('O:SYD:(A;;FR;;;WD)(A;;0x00000004;;;AU)') $false
 Accept ('O:BAD:(A;OIIO;FA;;;CO)') $false
 Refuse ('O:BUD:(A;;FA;;;'+$own+')') $false
 Refuse ('O:SYD:(A;;FA;;;'+$own+')') $true
 Refuse ('O:'+$own+'D:NO_ACCESS_CONTROL') $true
-Refuse ('O:'+$own+'D:(A;;DC;;;WD)') $false
+Refuse ('O:'+$own+'D:(A;;0x00000040;;;WD)') $false
 Refuse ('O:'+$own+'D:(A;;WD;;;AU)') $false
 Refuse ('O:'+$own+'D:(A;;FR;;;WD)') $true
 # TrustedInstaller is trusted only as an ancestor owner, never a writer or final owner.

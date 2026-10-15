@@ -19,7 +19,7 @@ try{
  $acl=Get-Acl -LiteralPath $root;$rule=New-Object Security.AccessControl.FileSystemAccessRule($everyone,[Security.AccessControl.FileSystemRights]::Read,[Security.AccessControl.AccessControlType]::Allow);$null=$acl.AddAccessRule($rule);Set-Acl -LiteralPath $root -AclObject $acl
  Refuse {Assert-AccountAccess $root $true}
 }finally{Set-Acl -LiteralPath $root -AclObject $original}
-foreach($rights in @([Security.AccessControl.FileSystemRights]::Delete,[Security.AccessControl.FileSystemRights]::WriteAttributes,[Security.AccessControl.FileSystemRights]::ChangePermissions)){
+foreach($rights in @([Security.AccessControl.FileSystemRights]0x40,[Security.AccessControl.FileSystemRights]::Delete,[Security.AccessControl.FileSystemRights]::WriteAttributes,[Security.AccessControl.FileSystemRights]::ChangePermissions)){
  try{
   $acl=Get-Acl -LiteralPath $root;$rule=New-Object Security.AccessControl.FileSystemAccessRule($everyone,$rights,[Security.AccessControl.AccessControlType]::Allow);$null=$acl.AddAccessRule($rule);Set-Acl -LiteralPath $root -AclObject $acl
   Refuse {Assert-DirectPath (Join-Path $root 'new-child')}
