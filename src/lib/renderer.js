@@ -15,7 +15,13 @@ function detectRenderer(){
  if(choice==='powerpoint')throw new Error('PowerPoint renderer requires Windows and desktop PowerPoint');
  let soffice;
  try{soffice=require('./helper-paths').resolveExecutable(process.env.SLIDES_SOFFICE || 'soffice');}catch{throw new Error('LibreOffice is required for PDF/PNG; set SLIDES_SOFFICE to an absolute executable outside the workspace.');}
- const r=probe(soffice,['--version']);
+ let r;
+ if(process.platform==='win32'){
+  // Even discovery uses a fresh profile and retained job; never attach to a user's Office session.
+  const profile=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'slides-office-version-'));
+  try{r=probe(require('./prerequisites').python(),['-I','-S','-B',path.join(__dirname,'../python/node_child.py'),'--inherit-environment','--',soffice,`-env:UserInstallation=${pathToFileURL(profile).href}`,'--version']);}
+  finally{fs.rmSync(profile,{recursive:true,force:true});}
+ }else r=probe(soffice,['--version']);
  if(r.status!==0)throw new Error('LibreOffice is required for PDF/PNG. Install LibreOffice Impress (Ubuntu: sudo apt-get install libreoffice-impress), or set SLIDES_SOFFICE to soffice.');
  let raster;let png=false;
  try{raster=require('./prerequisites').python();png=probe(raster,['-I','-B','-c','import pypdfium2']).status===0;}catch{}
