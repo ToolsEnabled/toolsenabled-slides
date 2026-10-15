@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "586e0264b48c991182924d9eff3c4eaf048c4f60",
+  "sourceCommit": "1358df44d7a934d272fa1ec5c8168bf7321834ac",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -45,8 +45,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 17922,
-      "sha256": "eee6599575787f5a9dd6eec3c1f62ddb5b400c53fb3bb435bbb755875b622eca"
+      "bytes": 18092,
+      "sha256": "547c226741243bce71493bc7c20c1ed834bd77cdd5fa298108b9f1cd73acea26"
     },
     {
       "path": "LICENSE",
@@ -165,8 +165,8 @@
     },
     {
       "path": "docs/WINDOWS.md",
-      "bytes": 7496,
-      "sha256": "2b74f285c03791797bbd42774fb0ed3223577107efcf62bb44b56d8fe466dac9"
+      "bytes": 7875,
+      "sha256": "be2dcb1a3c1d2b4f91584456ce6c55fccbeca22a340197893a9ff4cb09bf12e8"
     },
     {
       "path": "hooks/hooks.json",
@@ -290,8 +290,8 @@
     },
     {
       "path": "src/cli/studio.js",
-      "bytes": 743,
-      "sha256": "d9c3b75b8143c734b48b8e225cb8afa5184daec36bff970a1550ebf628e0640c"
+      "bytes": 1593,
+      "sha256": "aaa195403701490dee76d28af6a1b6165b7c701b36020c2ee8fce232c2955491"
     },
     {
       "path": "src/cli/view.js",
@@ -485,8 +485,8 @@
     },
     {
       "path": "src/server.js",
-      "bytes": 258803,
-      "sha256": "7f53b2b23a6abcd9e1b6680f5cf4f8dff03e79b9fbd952e585a701f8907da40c"
+      "bytes": 258978,
+      "sha256": "92f1f58666a5a93aac797cb5ec9c6b3f38b9f95aa393c5889832b931517d96b0"
     },
     {
       "path": "test/fixtures/foreign-requests.json",
