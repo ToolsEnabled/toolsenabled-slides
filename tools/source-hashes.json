@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "c84851000d757c8bd94c1b92180eb93c7712b7cf",
+  "sourceCommit": "60f989f45ebbc9b84d2b4dc262aa122e147b608c",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -136,7 +136,7 @@
     {
       "path": "docs/CODEX-INSTALL.md",
       "bytes": 6535,
-      "sha256": "2fe11fd7f5c484759d136cd5c8267521aef9fa615380df1513a3aba4484bca63"
+      "sha256": "7907b4c74892ca94dc1a53e27ad0f752d1675e5665dcae5589c1906e9e6ceb6b"
     },
     {
       "path": "docs/COM-REVIEW.md",
