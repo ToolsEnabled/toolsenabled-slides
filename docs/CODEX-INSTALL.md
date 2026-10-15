@@ -23,7 +23,7 @@ $env:SLIDES_WORKSPACE = 'C:\absolute\Deck Project'
 $env:SUITE_PYTHON = 'C:\absolute\Slides Runtime\Scripts\python.exe'
 $env:SUITE_PORT = '48123'
 $env:SLIDES_RENDERER = 'libreoffice'
-$env:SLIDES_SOFFICE = 'C:\absolute\LibreOffice\program\soffice.exe'
+$env:SLIDES_SOFFICE = 'C:\absolute\LibreOffice\program\soffice.com'
 ```
 
 Start Codex from this configured environment with Node.js 22+ available to its plugin launcher. Keep the runtime receipt, program and project separate. [OpenAI documents local marketplace root directories](https://developers.openai.com/plugins/build/plugins). This selects exact installed bytes; native Windows rendering/lifetime proof and the owner Codex host/UI check still require their separate release evidence.
