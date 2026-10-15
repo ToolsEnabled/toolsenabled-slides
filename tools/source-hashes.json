@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "b93872e99c6f01aaeb1e53f48fecce4227e7cc7b",
+  "sourceCommit": "8c9255f0033927c5b236474bfc8c20c8102721ad",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -195,8 +195,8 @@
     },
     {
       "path": "install.ps1",
-      "bytes": 12033,
-      "sha256": "7a978b7b065035b55cddf36a64da3c391656d14e747e2be4862a14cf25d6795a"
+      "bytes": 12063,
+      "sha256": "9bcceb8eaac1ee9f377fbbf331f2fd4ddb2d644109b922d782f20ffce01cc31b"
     },
     {
       "path": "manifest.json",
@@ -1210,8 +1210,8 @@
     },
     {
       "path": "test/windows/renderer-timeout.test.ps1",
-      "bytes": 3599,
-      "sha256": "7a5301117a4abe0ff86428b59a6ff63d6898aa73ffdc987ae58c9b39287e4a67"
+      "bytes": 3828,
+      "sha256": "61f4c4cec748a9d7808fb9654dfc6c1362f32d6d8123a1f51a6a1d73c86c8193"
     },
     {
       "path": "tools/generate-release.py",
