@@ -1,4 +1,4 @@
-$ErrorActionPreference='Stop'
+﻿$ErrorActionPreference='Stop'
 $tokens=$null;$errors=$null
 $ast=[Management.Automation.Language.Parser]::ParseFile((Join-Path $PSScriptRoot '..\..\install.ps1'),[ref]$tokens,[ref]$errors)
 if($errors.Count){throw 'Installer does not parse'}
