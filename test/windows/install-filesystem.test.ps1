@@ -13,22 +13,31 @@ $root=Join-Path ([IO.Path]::GetTempPath()) ('te-native-filesystem-'+[guid]::NewG
 function Refuse([scriptblock]$Action){$denied=$false;try{&$Action}catch{$denied=$true};if(-not$denied){throw 'Unsafe actual filesystem fixture accepted'};$script:passed++}
 New-PrivateFolder $root;$passed++
 if((Full-LocalPath $root)-ne$root){throw 'Native local NTFS volume spelling changed'};$passed++
-$original=Get-Acl -LiteralPath $root
+# Restrict fixture mutations to owner + DACL. Set-Acl can request SACL
+# privileges even for this ordinary-user fixture; no audit section is needed.
+$fixtureSections=[Security.AccessControl.AccessControlSections]([int][Security.AccessControl.AccessControlSections]::Access-bor[int][Security.AccessControl.AccessControlSections]::Owner)
+function Read-FixtureAcl { return [IO.Directory]::GetAccessControl($root,$fixtureSections) }
+function Write-FixtureAcl([Security.AccessControl.DirectorySecurity]$Value) {
+ $copy=New-Object Security.AccessControl.DirectorySecurity
+ $copy.SetSecurityDescriptorBinaryForm($Value.GetSecurityDescriptorBinaryForm(),$fixtureSections)
+ [IO.Directory]::SetAccessControl($root,$copy)
+}
+$original=Read-FixtureAcl
 if($original.GetOwner([Security.Principal.SecurityIdentifier]).Value-ne$accountSid.Value-or-not$original.AreAccessRulesProtected){throw 'Created directory is not protected and current-SID owned'};$passed++
 try{
- $acl=Get-Acl -LiteralPath $root;$rule=New-Object Security.AccessControl.FileSystemAccessRule($everyone,[Security.AccessControl.FileSystemRights]::Read,[Security.AccessControl.AccessControlType]::Allow);$null=$acl.AddAccessRule($rule);Set-Acl -LiteralPath $root -AclObject $acl
+ $acl=Read-FixtureAcl;$rule=New-Object Security.AccessControl.FileSystemAccessRule($everyone,[Security.AccessControl.FileSystemRights]::Read,[Security.AccessControl.AccessControlType]::Allow);$null=$acl.AddAccessRule($rule);Write-FixtureAcl $acl
  Refuse {Assert-AccountAccess $root $true}
-}finally{Set-Acl -LiteralPath $root -AclObject $original}
+}finally{Write-FixtureAcl $original}
 foreach($rights in @([Security.AccessControl.FileSystemRights]0x40,[Security.AccessControl.FileSystemRights]::Delete,[Security.AccessControl.FileSystemRights]::WriteAttributes,[Security.AccessControl.FileSystemRights]::ChangePermissions)){
  try{
-  $acl=Get-Acl -LiteralPath $root;$rule=New-Object Security.AccessControl.FileSystemAccessRule($everyone,$rights,[Security.AccessControl.AccessControlType]::Allow);$null=$acl.AddAccessRule($rule);Set-Acl -LiteralPath $root -AclObject $acl
+  $acl=Read-FixtureAcl;$rule=New-Object Security.AccessControl.FileSystemAccessRule($everyone,$rights,[Security.AccessControl.AccessControlType]::Allow);$null=$acl.AddAccessRule($rule);Write-FixtureAcl $acl
   Refuse {Assert-DirectPath (Join-Path $root 'new-child')}
- }finally{Set-Acl -LiteralPath $root -AclObject $original}
+ }finally{Write-FixtureAcl $original}
 }
 try{
- $acl=New-Object Security.AccessControl.DirectorySecurity;$acl.SetSecurityDescriptorSddlForm(('O:'+$accountSid.Value+'D:NO_ACCESS_CONTROL'));Set-Acl -LiteralPath $root -AclObject $acl
+ $acl=New-Object Security.AccessControl.DirectorySecurity;$acl.SetSecurityDescriptorSddlForm(('O:'+$accountSid.Value+'D:NO_ACCESS_CONTROL'),$fixtureSections);Write-FixtureAcl $acl
  Refuse {Assert-AccountAccess $root $true}
-}finally{Set-Acl -LiteralPath $root -AclObject $original}
+}finally{Write-FixtureAcl $original}
 $target=Join-Path $root 'target';New-PrivateFolder $target;$junction=Join-Path $root 'junction';New-Item -ItemType Junction -Path $junction -Target $target|Out-Null
 Refuse {Assert-DirectPath (Join-Path $junction 'new-child')}
 Refuse {New-PrivateFolder $root}
