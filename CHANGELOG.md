@@ -2,6 +2,8 @@
 
 ## 0.1.10 — native Windows candidate (unpublished)
 
+- Accept the exact measured Windows TrustedInstaller service SID only as an existing ancestor owner. Keep outside writer grants and non-current private owners refused; add authored owner-versus-writer regression cases.
+
 - Refuse Windows stream/device and ambiguous relative import/export paths before filesystem access. Add native counterparts for real ACL/volume/junction checks, renderer deadlines with retained detached-descendant identities, in-flight owner shutdown, lease/case/port contention and sharing-denied atomic model replacement. Native execution remains pending.
 - Follow-up: reject ambiguous raw installer paths and non-fixed/nonlocal/non-NTFS drive aliases before writes; native volume acceptance remains pending.
 

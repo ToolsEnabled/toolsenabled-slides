@@ -15,6 +15,9 @@ $sourceRoot = [IO.Path]::GetFullPath($PSScriptRoot)
 $version = (Get-Content -Raw -LiteralPath (Join-Path $sourceRoot 'package.json') | ConvertFrom-Json).version
 $accountSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
 $trustedSids = @($accountSid.Value, 'S-1-5-18', 'S-1-5-32-544')
+# Measured C: owner only. This does not authorize its grants or private terminal ownership.
+$trustedInstallerOwner = 'S-1-5-80-956008885-3418522649-1831038044-1853292631-2271478464'
+$trustedOwners = $trustedSids + @($trustedInstallerOwner)
 $accountProfile = [Environment]::GetFolderPath('UserProfile')
 if (-not $Prefix) { $Prefix = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) ('ToolsEnabled\Slides\' + $version) }
 if (-not $RuntimeDirectory) { $RuntimeDirectory = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) ('ToolsEnabled\Slides Runtime\' + $version) }
@@ -52,7 +55,7 @@ function Assert-DirectPath([string]$Value) {
 function Assert-AccountAccess([string]$Value, [bool]$Private) {
     $acl = Get-Acl -LiteralPath $Value
     $ownerSid = $acl.GetOwner([Security.Principal.SecurityIdentifier]).Value
-    if (($Private -and $ownerSid -ne $accountSid.Value) -or (-not $Private -and $trustedSids -notcontains $ownerSid)) { throw ('Folder has a different owner: ' + $Value) }
+    if (($Private -and $ownerSid -ne $accountSid.Value) -or (-not $Private -and $trustedOwners -notcontains $ownerSid)) { throw ('Folder has a different owner: ' + $Value) }
     $raw = [Security.AccessControl.RawSecurityDescriptor]::new($acl.GetSecurityDescriptorBinaryForm(), 0)
     if ($null -eq $raw.DiscretionaryAcl) { throw ('Folder has a null DACL: ' + $Value) }
     foreach ($ace in $raw.DiscretionaryAcl) {

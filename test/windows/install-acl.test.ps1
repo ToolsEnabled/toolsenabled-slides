@@ -11,6 +11,8 @@ foreach ($name in @('Assert-AccountAccess', 'Assert-DirectPath')) {
 }
 $accountSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
 $trustedSids = @($accountSid.Value, 'S-1-5-18', 'S-1-5-32-544')
+$trustedInstallerOwner = 'S-1-5-80-956008885-3418522649-1831038044-1853292631-2271478464'
+$trustedOwners = $trustedSids + @($trustedInstallerOwner)
 $own = $accountSid.Value
 $script:descriptor = $null
 function Get-Acl { param([string]$LiteralPath) return $script:descriptor }
@@ -33,6 +35,10 @@ Refuse ('O:'+$own+'D:NO_ACCESS_CONTROL') $true
 Refuse ('O:'+$own+'D:(A;;DC;;;WD)') $false
 Refuse ('O:'+$own+'D:(A;;WD;;;AU)') $false
 Refuse ('O:'+$own+'D:(A;;FR;;;WD)') $true
+# TrustedInstaller is trusted only as an ancestor owner, never a writer or final owner.
+Accept ('O:'+$trustedInstallerOwner+'D:(A;;FA;;;'+$own+')') $false
+Refuse ('O:'+$trustedInstallerOwner+'D:(A;;FA;;;'+$own+')') $true
+Refuse ('O:'+$own+'D:(A;;FA;;;'+$trustedInstallerOwner+')') $false
 # Exercise a foreign owner several levels above the intended leaf, without touching a filesystem.
 function Test-Path { param([string]$LiteralPath) return $true }
 function Get-Item { param([switch]$Force,[string]$LiteralPath) return [pscustomobject]@{Attributes=[IO.FileAttributes]::Directory;PSIsContainer=$true} }

@@ -7,6 +7,7 @@ foreach($name in @('Assert-PlainLocalInput','Full-LocalPath','Assert-AccountAcce
  if(-not$definition){throw ('Missing real installer function: '+$name)};Invoke-Expression $definition.Extent.Text
 }
 $accountSid=[Security.Principal.WindowsIdentity]::GetCurrent().User;$trustedSids=@($accountSid.Value,'S-1-5-18','S-1-5-32-544')
+$trustedOwners=$trustedSids+@('S-1-5-80-956008885-3418522649-1831038044-1853292631-2271478464')
 $everyone=New-Object Security.Principal.SecurityIdentifier('S-1-1-0')
 $root=Join-Path ([IO.Path]::GetTempPath()) ('te-native-filesystem-'+[guid]::NewGuid().ToString('N'));$passed=0
 function Refuse([scriptblock]$Action){$denied=$false;try{&$Action}catch{$denied=$true};if(-not$denied){throw 'Unsafe actual filesystem fixture accepted'};$script:passed++}
