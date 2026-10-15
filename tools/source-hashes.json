@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "1358df44d7a934d272fa1ec5c8168bf7321834ac",
+  "sourceCommit": "ce10bbe858c54bcb1dd73bef2942b4c15081ef81",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -45,8 +45,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 18092,
-      "sha256": "547c226741243bce71493bc7c20c1ed834bd77cdd5fa298108b9f1cd73acea26"
+      "bytes": 18246,
+      "sha256": "013436939f0d930314ce94356bfbc58355dc7cab0da5336b034d58627103a3eb"
     },
     {
       "path": "LICENSE",
@@ -165,8 +165,8 @@
     },
     {
       "path": "docs/WINDOWS.md",
-      "bytes": 7875,
-      "sha256": "be2dcb1a3c1d2b4f91584456ce6c55fccbeca22a340197893a9ff4cb09bf12e8"
+      "bytes": 8269,
+      "sha256": "3a06cd437f7b721abf5a4209052bbc31da520aa32c5e545327e95b0e15fad882"
     },
     {
       "path": "hooks/hooks.json",
@@ -195,8 +195,8 @@
     },
     {
       "path": "install.ps1",
-      "bytes": 11518,
-      "sha256": "cdb941eb4a36b3b5b683a94df471924e90d521bf45d014ba110a5422c201e764"
+      "bytes": 12033,
+      "sha256": "7a978b7b065035b55cddf36a64da3c391656d14e747e2be4862a14cf25d6795a"
     },
     {
       "path": "manifest.json",
@@ -785,8 +785,8 @@
     },
     {
       "path": "test/js/owner-death.test.js",
-      "bytes": 1266,
-      "sha256": "dab1087a43ef5e57e57ee7081f238a22eaaa8e99296621c3e998922eea00c954"
+      "bytes": 1217,
+      "sha256": "52940cccdbc472089a8b8f8fd145e7371d254ff670f469fffdf89e3894d5d230"
     },
     {
       "path": "test/js/pane-environment.test.js",
@@ -990,8 +990,8 @@
     },
     {
       "path": "test/js/windows-install.test.js",
-      "bytes": 713,
-      "sha256": "39d03877e057f263beb0b50518703dcc43f84381ea205913319603d5ff44334c"
+      "bytes": 1246,
+      "sha256": "0478e5045a0074cdf306d39a6d737ffbebb35293f8f0de52615adbba2cbcc134"
     },
     {
       "path": "test/js/windows-lifetime.test.js",
@@ -1169,6 +1169,11 @@
       "sha256": "e9ae69eb85c67159f0217c67c9a8ab701a1c41c3ec9c1277436fd4ee0545c0b2"
     },
     {
+      "path": "test/windows/install-path.test.ps1",
+      "bytes": 1017,
+      "sha256": "0de09ee2a897998fb238cc2618f08fc444aef093673f2964e1b2e21daf2afb19"
+    },
+    {
       "path": "tools/generate-release.py",
       "bytes": 5373,
       "sha256": "2c758b75020211ca05843b5bd18fded9ff2cc5691f855f8d1fe3ab4c2c3d8bb3"
@@ -1205,8 +1210,8 @@
     },
     {
       "path": "tools/package_inventory.py",
-      "bytes": 3586,
-      "sha256": "a9c5571a861f269a4e25466031cc6cd81b30f9fc1301bca462e8153272bc3d09"
+      "bytes": 3593,
+      "sha256": "b16271258f2692ba1de4f3f5d4b8645bef28a37a060c784e2b0d3fb503a64fe3"
     },
     {
       "path": "tools/pip-bootstrap.json",
@@ -1235,8 +1240,8 @@
     },
     {
       "path": "tools/source-files.json",
-      "bytes": 8286,
-      "sha256": "5f80e7f1ed178d8a7c85249194ca54177b3cf17367f7be00889674140c76836f"
+      "bytes": 8355,
+      "sha256": "466925233434c1304bcbd2891321dc14d00f00bf1940d23a12ed0fab9bcd994d"
     },
     {
       "path": "tools/update-source-files.py",
@@ -1262,6 +1267,11 @@
       "path": "tools/windows-runtime.json",
       "bytes": 504,
       "sha256": "016c929b20523e466dbddbe153b29d6b9fe285c47a0bbe4b46b7978003b75584"
+    },
+    {
+      "path": "tools/windows-volume.cs",
+      "bytes": 1350,
+      "sha256": "33b411d88970ace1164d2dbf775b6e4febe2aa495692933dc3e293f1ff12d5b5"
     }
   ]
 }
