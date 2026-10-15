@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — Codex branch
+
+- Document reviewed-branch marketplace installation, real MCP setup, human authority, retained local data and host-specific limits.
+
 ## 0.1.10 — native Windows candidate (unpublished)
 
 - Follow-up: reject ambiguous raw installer paths and non-fixed/nonlocal/non-NTFS drive aliases before writes; native volume acceptance remains pending.

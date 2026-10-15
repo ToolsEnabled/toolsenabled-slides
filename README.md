@@ -1,5 +1,7 @@
 # ToolsEnabled Slides
 
+Codex setup and limits: [docs/CODEX-INSTALL.md](docs/CODEX-INSTALL.md).
+
 Build and edit real PowerPoint presentations from an MCP host while you watch in a local browser. Slides keeps one editable deck model, a live studio, object history, slide locks, and human pause, resume, undo and redo controls.
 
 The MCP host supplies the agent. Slides makes no model calls and has no account, API key, or online service requirement.
