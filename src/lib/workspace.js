@@ -1,9 +1,15 @@
 'use strict';
 const fs=require('node:fs');const path=require('node:path');
 function inside(root,p){if(process.platform==='win32'){root=root.toLowerCase();p=p.toLowerCase();}return p===root || p.startsWith(root+path.sep);}
-function confined(root,value,{write=false,directory=false}={}){
- root=fs.realpathSync.native(root);
+function relativePath(value){
  if(typeof value!=='string'||!value||value.includes('\0')||value.includes('\\')||path.isAbsolute(value)||value.split('/').some(s=>!s||s==='.'||s==='..'))throw new Error('Use a relative path inside the workspace');
+ // Win32 normalizes these names or opens an alternate stream/device instead of the named file.
+ // Refuse before any exists/stat/open operation, including for not-yet-existing output paths.
+ if(process.platform==='win32'&&value.split('/').some(s=>/[<>:"|?*\x00-\x1f]/.test(s)||/[. ]$/.test(s)||/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(s)))throw new Error('Ambiguous Windows, device or stream path is refused');
+}
+function confined(root,value,{write=false,directory=false}={}){
+ relativePath(value);
+ root=fs.realpathSync.native(root);
  const dest=path.resolve(root,value);if(!inside(root,dest))throw new Error('Path escapes workspace');
  const state=path.join(root,'.slides-state');
  if(inside(state,dest)||value.split('/').some(s=>s.startsWith('.')))throw new Error('Private workspace files are not import/export destinations');

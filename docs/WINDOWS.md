@@ -1,6 +1,6 @@
 # Native Windows 0.1.10 candidate
 
-This is an unpublished engineering candidate. No Windows version is qualified for this candidate: the Windows 10 test host went offline before Slides testing. Windows 11, normal-user installation, Job Object cleanup, LibreOffice rendering and the Claude Code panes still require the acceptance below. Keep using the published Linux release until those gates pass.
+This is an unpublished engineering candidate. No Windows version is qualified for these candidate bytes yet. Windows 11, normal-user installation, Job Object cleanup, LibreOffice rendering and the Claude Code panes still require the acceptance below. Keep using the published Linux release until those gates pass.
 
 The candidate uses native Node.js, a private CPython 3.12 venv and native Windows Job Objects. It needs no WSL, Cygwin, shell translation, service, registry change or administrator installer. Source, wheels and Python are separate verified inputs. The source ZIP contains no venv or binary runtime.
 
@@ -38,7 +38,17 @@ Windows panes use the configured Python with `-I -S -B` to start the configured 
 
 Use a normal Windows user and fresh folders, following only this document. Record OS/build, Node/Python versions, archive hashes and exact exit/output receipts. Run source verification, installer and runtime doctor; then `node test/run.js` with `SUITE_PYTHON` pointing to the installed `Scripts\python.exe`, private TMP/TEMP paths and `SLIDES_KEEP_TESTS=1`. Keep `SLIDES_TEST_POWERPOINT_COM` unset; full test runner omits the GUI test unless explicitly enabled. Some existing fixtures still assume POSIX executables and need native qualification rather than being silently skipped.
 
+Run the native counterparts explicitly before the full suite so their results cannot be confused with POSIX-double skips:
+
+```powershell
+& 'C:\Program Files\nodejs\node.exe' --test --test-concurrency=1 .\test\js\windows-install.test.js .\test\js\windows-lifetime.test.js .\test\js\windows-renderer-timeout.test.js .\test\js\windows-workspace.test.js .\test\js\isolated-launcher.test.js .\test\js\pane-environment.test.js .\test\js\lifecycle.test.js .\test\js\owner-death.test.js
+```
+
+The native installer fixture measures the real volume API, protected current-owner creation, broad/null/dangerous actual DACL refusal and junction ancestry (10 cases), alongside the separate10authored-descriptor cases. The renderer fixture compiles an inert Windows executable in its own temporary folder, retains and verifies creation identities/job membership for its native root and detached descendant, and measures PDF/PNG deadlines, in-flight private-owner EOF and forced owning-MCP death (4 cases). It checks job quiescence, no partial output and staging cleanup. Test-only timeout acceleration does not change the production deadline. The native workspace fixture measures same-workspace restart, case-alias attachment, lease contention, occupied-port refusal, device/stream/junction paths and real sharing-denied model replacement with unchanged authoritative bytes. All these results remain unexecuted until measured on Windows; compiling/parsing them on Linux proves no native behavior.
+
 Prove stdio initialization/tool discovery; create/edit/export/import PPTX; PDF and PNG with explicit LibreOffice; same-workspace restart after ordinary EOF; attached-client ownership; abrupt owner exit; timeout ending a detached grandchild; occupied port and lease contention; spaces, apostrophes, Unicode and mixed-case paths; installer refusal of junctions, untrusted ancestor owners, dangerous DACLs and overlapping paths. The authored SDDL fixture in `test/windows/install-acl.test.ps1` must report10passes. Compare hashes of source/state before and after refused operations. A different agent must repeat the documented installation and representative MCP/renderer workflow from a clean folder.
+
+Import/export relative names also refuse Windows alternate streams, reserved devices, invalid characters and trailing dots/spaces before any filesystem read or write. An ordinary MCP input EOF drains already queued tool calls before normal owner cleanup; the native in-flight EOF test uses the suite owner's separate private pipe, not cancellation of an already queued MCP call.
 
 PowerPoint COM testing needs an expressly authorized private desktop session and a separately owned PowerPoint instance. Run `test/windows/export_scripts.test.ps1` only in that setting; it is not part of unattended qualification. Windows 11 requires its own evidence. A Windows10-only candidate can be ready after its non-GUI Windows10 gates and independent review pass. Untested Windows11 and PowerPoint GUI features stay explicitly unqualified owner checks.
 
