@@ -41,7 +41,7 @@ function footer(){
 // Every press, by hotkey, click or Enter, passes here: an idle key only shows why; a live one acts.
 function pressKey($:any,k:string,action:()=>any){hint=idle(k);if(hint){redraw($);return}return action()}
 // The only client variables a pane child may see; the launch builders clear everything else.
-async function host($:any){return {PATH:await $.env.get('PATH'),HOME:await $.env.get('HOME'),LANG:await $.env.get('LANG')}}
+async function host($:any){return {PATH:await $.env.get('PATH'),HOME:await $.env.get('HOME'),LANG:await $.env.get('LANG'),SystemRoot:await $.env.get('SystemRoot')}}
 async function load($:any,options:any,offset=0,revision?:string){
  const mine=++serial,selected=view,selectedId=selector,filter=all,pageLimit=view==='help'?2:LIMIT
  loading=true;error='';page=null;detail=null;detailOffset=0;diagnostic='';probing=false;hint='';redraw($)

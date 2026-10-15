@@ -8,7 +8,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 
-def build(inputs, output, pip_wheel):
+def build(inputs, output, pip_wheel, profiles=None):
     output.mkdir(parents=True, exist_ok=True)
     metadata = json.loads((ROOT / 'tools/wheels.json').read_text())
     installer = json.loads((ROOT / 'tools/pip-bootstrap.json').read_text())
@@ -16,7 +16,11 @@ def build(inputs, output, pip_wheel):
     if pip_wheel.is_symlink() or len(installer_data) != installer['size'] or hashlib.sha256(installer_data).hexdigest() != installer['sha256']:
         raise ValueError('Offline installer wheel hash/size mismatch')
     results = []
-    for profile, wheels in metadata['profiles'].items():
+    version = json.loads((ROOT / 'package.json').read_text())['version']
+    selected = profiles or list(metadata['profiles'])
+    if any(name not in metadata['profiles'] for name in selected): raise ValueError('Unknown wheel profile')
+    for profile in selected:
+        wheels = metadata['profiles'][profile]
         payloads = {}
         for wheel in wheels:
             file = inputs / wheel['filename']
@@ -28,7 +32,7 @@ def build(inputs, output, pip_wheel):
         payloads[installer['filename']] = installer_data
         payloads['WHEELS.json'] = (json.dumps({'profile': profile, 'wheels': wheels, 'installer': installer}, indent=2) + '\n').encode()
         payloads['SHA256SUMS'] = ''.join(hashlib.sha256(data).hexdigest() + '  ' + name + '\n' for name, data in sorted(payloads.items())).encode()
-        archive = output / f'toolsenabled-slides-0.1.9-{profile}-wheels.zip'
+        archive = output / f'toolsenabled-slides-{version}-{profile}-wheels.zip'
         with zipfile.ZipFile(archive, 'w') as bundle:
             for name, data in sorted(payloads.items()):
                 info = zipfile.ZipInfo(profile + '/' + name, date_time=(2026, 1, 1, 0, 0, 0)); info.create_system = 3
@@ -43,5 +47,6 @@ if __name__ == '__main__':
     parser.add_argument('--input', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--pip-wheel', type=Path, required=True)
+    parser.add_argument('--profile', action='append', help='Build only a selected profile (repeatable)')
     args = parser.parse_args()
-    print(json.dumps(build(args.input, args.output, args.pip_wheel), indent=2))
+    print(json.dumps(build(args.input, args.output, args.pip_wheel, args.profile), indent=2))

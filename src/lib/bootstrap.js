@@ -32,7 +32,8 @@ async function stopChild(child, closed) {
   if (!child || child.exitCode !== null || child.signalCode !== null) return;
   const timer = setTimeout(() => child.kill('SIGKILL'), 10000);
   try {
-    child.kill('SIGTERM');
+    // The private ownership pipe reaches the suite's graceful shutdown on Windows too.
+    child.stdin.end();
     await closed;
   } finally { clearTimeout(timer); }
 }
@@ -92,10 +93,16 @@ async function start() {
     if (h && !matches(h)) throw new Error(`Port ${port} belongs to a different service or workspace. Choose another SUITE_PORT.`);
     if (!h) {
       if (process.env.SLIDES_PLUGIN_MODE !== '1') checkPython();
-      child = spawn(process.execPath, [path.join(__dirname, '..', 'server.js')], {
+      const command = process.platform === 'win32' ? python() : process.execPath;
+      const serverArgs = [path.join(__dirname, '..', 'server.js')];
+      const args = process.platform === 'win32'
+        ? ['-I','-S','-B',path.join(__dirname,'../python/node_child.py'),'--inherit-environment','--',process.execPath,...serverArgs]
+        : serverArgs;
+      child = spawn(command, args, {
         cwd:path.resolve(__dirname,'../..'), env:{...process.env,SLIDES_OWNER_STDIN:'1'},
         stdio:['pipe','pipe','pipe'], windowsHide:true,
       });
+      child.stdin.on('error',()=>{});
       child.stdout.pipe(process.stderr);
       child.stderr.pipe(process.stderr);
       let childWroteStderr = false;

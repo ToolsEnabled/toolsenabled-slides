@@ -20,7 +20,7 @@ test('README, skill and installation docs contain the same complete command tabl
  const install=fs.readFileSync(path.join(root,'docs/CLAUDE-INSTALL.md'),'utf8');assert(!/coordinator|release handoff/.test(install));
  for(const name of ['README.md','docs/CLAUDE-INSTALL.md']){
   const text=fs.readFileSync(path.join(root,name),'utf8');
-  assert(text.includes('Linux tested; native Windows not yet supported'),name+' must state the qualified platform');
+  assert(/Linux tested; native Windows (?:not yet supported|candidate unqualified)/.test(text),name+' must state the qualified platform');
   assert(!/On Windows (?:PowerShell|use)|winget install|PowerShell: set|Open the reviewed `.mcpb` in Desktop on macOS or Windows/.test(text),name+' must not present unqualified Windows setup as supported');
  }
  const desktop=JSON.parse(fs.readFileSync(path.join(root,'manifest.json'),'utf8'));

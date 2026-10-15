@@ -1,6 +1,6 @@
 {
   "name": "toolsenabled-slides",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "private": true,
   "description": "Local presentation editing over MCP with a live studio, human controls and portable exports.",
   "type": "commonjs",

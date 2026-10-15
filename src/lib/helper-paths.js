@@ -50,4 +50,4 @@ function childArgs(command,args){return command===process.env.SUITE_PYTHON||/^py
 function spawn(command,args,opts){return childProcess.spawn(executable(command),childArgs(command,args),options(opts));}
 function spawnSync(command,args,opts){return childProcess.spawnSync(executable(command),childArgs(command,args),options(opts));}
 function execFile(command,args,opts,callback){if(typeof opts==='function'){callback=opts;opts={};}return childProcess.execFile(executable(command),childArgs(command,args),options(opts),callback);}
-module.exports={inside,absolutePath,INSTALL,systemHelper,resolveExecutable,spawn,spawnSync,execFile};
+module.exports={inside,absolutePath,INSTALL,systemHelper,resolveExecutable,executable,spawn,spawnSync,execFile};

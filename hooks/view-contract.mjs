@@ -47,27 +47,32 @@ export function detailLines(record,width=80){
 // reach it, and no init env is passed. `--` ends env options; the executable is refused when it
 // is not a plain absolute path, since env would read one containing '=' as another assignment.
 export const CLEAR_ENV='/usr/bin/env';
-export function launchable(value){return absolute(value)&&value.startsWith('/')&&!value.includes('=');}
-function cleared(argv,vars,cwd,timeoutMs){
+export function launchable(value){return absolute(value)&&!value.includes('=');}
+const windowsPath=value=>/^[A-Za-z]:[\\/]/.test(value)||value.startsWith('\\\\');
+function cleared(argv,vars,cwd,timeoutMs,python){
  if(!launchable(argv[0]))throw new Error('Configure an absolute Node.js executable');
  const pairs=[];
  for(const [name,value] of Object.entries(vars)){
   if(value===undefined)continue;
-  if(!/^[A-Z_][A-Z0-9_]*$/.test(name)||typeof value!=='string'||value.includes('\0'))throw new Error('Invalid child variable');
+  if(!(/^[A-Z_][A-Z0-9_]*$/.test(name)||windowsPath(argv[0])&&name==='SystemRoot')||typeof value!=='string'||value.includes('\0'))throw new Error('Invalid child variable');
   pairs.push(name+'='+value);
+ }
+ if(windowsPath(argv[0])){
+  if(!launchable(python)||!windowsPath(python))throw new Error('Configure an absolute Windows Python executable');
+  return {argv:[python,'-I','-S','-B',`${cwd}/src/python/node_child.py`,'--environment',JSON.stringify(Object.fromEntries(Object.entries(vars).filter(([,value])=>value!==undefined))),'--',...argv],init:{cwd,timeoutMs}};
  }
  return {argv:[CLEAR_ENV,'-i','--',...pairs,...argv],init:{cwd,timeoutMs}};
 }
 // PATH (renderer discovery), HOME and LANG cross only when the client has them; nothing else does.
-const baseline=host=>({PATH:host.PATH||undefined,HOME:host.HOME||undefined,LANG:host.LANG||undefined});
+const baseline=(host,node)=>({PATH:host.PATH||undefined,HOME:host.HOME||undefined,LANG:host.LANG||undefined,...windowsPath(node)?{SystemRoot:host.SystemRoot||'C:\\Windows'}:{}});
 export function readerLaunch({root,options,host={},view,selector='',offset=0,limit=LIMIT,all=false,revision}){
  return cleared([options.node_executable,'--max-old-space-size=384',`${root}/src/cli/view.js`,view,
   ...(selector?[selector]:[]),'--json','--offset',String(offset),'--limit',String(limit),...(all?['--all']:[]),...(revision===undefined?[]:['--revision',revision])],
-  {...baseline(host),SLIDES_WORKSPACE:typeof options.workspace_directory==='string'?options.workspace_directory:'',SUITE_PYTHON:String(options.python_executable||''),
-   SUITE_PORT:String(options.port||4599),SLIDES_RENDERER:String(options.renderer||'auto'),SLIDES_SOFFICE:String(options.libreoffice_executable||'')},root,7000);
+  {...baseline(host,options.node_executable),SLIDES_WORKSPACE:typeof options.workspace_directory==='string'?options.workspace_directory:'',SUITE_PYTHON:String(options.python_executable||''),
+   SUITE_PORT:String(options.port||4599),SLIDES_RENDERER:String(options.renderer||'auto'),SLIDES_SOFFICE:String(options.libreoffice_executable||'')},root,7000,options.python_executable);
 }
 export function probeLaunch({root,options,host={}}){
  return cleared([options.node_executable,`${root}/src/cli/doctor.js`],
-  {...baseline(host),SLIDES_PLUGIN_MODE:'1',SLIDES_WORKSPACE:String(options.workspace_directory||''),SUITE_PYTHON:String(options.python_executable||''),
-   SLIDES_RENDERER:String(options.renderer||'auto'),SLIDES_SOFFICE:String(options.libreoffice_executable||'')},root,45000);
+  {...baseline(host,options.node_executable),SLIDES_PLUGIN_MODE:'1',SLIDES_WORKSPACE:String(options.workspace_directory||''),SUITE_PYTHON:String(options.python_executable||''),
+   SLIDES_RENDERER:String(options.renderer||'auto'),SLIDES_SOFFICE:String(options.libreoffice_executable||'')},root,45000,options.python_executable);
 }

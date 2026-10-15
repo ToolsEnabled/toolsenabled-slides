@@ -24,7 +24,7 @@ async function run(command,args){
    if(!requested.length||requested.includes(file))await run(dir==='python'?env.SUITE_PYTHON:process.execPath,['test/'+dir+'/'+file]);
   }
  }
- if(!requested.length){if(process.platform==='win32')await run('powershell',['-NoProfile','-File','test/windows/export_scripts.test.ps1']);else console.log('WINDOWS ONLY: test/windows/export_scripts.test.ps1 requires PowerPoint COM; see docs/TESTING.md.');}
+ if(!requested.length){if(process.platform==='win32'&&process.env.SLIDES_TEST_POWERPOINT_COM==='1')await run('powershell',['-NoProfile','-File','test/windows/export_scripts.test.ps1']);else console.log('WINDOWS ONLY: test/windows/export_scripts.test.ps1 requires explicit SLIDES_TEST_POWERPOINT_COM=1 and an authorized private desktop; see docs/TESTING.md.');}
  console.log(`\nFILES ${files}; FAILED ${failures}; DISPLAY=${env.DISPLAY===undefined?'unset':'set'}`);
  process.exitCode=failures?1:0;
 })().catch(e=>{console.error(e.stack);process.exitCode=1;}).finally(()=>{

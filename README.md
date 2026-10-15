@@ -8,7 +8,7 @@ New decks use a clean white theme with Arial headings and body text, a blue acce
 
 ## Install and start
 
-**Linux tested; native Windows not yet supported.** This release is scoped to Linux. Native Windows qualification found that normal shutdown leaves the workspace lease behind, preventing a second session. Windows renderer/setup fixes and native macOS/Desktop qualification are pending.
+**Linux tested; native Windows candidate unqualified.** The unpublished 0.1.10 Windows candidate adds an offline per-user installer, portable CPython 3.12 input, Windows pane launcher and Job Object lifetime custody. The Windows host went offline before native Slides acceptance; normal-user, renderer, plugin-host and Windows 11 qualification remain open. Follow [the candidate Windows instructions](docs/WINDOWS.md) only for engineering verification. Native macOS/Desktop qualification is also pending.
 
 Requirements: Node.js 22 or newer, Python 3.10 or newer, and the Python packages in `requirements.txt`. PDF and PNG on Linux also require LibreOffice Impress. PNG conversion through LibreOffice uses the pinned pypdfium2 wheel.
 
@@ -94,6 +94,8 @@ Pressing `v` in the status view, and nothing else, runs the renderer probe with 
 ```
 /usr/bin/env -i -- PATH=… HOME=… LANG=… SLIDES_PLUGIN_MODE=1 SLIDES_WORKSPACE=… SUITE_PYTHON=… SLIDES_RENDERER=… SLIDES_SOFFICE=… <node_executable> <plugin>/src/cli/doctor.js
 ```
+
+On native Windows the same two launches use the configured absolute Python with `-I -S -B`, `src/python/node_child.py --environment <literal JSON> -- <absolute Node> ...`. The helper starts Node with a fresh allowlisted environment before any inherited Node loader hook can run; Windows additionally passes SystemRoot. No cmd or PowerShell command string is interpreted. These Windows paths are candidate implementations awaiting native acceptance.
 
 The pane's data comes from the same reader as the command-line views, `src/cli/view.js`, run as a separate Node process with a 384 MB memory cap and a time limit. The mod assembles the command when it runs, because it contains your configured paths and the view you asked for. `env -i` starts the child with an empty environment, so the child receives only the variables written after it: PATH, HOME and LANG, which the mod reads from Claude Code with `$.env.get`, and the plugin settings. `node_executable` must be an absolute path without `=`, and the pane never falls back to `node` on PATH. The probe's `doctor.js` runs the configured Python (the runtime check and the pypdfium2 version) and `soffice --version`.
 

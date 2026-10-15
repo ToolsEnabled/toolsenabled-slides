@@ -52,3 +52,5 @@ Pane key tests press keys the way Claude Code 2.1.287 dispatches them in a focus
 Qualification correction: an early 0.1.0 Codex loader receipt incorrectly claimed an isolated profile while inheriting a signed-in CODEX_HOME. A subsequent isolated-profile runtime gate passed. The earlier loader-only receipt must not be used as proof of isolation, runtime startup or a model turn. New receipts distinguish metadata discovery, actual MCP startup, hook logic and real TUI evidence.
 
 The runtime-reader, action and inventory unit tests can run locally without a renderer. Full-suite browser/render coverage and real PTY/TUI qualification require the designated host runner when the development sandbox prohibits those processes. Do not relabel missing host evidence as a pass.
+
+Native Windows candidate: full runner requires `SLIDES_TEST_POWERPOINT_COM=1` to opt into its final GUI-only PowerPoint COM script. Leave it unset for unattended runs. The ACL and Job Object fixtures run only on real Windows. See [Windows acceptance](WINDOWS.md); Linux passes do not qualify native APIs.

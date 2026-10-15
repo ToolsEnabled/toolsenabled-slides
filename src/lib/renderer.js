@@ -40,7 +40,11 @@ async function stop(){
 }
 function run(cmd,args){return new Promise((resolve,reject)=>{
  if(stopping)return reject(new Error('Renderer is stopping'));
- const child=spawn(cmd,args,{stdio:['ignore','pipe','pipe'],windowsHide:true,detached:process.platform!=='win32',env:{...process.env,SAL_USE_VCLPLUGIN:'svp'}});
+ const windows=process.platform==='win32';
+ const command=windows?require('./prerequisites').python():cmd;
+ const childArgs=windows?['-I','-S','-B',path.join(__dirname,'../python/node_child.py'),'--inherit-environment','--owner-pipe','--',require('./helper-paths').executable(cmd),...args]:args;
+ const child=spawn(command,childArgs,{stdio:[windows?'pipe':'ignore','pipe','pipe'],windowsHide:true,detached:!windows,env:{...process.env,SAL_USE_VCLPLUGIN:'svp'}});
+ if(windows)child.stdin.on('error',()=>{});
  children.add(child);
  let log='';let timedOut=false;const timer=setTimeout(()=>{timedOut=true;signalChild(child,'SIGKILL');},90000);
  for(const stream of [child.stdout,child.stderr])stream.on('data',c=>{log=(log+c).slice(-4096);});

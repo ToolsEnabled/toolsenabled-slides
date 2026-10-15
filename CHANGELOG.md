@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.10 — native Windows candidate (unpublished)
+
+- Close the owning suite's private stdin for graceful shutdown so the Windows lease can be released. Preserve attached-studio ownership and the bounded forced fallback.
+- Add native Windows suite/renderer Job Object custody through an isolated Python guardian; establish containment before child creation, terminate descendants on owner-pipe loss and wait for launcher descendants on successful conversion. Add a native detached-grandchild fixture. These native paths remain untested while the Windows host is offline.
+- Replace the Windows pane's POSIX env executable with an isolated configured Python launcher that removes inherited startup hooks and credential variables before Node starts. Preserve literal argv and the explicit variable allowlist; add SystemRoot only on Windows. Linux keeps env -i.
+- Add new-only per-user PowerShell/cmd installation, every-ancestor owner/reparse/effective-DACL checks, exact source hashes, offline Windows wheel packaging and a pinned portable full CPython3.12 input. Keep runtime/base/temp outside the immutable program and workspace. No host settings or machine installation are changed.
+- Derive package names from package.json and allow selecting one verified wheel profile. Require explicit SLIDES_TEST_POWERPOINT_COM=1 for the GUI-only full-runner step. Windows normal-user, renderer, host, independent clean-folder and Windows11 gates remain open; see docs/WINDOWS.md.
+
 ## 0.1.9 — 2026-10-14
 
 Fixes from the 2026-10-14 fresh-user verification of 0.1.8 and from the plugin directory's review of 0.1.8; the tools, studio, panes and mod work as before:

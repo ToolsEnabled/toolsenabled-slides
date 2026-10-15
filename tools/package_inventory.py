@@ -3,10 +3,10 @@ import json
 import subprocess
 from pathlib import Path, PurePosixPath
 
-ALLOWED = {'.js', '.cjs', '.mjs', '.ts', '.tsx', '.py', '.ps1', '.md', '.json', '.html', '.css', '.txt', '.base64', '.png'}
+ALLOWED = {'.js', '.cjs', '.mjs', '.ts', '.tsx', '.py', '.ps1', '.md', '.json', '.html', '.css', '.txt', '.base64', '.png', '.cmd'}
 EXCLUDED = {'.git', '.venv', 'node_modules', 'data', '.slides-state', '.slides-workspace', 'dist', '__pycache__'}
 ROOTS = {'README.md', 'LICENSE', 'SECURITY.md', 'CHANGELOG.md', 'package.json', 'requirements.txt',
-         'slides-mcp.js', '.mcp.json', '.gitignore', 'manifest.json'}
+         'slides-mcp.js', '.mcp.json', '.gitignore', '.gitattributes', 'manifest.json', 'install.ps1', 'install.cmd'}
 DIRECTORIES = {'src', 'public', 'scripts', 'test', 'docs', 'tools', '.codex-plugin', '.claude-plugin', '.agents', 'skills', 'hooks', 'commands'}
 
 def listing_image(name):
@@ -46,7 +46,7 @@ def files(root):
         # Stock mcpb omits .gitignore. It is absent only in that extracted source form.
         if not checkout and name == '.gitignore' and not file.exists(): continue
         if not file.is_file(): raise ValueError('Missing tracked source file: ' + name)
-        if file.suffix in ALLOWED or file.name in {'.gitignore', 'LICENSE'}:
+        if file.suffix in ALLOWED or file.name in {'.gitignore', '.gitattributes', 'LICENSE'}:
             if file.name.startswith('warm') or file.name == 'agent-settings.json': continue
             result.append((name, file))
     return sorted(result)
