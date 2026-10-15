@@ -132,7 +132,8 @@ async function main() {
       init.result &&
       init.result.protocolVersion === '2025-06-18' &&
       init.result.serverInfo &&
-      init.result.serverInfo.name === 'toolsenabled-slides');
+      init.result.serverInfo.name === 'toolsenabled-slides' &&
+      init.result.serverInfo.version === require(path.join(SUITE_ROOT, 'package.json')).version);
 
     const listed = await rpc('tools/list');
     const tools = listed.result && Array.isArray(listed.result.tools) ? listed.result.tools : [];
