@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "8504f3635544da2a5b16d63ff9d9390c898b33ba",
+  "sourceCommit": "49a1b6f093f427c61bcf3cc07a3a6169e38ec6a6",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -45,8 +45,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 18331,
-      "sha256": "c6d956e49491c6158dcdcc34cf46490447864b7adebecb2205966c4d9054c548"
+      "bytes": 18496,
+      "sha256": "be369f5b888309718ddd9da6f59b3b9bbd3a3b35b6462d1dc9ec9210f90564a3"
     },
     {
       "path": "LICENSE",
@@ -55,8 +55,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 34211,
-      "sha256": "1adeff1f00fbff7672dfb0621044a7b13f858c1f33b4d81f92d526e72ffe4aff"
+      "bytes": 34284,
+      "sha256": "ee463b4feacb8e89627cb421886362baec6ba1a086976846aab1cf490aaff62e"
     },
     {
       "path": "SECURITY.md",
@@ -132,6 +132,11 @@
       "path": "docs/CLAUDE-INSTALL.md",
       "bytes": 21812,
       "sha256": "fef80a0feff428feb20bb0d79b9d1d31fc63f1611a8a5ea68fa2a95261a59b1c"
+    },
+    {
+      "path": "docs/CODEX-INSTALL.md",
+      "bytes": 5102,
+      "sha256": "fb8c0d21562812b246dd371d1c276095dbba98c1eaadd04380b5c0707f812e98"
     },
     {
       "path": "docs/COM-REVIEW.md",
@@ -275,8 +280,8 @@
     },
     {
       "path": "skills/toolsenabled-slides/SKILL.md",
-      "bytes": 10552,
-      "sha256": "36d263839fdc8df4a688fc003c167253094812a24077584bfe509f5946b019fe"
+      "bytes": 10864,
+      "sha256": "fce60c6e2ede4409264783b6f0d6ad21f166be47ad93fa11778f2d716b2ae85b"
     },
     {
       "path": "slides-mcp.js",
@@ -1240,8 +1245,8 @@
     },
     {
       "path": "tools/source-files.json",
-      "bytes": 8355,
-      "sha256": "466925233434c1304bcbd2891321dc14d00f00bf1940d23a12ed0fab9bcd994d"
+      "bytes": 8382,
+      "sha256": "21af56f868084393c52c80784b720f546af3ce38e4ec7ecb6cdd4b0e22cdd1a7"
     },
     {
       "path": "tools/update-source-files.py",
