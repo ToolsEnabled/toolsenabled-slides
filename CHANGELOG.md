@@ -2,6 +2,8 @@
 
 ## 0.1.10 — native Windows candidate (unpublished)
 
+- Follow-up: reject ambiguous raw installer paths and non-fixed/nonlocal/non-NTFS drive aliases before writes; native volume acceptance remains pending.
+
 - Close the owning suite's private stdin for graceful shutdown so the Windows lease can be released. Preserve attached-studio ownership and the bounded forced fallback.
 - Add native Windows suite/renderer Job Object custody through an isolated Python guardian; establish containment before child creation, terminate descendants on owner-pipe loss and wait for launcher descendants on successful conversion. Apply the same guardian to captured render helpers and the persistent-studio entry point; replace captured-helper numeric taskkill with the retained ChildProcess handle. Add a native detached-grandchild fixture. These native paths remain untested while the Windows host is offline.
 - Replace the Windows pane's POSIX env executable with an isolated configured Python launcher that removes inherited startup hooks and credential variables before Node starts. Preserve literal argv and the explicit variable allowlist; add SystemRoot only on Windows. Linux keeps env -i.

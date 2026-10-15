@@ -231,6 +231,7 @@
   "test/run.js",
   "test/windows/export_scripts.test.ps1",
   "test/windows/install-acl.test.ps1",
+  "test/windows/install-path.test.ps1",
   "tools/generate-release.py",
   "tools/local_health.py",
   "tools/mcp-config.mjs",
@@ -250,5 +251,6 @@
   "tools/update-source-hashes.py",
   "tools/verify-source.mjs",
   "tools/wheels.json",
-  "tools/windows-runtime.json"
+  "tools/windows-runtime.json",
+  "tools/windows-volume.cs"
 ]

@@ -18,11 +18,20 @@ $trustedSids = @($accountSid.Value, 'S-1-5-18', 'S-1-5-32-544')
 $accountProfile = [Environment]::GetFolderPath('UserProfile')
 if (-not $Prefix) { $Prefix = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) ('ToolsEnabled\Slides\' + $version) }
 if (-not $RuntimeDirectory) { $RuntimeDirectory = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) ('ToolsEnabled\Slides Runtime\' + $version) }
+function Assert-PlainLocalInput([string]$Value) {
+    if (-not $Value -or $Value -notmatch '^[A-Za-z]:[\\/]' -or $Value.Substring(2).Contains(':')) { throw 'Use an absolute ordinary local drive path.' }
+    foreach ($part in $Value.Replace('/', '\').Substring(3).Split('\')) {
+        if (-not $part) { continue }
+        if ($part -in @('.', '..') -or $part -match '[<>"|?*\x00-\x1f]' -or $part -match '[. ]$' -or $part -match '^(?i:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)') { throw 'Ambiguous, device or stream path spelling is refused.' }
+    }
+}
 function Full-LocalPath([string]$Value) {
-    if (-not [IO.Path]::IsPathRooted($Value) -or $Value -notmatch '^[A-Za-z]:[\\/]') { throw 'Use an absolute local drive path.' }
-    $result = [IO.Path]::GetFullPath($Value).TrimEnd('\')
-    $drive = New-Object IO.DriveInfo([IO.Path]::GetPathRoot($result))
-    if ($drive.DriveFormat -ne 'NTFS') { throw 'The Windows install and workspace require a local NTFS volume.' }
+    Assert-PlainLocalInput $Value
+    $result = [IO.Path]::GetFullPath($Value)
+    $root = [IO.Path]::GetPathRoot($result)
+    if (-not ('TEInstallVolume' -as [type])) { Add-Type -Path (Join-Path $sourceRoot 'tools\windows-volume.cs') }
+    [TEInstallVolume]::Check($root)
+    if ($result -ne $root) { $result = $result.TrimEnd('\') }
     return $result
 }
 function Inside([string]$Parent, [string]$Child) {

@@ -5,5 +5,5 @@ test('suite stops and releases its lease when owning MCP dies abruptly',async()=
  try{await client.tool('ppt_show');pid=(await (await fetch(`http://127.0.0.1:${port}/api/health`)).json()).pid;client.child.kill('SIGKILL');await client.exited;
  const until=Date.now()+7000;while(Date.now()<until&&fs.existsSync(path.join(root,'.slides-state/server.lock')))await new Promise(r=>setTimeout(r,50));
  assert(!fs.existsSync(path.join(root,'.slides-state/server.lock')),'orphan still owns workspace lease');await assertProcessExited(pid);
- }finally{if(pid){try{process.kill(pid,'SIGTERM');}catch{}}client.child.kill('SIGKILL');await client.exited;fs.rmSync(root,{recursive:true,force:true});}
+ }finally{client.child.kill('SIGKILL');await client.exited;fs.rmSync(root,{recursive:true,force:true});}
 });

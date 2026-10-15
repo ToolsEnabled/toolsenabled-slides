@@ -3,7 +3,7 @@ import json
 import subprocess
 from pathlib import Path, PurePosixPath
 
-ALLOWED = {'.js', '.cjs', '.mjs', '.ts', '.tsx', '.py', '.ps1', '.md', '.json', '.html', '.css', '.txt', '.base64', '.png', '.cmd'}
+ALLOWED = {'.js', '.cjs', '.mjs', '.ts', '.tsx', '.py', '.ps1', '.md', '.json', '.html', '.css', '.txt', '.base64', '.png', '.cmd', '.cs'}
 EXCLUDED = {'.git', '.venv', 'node_modules', 'data', '.slides-state', '.slides-workspace', 'dist', '__pycache__'}
 ROOTS = {'README.md', 'LICENSE', 'SECURITY.md', 'CHANGELOG.md', 'package.json', 'requirements.txt',
          'slides-mcp.js', '.mcp.json', '.gitignore', '.gitattributes', 'manifest.json', 'install.ps1', 'install.cmd'}

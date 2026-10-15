@@ -5,3 +5,8 @@ test('native installer refuses foreign owners and dangerous ancestor ACLs',{skip
  const r=spawnSync(path.join(process.env.SystemRoot||'C:\\Windows','System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.resolve(__dirname,'../windows/install-acl.test.ps1')],{encoding:'utf8',timeout:15000});
  assert.equal(r.status,0,r.stdout+r.stderr);assert.match(r.stdout,/WINDOWS_INSTALL_ACL_CASES_PASS 10/);
 });
+
+test('installer refuses ambiguous raw spelling before normalization',{skip:process.platform!=='win32'?'native PowerShell path fixture':false},()=>{
+ const r=spawnSync(path.join(process.env.SystemRoot||'C:\\Windows','System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.resolve(__dirname,'../windows/install-path.test.ps1')],{encoding:'utf8',timeout:15000});
+ assert.equal(r.status,0,r.stdout+r.stderr);assert.match(r.stdout,/RAW_WINDOWS_PATH_CASES_PASS 16/);
+});
