@@ -33,7 +33,21 @@ function lease(data){
  const file=path.join(data,'server.lock');
  // Conservative crash recovery: never steal a lease automatically or probe untrusted PIDs.
  const value=JSON.stringify({pid:process.pid,entry:'slides-server',started:new Date().toISOString()});
- try{fs.writeFileSync(file,value,{flag:'wx',mode:0o600});}catch(e){throw new Error('Workspace is already leased or its state is inaccessible. Stop the other Slides server, or choose another SLIDES_WORKSPACE. After a crash, verify the recorded PID is gone before removing .slides-state/server.lock.');}
+ const refused=()=>new Error('Workspace is already leased or its state is inaccessible. Stop the other Slides server, or choose another SLIDES_WORKSPACE. After a crash, verify the recorded PID is gone before removing .slides-state/server.lock.');
+ if(process.platform==='win32'){
+  // Microsoft UCRT _O_TEMPORARY; libuv maps this to FILE_FLAG_DELETE_ON_CLOSE.
+  const temporary=0x0040;
+  let fd=null;
+  try{
+   fd=fs.openSync(file,fs.constants.O_WRONLY|fs.constants.O_CREAT|fs.constants.O_EXCL|temporary,0o600);
+   const held=fs.fstatSync(fd);
+   if(!held.isFile()||held.nlink!==1)throw new Error('Unsafe new workspace lease');
+   fs.writeFileSync(fd,value,{encoding:'utf8'});
+  }catch(e){if(fd!==null){const created=fd;fd=null;fs.closeSync(created);}throw refused();}
+  const release=()=>{if(fd!==null){const owned=fd;fd=null;fs.closeSync(owned);}};
+  process.once('exit',release);return release;
+ }
+ try{fs.writeFileSync(file,value,{flag:'wx',mode:0o600});}catch(e){throw refused();}
  const release=()=>{try{if(fs.readFileSync(file,'utf8')===value)fs.unlinkSync(file);}catch{}};
  process.once('exit',release);return release;
 }

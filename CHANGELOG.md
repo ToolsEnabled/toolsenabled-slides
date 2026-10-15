@@ -2,6 +2,7 @@
 
 - Observe the owned Windows lifetime pipe through an independent non-inheritable handle with bounded raw reads. Keep its non-daemon observer active until descendant Job accounting settles, then explicitly stop and join it before normal Python shutdown. Native render and lifecycle acceptance remains pending.
 - Preserve redacted lifecycle failure artifacts and native workspace path/health receipts when the test harness explicitly retains its fixtures.
+- Keep the Windows workspace lease in a new-only retained temporary descriptor so kernel handle retirement can remove it when an owner is killed. Normal release closes that exact descriptor; POSIX retains its existing conditional release. Existing leases still refuse without PID lookup, automatic stealing or a pathname cleanup fallback. Add actual runtime view/contention/release and Windows owner-death regressions; complete candidate native acceptance remains required.
 
 # Changelog
 
