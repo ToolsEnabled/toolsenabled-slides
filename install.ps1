@@ -63,7 +63,7 @@ function Assert-AccountAccess([string]$Value, [bool]$Private) {
     }
     # Existing ancestors may allow sibling creation. They must not let another
     # account replace/delete an existing path or change its attributes, owner or DACL.
-    $dangerous = [Security.AccessControl.FileSystemRights]0x500D0140
+    $dangerous = [int]0x500D0140
     foreach ($rule in $acl.GetAccessRules($true, $true, [Security.Principal.SecurityIdentifier])) {
         $appliesHere = ([int]$rule.PropagationFlags -band [int][Security.AccessControl.PropagationFlags]::InheritOnly) -eq 0
         if ($rule.AccessControlType -eq [Security.AccessControl.AccessControlType]::Allow -and $trustedSids -notcontains $rule.IdentityReference.Value -and ($Private -or ($appliesHere -and (([int]$rule.FileSystemRights -band [int]$dangerous) -ne 0)))) {

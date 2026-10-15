@@ -9,6 +9,21 @@ foreach ($name in @('Assert-AccountAccess', 'Assert-DirectPath')) {
     if (-not $definition) { throw ('Function missing: ' + $name) }
     Invoke-Expression $definition.Extent.Text
 }
+# Execute the production assessor's raw-mask expression, not a second policy.
+$maskAssignment = $ast.Find({param($part) $part -is [Management.Automation.Language.AssignmentStatementAst] -and $part.Left.Extent.Text -eq '$dangerous'}, $true)
+if (-not $maskAssignment) { throw 'Production ancestor mask assignment is missing' }
+$actualMask = Invoke-Expression $maskAssignment.Right.Extent.Text
+$maskCases = @(
+    @(0x40,$true), @(0x100,$true), @(0x10000,$true), @(0x40000,$true),
+    @(0x80000,$true), @(0x10000000,$true), @(0x40000000,$true),
+    @(0,$false), @(1,$false), @(2,$false), @(4,$false), @(0x10,$false),
+    @(0x20,$false), @(0x80,$false), @(0x20000,$false)
+)
+foreach ($case in $maskCases) {
+    if ((([int]$case[0] -band $actualMask) -ne 0) -ne [bool]$case[1]) { throw 'Production ancestor raw-mask policy changed' }
+}
+Write-Output ('WINDOWS_INSTALL_MASK_CASES_PASS ' + $maskCases.Count)
+# Native owner and raw descriptor tests follow.
 $accountSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
 $trustedSids = @($accountSid.Value, 'S-1-5-18', 'S-1-5-32-544')
 $trustedInstallerOwner = 'S-1-5-80-956008885-3418522649-1831038044-1853292631-2271478464'
