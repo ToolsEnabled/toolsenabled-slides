@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "78b09826547045b171a49f95e12f85f18c061df1",
+  "sourceCommit": "30d7c8f1ac13e45539ca6072f689cceb63ce3a04",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -305,8 +305,8 @@
     },
     {
       "path": "src/lib/bootstrap.js",
-      "bytes": 6739,
-      "sha256": "5ca7d5cc6de6f50ff49be7e18c36778dc389f4cce27b2c4fa771f42c16cbec22"
+      "bytes": 6746,
+      "sha256": "04a2c773a4514e237f43da06566f536d85d63f401b1e8634a926a0abdef7cdd8"
     },
     {
       "path": "src/lib/dashboard-session.js",
@@ -1010,8 +1010,8 @@
     },
     {
       "path": "test/js/windows-workspace.test.js",
-      "bytes": 6526,
-      "sha256": "50f63ee6983665be0ad18c4c7d8d2a46a9fbe8df100768d5cd6317e7378bfe72"
+      "bytes": 6899,
+      "sha256": "318e063a0c2c6a5299f31b5d3bc515cf185b1aa7c4af9e6abea557eb09e9fcc4"
     },
     {
       "path": "test/js/workspace-alias.test.js",
