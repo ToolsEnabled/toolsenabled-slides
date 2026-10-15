@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "0d7b18abc4ef5bea6839f460f49c22ee2a829a01",
+  "sourceCommit": "8dead0165f529048d1173b9bc5af5f0711c0dc47",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -170,8 +170,8 @@
     },
     {
       "path": "docs/WINDOWS.md",
-      "bytes": 10769,
-      "sha256": "5420ec41c0978763a4075c74c6fe49984e2f7ba79b15b2f586b30b0bf3790852"
+      "bytes": 11059,
+      "sha256": "9955333d6fbb7001585e2c39330f11fad47bf3b1515afeea431be5de3b7b2bdc"
     },
     {
       "path": "hooks/hooks.json",
@@ -996,7 +996,7 @@
     {
       "path": "test/js/windows-install.test.js",
       "bytes": 1798,
-      "sha256": "f4535afb1efe3dc398bb8481cb9e5db06fe6dd94ed847da594b7b02e7b535cb1"
+      "sha256": "6dc1518dfb9285b9b0244077b3aaef3e06bca04a0ce4d5f351799bf61532e07d"
     },
     {
       "path": "test/js/windows-lifetime.test.js",
@@ -1190,13 +1190,13 @@
     },
     {
       "path": "test/windows/install-acl.test.ps1",
-      "bytes": 3095,
-      "sha256": "39f7fa8f49a1c12448e909422ad7c37240420500e2baf86c16b73f859b4fff00"
+      "bytes": 3477,
+      "sha256": "b189aa7a39aab6fb95ceba3e211e47432fd3360522332108f33db72d1b143ca8"
     },
     {
       "path": "test/windows/install-filesystem.test.ps1",
-      "bytes": 3579,
-      "sha256": "9c2dec6a3284622d1b118f03bfee8766e423999c002b9e4967135f8ffac2545f"
+      "bytes": 3625,
+      "sha256": "3092a49b53c93e241ffeb85be9b5bed5715aa87f97492ec72aeb44b851aed8ac"
     },
     {
       "path": "test/windows/install-path.test.ps1",
