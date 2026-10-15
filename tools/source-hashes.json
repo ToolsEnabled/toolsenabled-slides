@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "60f989f45ebbc9b84d2b4dc262aa122e147b608c",
+  "sourceCommit": "77c26fa274ef2529d985e64b11fd851ca46896f5",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -135,8 +135,8 @@
     },
     {
       "path": "docs/CODEX-INSTALL.md",
-      "bytes": 6535,
-      "sha256": "7907b4c74892ca94dc1a53e27ad0f752d1675e5665dcae5589c1906e9e6ceb6b"
+      "bytes": 6679,
+      "sha256": "2446985adfdd36f0b8e73e718987db3b36cb2b315b081ea2717c70f439dfdffa"
     },
     {
       "path": "docs/COM-REVIEW.md",
@@ -160,8 +160,8 @@
     },
     {
       "path": "docs/TESTING.md",
-      "bytes": 9707,
-      "sha256": "1917f6d3c29402543cd025683bf448243ab0dc945c6e8401669042ad9637b78c"
+      "bytes": 10768,
+      "sha256": "dcc518c87de18c9e164bcdfdd7ef38e7f12bc59a2cc499a78fd448298a478996"
     },
     {
       "path": "docs/TOOL-REVIEW.md",
@@ -490,8 +490,8 @@
     },
     {
       "path": "src/server.js",
-      "bytes": 258978,
-      "sha256": "92f1f58666a5a93aac797cb5ec9c6b3f38b9f95aa393c5889832b931517d96b0"
+      "bytes": 258981,
+      "sha256": "3bd67d8a0d6ccbc498efdb7c1a4b7219b6c7a324a0d7ce6d325b0197a0b5d586"
     },
     {
       "path": "test/fixtures/foreign-requests.json",
@@ -635,8 +635,8 @@
     },
     {
       "path": "test/js/config-runtime.test.js",
-      "bytes": 2370,
-      "sha256": "f14edc443b991ff87f7f80b2568a77854852a00f5f2cda24fd6f7a44546dd926"
+      "bytes": 2523,
+      "sha256": "a5572f6c2b99a266ebb4e0f9d3a6f3d1731ad4cbe11993e2184ec2a828ac9963"
     },
     {
       "path": "test/js/control-contract.test.js",
@@ -747,6 +747,11 @@
       "path": "test/js/import-protections.test.js",
       "bytes": 7932,
       "sha256": "fd3c4bbe36911e56a52d5e2af2071aac97a4692c6e6e28c5bd58a18d804bd166"
+    },
+    {
+      "path": "test/js/import-refusal-lines.test.js",
+      "bytes": 4507,
+      "sha256": "e5c2bb3cbcba9e51d7930ede1d8cc3a1ea6f9542ce9713bf352f7c8628a9f781"
     },
     {
       "path": "test/js/instance-pin.test.js",
@@ -925,8 +930,8 @@
     },
     {
       "path": "test/js/swarm-locks-selectors.test.js",
-      "bytes": 12611,
-      "sha256": "6c64fb4ae4fb723002be6c4a3bbb0aa6035ac461ff5cb78b972875b837983e97"
+      "bytes": 12936,
+      "sha256": "4b12b2817531483808dd7f43686e73c4b43b7a1de0ee0ed6d5308b636e4b0956"
     },
     {
       "path": "test/js/task-reader.test.js",
@@ -1030,8 +1035,8 @@
     },
     {
       "path": "test/prove-lifecycle.js",
-      "bytes": 6718,
-      "sha256": "6047fa55909b70f6d194a9e6a9bc9cf74dcae8ca4c17e2f16f1c95108c882591"
+      "bytes": 7146,
+      "sha256": "614f8fa715d4bed29038d23781e3164fcd8de21d7a196d95f08f819eacfc3add"
     },
     {
       "path": "test/python/animated-render.test.py",
@@ -1055,8 +1060,8 @@
     },
     {
       "path": "test/python/codex_gate.test.py",
-      "bytes": 11097,
-      "sha256": "a1c5e56a099f40063b4c03982143df5241aa32d1c6dcc066bab360105edb975d"
+      "bytes": 11691,
+      "sha256": "4fff5df80a2ee2f25dcae51d3a55d9ed562c9ea133c6391ca933d2a6e10e7b43"
     },
     {
       "path": "test/python/current_content.test.py",
@@ -1165,13 +1170,13 @@
     },
     {
       "path": "test/python/render_tools.test.py",
-      "bytes": 72751,
-      "sha256": "a9fd9811e0e941d835a777eec2d75420185e205452bcfc124a55c1d489ad2c4c"
+      "bytes": 73474,
+      "sha256": "acaa499ca18b234568105fdd9eb418d6a51495484c4c3afe7ab570c4dc8788e8"
     },
     {
       "path": "test/python/runtime-paths.test.py",
-      "bytes": 2920,
-      "sha256": "16bfa941f5584e21a0bc23af269524a139297e14c36a6fdc33c0afdddd0ace04"
+      "bytes": 2907,
+      "sha256": "814f43247a08f0b5addb0da308a2aa3d0d0ed938d95c821735729be0511b6cb6"
     },
     {
       "path": "test/python/static-render-copy.test.py",
@@ -1285,8 +1290,8 @@
     },
     {
       "path": "tools/prove-codex-plugin.py",
-      "bytes": 12972,
-      "sha256": "068b212e34fc3f5fed1fa375b81e986e73e9378b39d20692d79af25c16b0d1d8"
+      "bytes": 13111,
+      "sha256": "fa12b8ed9594259eeb1202e05a6212f455aba1ac8109c053be193b9f2f509050"
     },
     {
       "path": "tools/registry-draft.py",
@@ -1305,8 +1310,8 @@
     },
     {
       "path": "tools/source-files.json",
-      "bytes": 8859,
-      "sha256": "296d5e50ccef1403f96d4e1e69d60afa4d9d603ae59e00ce6522ccc9b20fef12"
+      "bytes": 8901,
+      "sha256": "100cf46b94a4ad7ea0b7f7eea216ea4f56748da8573ece6b708d8800ed095950"
     },
     {
       "path": "tools/update-source-files.py",
