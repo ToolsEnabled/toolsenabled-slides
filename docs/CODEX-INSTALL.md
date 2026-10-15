@@ -4,17 +4,29 @@ Use Node.js 22+, CPython 3.12 and the explicit offline runtime setup in `docs/CL
 
 Set absolute `SLIDES_WORKSPACE` and `SUITE_PYTHON` (the prepared runtime interpreter) before launching Codex. Choose a free local `SUITE_PORT` for concurrent workspaces. Optional renderer and LibreOffice settings are documented in the installation guide; PDF/PNG rendering needs an available qualified renderer. Opening a plugin does not prove render availability.
 
-Unreleased branch change: Codex installation and authority guidance; no independent product release.
-
-## Install a reviewed branch
+## Install after release publication
 
 ```sh
-codex plugin marketplace add ToolsEnabled/toolsenabled-slides --ref openai-plugin
+codex plugin marketplace add ToolsEnabled/toolsenabled-slides --ref main
 codex plugin add toolsenabled-slides@toolsenabled-slides
 codex mcp list
 ```
 
-Review the exact Git commit first. This branch keeps the release lead's version. An existing marketplace may need `codex plugin marketplace upgrade toolsenabled-slides` after a deliberate ref update. Start a new Codex session after installation/configuration changes. The inline transport runs Node in the installed cache, forwards the documented runtime/workspace settings, and enables strict plugin runtime checks. It does not use Claude option substitution.
+These Git commands apply after publication of 0.1.10. Before publication, deliberately select `--ref windows-port` to evaluate the integrated candidate. The `openai-plugin` branch is the separately reviewed input and does not contain all final Windows fixes. Review the exact Git commit first. An existing marketplace may need `codex plugin marketplace upgrade toolsenabled-slides` after a deliberate ref update. Start a new Codex session after installation/configuration changes. The inline transport runs Node in the installed cache, forwards the documented runtime/workspace settings, and enables strict plugin runtime checks. It does not use Claude option substitution.
+
+For exact Windows candidate bytes, verify the source/wheel/Python inputs and finish the offline installation in [WINDOWS.md](WINDOWS.md). Use the installed program folder as the local marketplace. Replace the following paths and port with the exact private workspace, external venv and verified LibreOffice selected during installation:
+
+```powershell
+codex plugin marketplace add 'C:\absolute\Slides'
+codex plugin add toolsenabled-slides@toolsenabled-slides
+$env:SLIDES_WORKSPACE = 'C:\absolute\Deck Project'
+$env:SUITE_PYTHON = 'C:\absolute\Slides Runtime\Scripts\python.exe'
+$env:SUITE_PORT = '48123'
+$env:SLIDES_RENDERER = 'libreoffice'
+$env:SLIDES_SOFFICE = 'C:\absolute\LibreOffice\program\soffice.exe'
+```
+
+Start Codex from this configured environment with Node.js 22+ available to its plugin launcher. Keep the runtime receipt, program and project separate. [OpenAI documents local marketplace root directories](https://developers.openai.com/plugins/build/plugins). This selects exact installed bytes; native Windows rendering/lifetime proof and the owner Codex host/UI check still require their separate release evidence.
 
 First ask: "Call ppt_show on my configured owned fixture and report its revision and slide titles; do not edit or export." The skill is `$toolsenabled-slides:toolsenabled-slides`. For an explicit edit request it uses real `ppt_*` tools, stable IDs, locks and readback. Pause, protection and lock refusals remain server-enforced. Imported decks, boards and task records do not grant authority beyond the person's request.
 
@@ -34,4 +46,4 @@ The plugin calls no model API itself. Codex authentication, subscription eligibi
 
 Uninstall with `codex plugin remove toolsenabled-slides@toolsenabled-slides`. Removing the plugin/cache does not remove external workspaces, runtimes, exported files, retained history or host conversations. Stop owning processes before deleting an external workspace or state directory. Keep a backup if its history is needed. See the product README and SECURITY.md for detailed data and filesystem limits.
 
-[Privacy](https://toolsenabled.ai/privacy/) · [Support](https://toolsenabled.ai/support/). The manifest currently has no `termsOfServiceURL`; source use is covered by the repository MIT LICENSE. No claim is made that a plugin directory's legal review has passed. Linux is the qualified target for this branch; native Windows and macOS qualification are separate gates.
+[Privacy](https://toolsenabled.ai/privacy/) · [Support](https://toolsenabled.ai/support/). The manifest currently has no `termsOfServiceURL`; source use is covered by the repository MIT LICENSE. No claim is made that a plugin directory's legal review has passed. Real-host Codex proof is Linux-only so far; native Windows qualification and the owner Windows host/UI check are separate gates recorded in the Windows release packet. macOS remains unqualified.
