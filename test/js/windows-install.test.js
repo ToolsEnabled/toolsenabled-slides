@@ -14,3 +14,9 @@ test('native installer inspects real ACLs, NTFS volume and junction ancestry',{s
  const r=spawnSync(path.join(process.env.SystemRoot||'C:\\Windows','System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.resolve(__dirname,'../windows/install-filesystem.test.ps1')],{encoding:'utf8',timeout:30000});
  assert.equal(r.status,0,r.stdout+r.stderr);assert.match(r.stdout,/NATIVE_INSTALL_FILESYSTEM_PASS 11/);
 });
+
+test('runtime creation applies current-SID owner and private DACL before venv bytes', {skip:process.platform!=='win32'?'native current-SID runtime directory fixture':false},()=>{
+ assert.ok(process.env.SUITE_PYTHON,'prepare the explicit offline runtime first');
+ const r=spawnSync(path.join(process.env.SystemRoot||'C:\\Windows','System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.resolve(__dirname,'../windows/runtime-directory.test.ps1'),'-Python',process.env.SUITE_PYTHON],{encoding:'utf8',timeout:30000});
+ assert.equal(r.status,0,r.stdout+r.stderr);assert.match(r.stdout,/NATIVE_RUNTIME_CREATE_NEW_PASS 4/);
+});

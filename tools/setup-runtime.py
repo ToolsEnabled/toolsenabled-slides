@@ -25,6 +25,70 @@ def profile():
     if key not in profiles: raise ValueError('No reviewed offline wheel profile for this platform')
     return profiles[key]
 
+def _create_windows_runtime_directory(runtime):
+    """CREATE_NEW with an explicit current-token-user owner and private DACL.
+
+    Python's Windows mkdir(0700) uses OWNER_RIGHTS and the token's default
+    owner, which can be Administrators in an elevated process. This applies
+    the intended descriptor at creation, before venv/package bytes exist.
+    No existing entry or token/account policy is changed.
+    """
+    import ctypes as C
+    from ctypes import wintypes as W
+    kernel = C.WinDLL('kernel32', use_last_error=True)
+    security = C.WinDLL('advapi32', use_last_error=True)
+
+    class SecurityAttributes(C.Structure):
+        _fields_ = [('length', W.DWORD), ('descriptor', C.c_void_p), ('inherit', W.BOOL)]
+
+    class TokenUser(C.Structure):
+        _fields_ = [('sid', C.c_void_p), ('attributes', W.DWORD)]
+
+    def api(dll, name, arguments, result=W.BOOL):
+        value = getattr(dll, name)
+        value.argtypes, value.restype = arguments, result
+        return value
+
+    current = api(kernel, 'GetCurrentProcess', [], W.HANDLE)
+    close = api(kernel, 'CloseHandle', [W.HANDLE])
+    free = api(kernel, 'LocalFree', [C.c_void_p], C.c_void_p)
+    open_token = api(security, 'OpenProcessToken', [W.HANDLE, W.DWORD, C.POINTER(W.HANDLE)])
+    token_info = api(security, 'GetTokenInformation', [W.HANDLE, C.c_int, C.c_void_p, W.DWORD, C.POINTER(W.DWORD)])
+    sid_text = api(security, 'ConvertSidToStringSidW', [C.c_void_p, C.POINTER(W.LPWSTR)])
+    descriptor = api(security, 'ConvertStringSecurityDescriptorToSecurityDescriptorW',
+                     [W.LPCWSTR, W.DWORD, C.POINTER(C.c_void_p), C.POINTER(W.DWORD)])
+    create = api(kernel, 'CreateDirectoryW', [W.LPCWSTR, C.POINTER(SecurityAttributes)])
+    token = W.HANDLE(); sid = W.LPWSTR(); raw = C.c_void_p()
+
+    def checked(value):
+        if not value:
+            raise C.WinError(C.get_last_error())
+
+    try:
+        checked(open_token(current(), 8, C.byref(token)))  # TOKEN_QUERY only.
+        needed = W.DWORD()
+        if token_info(token, 1, None, 0, C.byref(needed)) or C.get_last_error() != 122 or not 8 <= needed.value <= 65536:
+            raise OSError('Cannot establish the current Windows token user')
+        buffer = C.create_string_buffer(needed.value)
+        checked(token_info(token, 1, buffer, needed, C.byref(needed)))
+        checked(sid_text(C.cast(buffer, C.POINTER(TokenUser)).contents.sid, C.byref(sid)))
+        sddl = 'O:' + sid.value + 'D:P(A;OICI;FA;;;' + sid.value + ')(A;OICI;FA;;;SY)'
+        checked(descriptor(sddl, 1, C.byref(raw), None))
+        attributes = SecurityAttributes(C.sizeof(SecurityAttributes), raw, False)
+        checked(create(str(runtime), C.byref(attributes)))  # Existing paths fail.
+    finally:
+        if raw.value: free(raw)
+        if sid: free(C.cast(sid, C.c_void_p))
+        if token: close(token)
+
+
+def create_runtime_directory(runtime):
+    if os.name == 'nt':
+        _create_windows_runtime_directory(runtime)
+    else:
+        runtime.mkdir(mode=0o700)
+
+
 def setup(runtime, wheels, pip_wheel=None):
     selected = profile()
     if not runtime.is_absolute() or not wheels.is_absolute(): raise ValueError('Use absolute runtime and wheel paths')
@@ -46,7 +110,7 @@ def setup(runtime, wheels, pip_wheel=None):
             raise ValueError('Invalid offline pip wheel')
         if hashlib.sha256(pip_wheel.read_bytes()).hexdigest() != installer['sha256']:
             raise ValueError('Offline pip wheel hash mismatch')
-    runtime.mkdir(mode=0o700)
+    create_runtime_directory(runtime)
     try:
         venv.EnvBuilder(with_pip=pip_wheel is None, symlinks=False).create(runtime)
         python = runtime / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')

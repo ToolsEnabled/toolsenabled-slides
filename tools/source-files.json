@@ -241,6 +241,7 @@
   "test/windows/renderer-double.cs",
   "test/windows/renderer-timeout.mjs",
   "test/windows/renderer-timeout.test.ps1",
+  "test/windows/runtime-directory.test.ps1",
   "tools/generate-release.py",
   "tools/local_health.py",
   "tools/mcp-config.mjs",

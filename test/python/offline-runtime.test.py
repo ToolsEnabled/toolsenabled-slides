@@ -23,4 +23,20 @@ class OfflineRuntime(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'already exists'): setup(runtime, root)
             self.assertEqual(marker.read_text(), 'existing')
 
+    def test_runtime_creation_precedes_any_venv_or_package_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory); plugin = base / 'plugin'; (plugin / 'tools').mkdir(parents=True)
+            wheels = base / 'wheels'; wheels.mkdir(); runtime = base / 'runtime'
+            (plugin / 'tools/wheels.json').write_text(json.dumps({'profiles': {'fixture': []}}))
+            events = []
+            def create(path):
+                events.append(('create', path)); path.mkdir(mode=0o700)
+            class Builder:
+                def __init__(self, **kwargs): pass
+                def create(self, path):
+                    events.append(('venv', path)); raise RuntimeError('stop before package installation')
+            with mock.patch.dict(setup.__globals__, ROOT=plugin, profile=lambda: 'fixture', create_runtime_directory=create), mock.patch('venv.EnvBuilder', Builder):
+                with self.assertRaisesRegex(RuntimeError, 'stop before package'): setup(runtime, wheels)
+            self.assertEqual(events, [('create', runtime), ('venv', runtime)])
+
 if __name__ == '__main__': unittest.main()

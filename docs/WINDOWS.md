@@ -64,3 +64,5 @@ agree; mapped or substituted directory roots refuse. This avoids relying on
 a drive-map query unavailable to some restricted ordinary-user tokens. The
 current candidate still requires measured native installer, ACL, alias and
 lifetime acceptance; a portable policy test is not Windows qualification.
+
+The Windows runtime root is created new with an explicit current-token-user SID owner and protected current-SID/SYSTEM descriptor before venv or package bytes. Python mkdir(0700) is not used for that root: the pinned Python can create OWNER_RIGHTS/default-owner directories under an elevated token, which this installer correctly refuses. Existing destinations still refuse and no existing ACL is repaired. This describes root creation, not a measured ownership census of every runtime child.
