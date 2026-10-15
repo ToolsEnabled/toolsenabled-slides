@@ -2853,7 +2853,11 @@ function runCapturedProcess(command, args, options, stdinText, timeoutMs) {
 function captureProcess(command, args, options, stdinText, timeoutMs) {
   if (shuttingDown) return Promise.resolve({ok:false,error:'Suite is shutting down'});
   return new Promise((resolve) => {
-    const child = spawn(command, args, options);
+    // Retain a native handle through the guardian's unnamed job, never a PID lookup.
+    const guardianArgs = process.platform === 'win32'
+      ? ['-I','-S','-B',path.join(HERE,'src/python/node_child.py'),'--inherit-environment','--',require('./lib/helper-paths').executable(command),...args]
+      : args;
+    const child = spawn(process.platform === 'win32' ? PY : command, guardianArgs, options);
     capturedChildren.add(child);
     let stderr = '';
     let settled = false;
@@ -2890,13 +2894,9 @@ function captureProcess(command, args, options, stdinText, timeoutMs) {
     timer = setTimeout(() => {
       timedOut = true;
       stderr = (stderr + `\nprocess timed out after ${timeoutMs}ms`).slice(0, 64 * 1024);
-      if (process.platform === 'win32' && child.pid) {
-        // Kill the exact process tree, never a blanket python/PowerPoint kill.
-        // A COM-created PowerPoint process may be a child of PowerShell.
-        execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true }, () => {});
-      } else {
-        try { child.kill('SIGKILL'); } catch (_) {}
-      }
+      // On Windows this is our retained guardian ChildProcess; closing its job
+      // ends its owned descendants without a query-then-kill PID reuse window.
+      try { child.kill('SIGKILL'); } catch (_) {}
       // close is the normal completion signal. Keep a bounded final escape
       // hatch for a broken OS process table; PDF jobs use unique output paths,
       // so even this worst case can never overwrite the canonical PDF later.
