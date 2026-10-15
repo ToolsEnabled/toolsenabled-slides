@@ -67,7 +67,7 @@ async function start() {
   }
   process.env.SLIDES_WORKSPACE = path.resolve(process.env.SLIDES_WORKSPACE || path.join(process.cwd(), '.slides-workspace'));
   fs.mkdirSync(process.env.SLIDES_WORKSPACE, {recursive:true, mode:0o700});
-  process.env.SLIDES_WORKSPACE = fs.realpathSync(process.env.SLIDES_WORKSPACE);
+  process.env.SLIDES_WORKSPACE = fs.realpathSync.native(process.env.SLIDES_WORKSPACE);
   process.env.SUITE_PYTHON = python();
   process.env.SUITE_HOST = '127.0.0.1';
   process.env.SUITE_EDITOR = 'mcp-' + process.pid;
