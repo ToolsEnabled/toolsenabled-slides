@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "8c9255f0033927c5b236474bfc8c20c8102721ad",
+  "sourceCommit": "0d7b18abc4ef5bea6839f460f49c22ee2a829a01",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -45,8 +45,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 18694,
-      "sha256": "ab52401af5f7aef5723e19ae932b3240791d2e3af66865d08b4c642c9f4fa34e"
+      "bytes": 18914,
+      "sha256": "85fb2dd45abcca18a4dd52fb97ad95a45f4fd67cd2c5d9ead412eb13411d40ef"
     },
     {
       "path": "LICENSE",
@@ -55,8 +55,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 34211,
-      "sha256": "1adeff1f00fbff7672dfb0621044a7b13f858c1f33b4d81f92d526e72ffe4aff"
+      "bytes": 34284,
+      "sha256": "ee463b4feacb8e89627cb421886362baec6ba1a086976846aab1cf490aaff62e"
     },
     {
       "path": "SECURITY.md",
@@ -134,6 +134,11 @@
       "sha256": "fef80a0feff428feb20bb0d79b9d1d31fc63f1611a8a5ea68fa2a95261a59b1c"
     },
     {
+      "path": "docs/CODEX-INSTALL.md",
+      "bytes": 5204,
+      "sha256": "08beb530428a58b13faf9d626d0d2577b192739300d29ebf325f10a6ec8d0787"
+    },
+    {
       "path": "docs/COM-REVIEW.md",
       "bytes": 2459,
       "sha256": "cc0408b6d1769ab3b386a9313d10cf32d7162ea0bf9e85eb10784efed0a7076d"
@@ -165,8 +170,8 @@
     },
     {
       "path": "docs/WINDOWS.md",
-      "bytes": 10349,
-      "sha256": "bf881c6726f6f3ba26b9684939fc146d01008aeae829fb09d09cd090f9298814"
+      "bytes": 10769,
+      "sha256": "5420ec41c0978763a4075c74c6fe49984e2f7ba79b15b2f586b30b0bf3790852"
     },
     {
       "path": "hooks/hooks.json",
@@ -195,8 +200,8 @@
     },
     {
       "path": "install.ps1",
-      "bytes": 12063,
-      "sha256": "9bcceb8eaac1ee9f377fbbf331f2fd4ddb2d644109b922d782f20ffce01cc31b"
+      "bytes": 12305,
+      "sha256": "ba4d11ca477b2801a5c69e43bab4461fa643d42523474d33fd5a3be283067cb9"
     },
     {
       "path": "manifest.json",
@@ -275,8 +280,8 @@
     },
     {
       "path": "skills/toolsenabled-slides/SKILL.md",
-      "bytes": 10552,
-      "sha256": "36d263839fdc8df4a688fc003c167253094812a24077584bfe509f5946b019fe"
+      "bytes": 10864,
+      "sha256": "fce60c6e2ede4409264783b6f0d6ad21f166be47ad93fa11778f2d716b2ae85b"
     },
     {
       "path": "slides-mcp.js",
@@ -991,7 +996,7 @@
     {
       "path": "test/js/windows-install.test.js",
       "bytes": 1798,
-      "sha256": "ae540ae33ad94d75a225a8c50a7b2fbac959efd0acd5ff747a1df09967b3496e"
+      "sha256": "f4535afb1efe3dc398bb8481cb9e5db06fe6dd94ed847da594b7b02e7b535cb1"
     },
     {
       "path": "test/js/windows-lifetime.test.js",
@@ -1185,13 +1190,13 @@
     },
     {
       "path": "test/windows/install-acl.test.ps1",
-      "bytes": 2659,
-      "sha256": "e9ae69eb85c67159f0217c67c9a8ab701a1c41c3ec9c1277436fd4ee0545c0b2"
+      "bytes": 3095,
+      "sha256": "39f7fa8f49a1c12448e909422ad7c37240420500e2baf86c16b73f859b4fff00"
     },
     {
       "path": "test/windows/install-filesystem.test.ps1",
-      "bytes": 3483,
-      "sha256": "ca0a10d04729f0d8a7a8616b3903b203cf3e53b59f5ab945704861407e8a0d3f"
+      "bytes": 3579,
+      "sha256": "9c2dec6a3284622d1b118f03bfee8766e423999c002b9e4967135f8ffac2545f"
     },
     {
       "path": "test/windows/install-path.test.ps1",
@@ -1280,8 +1285,8 @@
     },
     {
       "path": "tools/source-files.json",
-      "bytes": 8671,
-      "sha256": "ca8351bc2ae11397f89dbad841e6306846a28555f7ed5eb032ae92acb0cb9e73"
+      "bytes": 8698,
+      "sha256": "30e4b8dc077717ce4c56c733a640d6588f6e636bf4f14c3c754071f2ccef6ca8"
     },
     {
       "path": "tools/update-source-files.py",
