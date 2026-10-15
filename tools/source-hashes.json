@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "175c68823a8e3301be1c4b90dff0570880264127",
+  "sourceCommit": "4eaceb7199c66c8094d7fe022c7c13cecb300e09",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -1200,8 +1200,8 @@
     },
     {
       "path": "test/windows/install-path.test.ps1",
-      "bytes": 1017,
-      "sha256": "0de09ee2a897998fb238cc2618f08fc444aef093673f2964e1b2e21daf2afb19"
+      "bytes": 1020,
+      "sha256": "b835b1cb000c4d9644daa0bab58df6d5407076ca0fe32376f3e49b904d9f011d"
     },
     {
       "path": "test/windows/renderer-double.cs",
