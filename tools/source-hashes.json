@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "bf85cb99f50d0b2620923294e8d9c7176ebd5802",
+  "sourceCommit": "78b09826547045b171a49f95e12f85f18c061df1",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -45,8 +45,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 18914,
-      "sha256": "85fb2dd45abcca18a4dd52fb97ad95a45f4fd67cd2c5d9ead412eb13411d40ef"
+      "bytes": 19417,
+      "sha256": "6650e98bbc867f0abbedb0e7bcab1a6a8f01e340905c5d3b2d7dc375552fc227"
     },
     {
       "path": "LICENSE",
@@ -435,8 +435,8 @@
     },
     {
       "path": "src/python/node_child.py",
-      "bytes": 2687,
-      "sha256": "c5426e0d0af5450b374b2562c4805f6cbb3e4c47b43e439fdf2c1a35f5195141"
+      "bytes": 7289,
+      "sha256": "f7dd8d0e34ca34d3ac1f426b14515da410ab1da0d39b954d26445c864a9fbc9e"
     },
     {
       "path": "src/python/package_safety.py",
@@ -755,8 +755,8 @@
     },
     {
       "path": "test/js/lifecycle.test.js",
-      "bytes": 763,
-      "sha256": "b7b5f2c50d13d4fce95a301f1ba3aeb89811dbc126b8335aa01065343338c21e"
+      "bytes": 980,
+      "sha256": "1dd1712634183929790aa0bc04102cb66daf4017f1a1d14f51084358c377b22d"
     },
     {
       "path": "test/js/lint-defaults.test.js",
@@ -790,8 +790,8 @@
     },
     {
       "path": "test/js/owner-death.test.js",
-      "bytes": 1217,
-      "sha256": "52940cccdbc472089a8b8f8fd145e7371d254ff670f469fffdf89e3894d5d230"
+      "bytes": 1561,
+      "sha256": "2145b6c64c1caa1b49948b8f7e8e559222460d6e71f35fbd14c4e2e1b3b0fde2"
     },
     {
       "path": "test/js/pane-environment.test.js",
@@ -1000,8 +1000,8 @@
     },
     {
       "path": "test/js/windows-lifetime.test.js",
-      "bytes": 2063,
-      "sha256": "80efa022ff598ffd46c1551b34f7609967daf0411e43d78a16644abeb238fab9"
+      "bytes": 4154,
+      "sha256": "f2f287b20bffdb169a64fb502d4b571689f0eff1cefa9dbf38bde33f4f1a0037"
     },
     {
       "path": "test/js/windows-renderer-timeout.test.js",
@@ -1010,8 +1010,8 @@
     },
     {
       "path": "test/js/windows-workspace.test.js",
-      "bytes": 5952,
-      "sha256": "c255745cca747fcddae3fd1bf67577bf1046d8545fc0e52001c034b1605ab0ee"
+      "bytes": 6526,
+      "sha256": "50f63ee6983665be0ad18c4c7d8d2a46a9fbe8df100768d5cd6317e7378bfe72"
     },
     {
       "path": "test/js/workspace-alias.test.js",
@@ -1020,8 +1020,8 @@
     },
     {
       "path": "test/prove-lifecycle.js",
-      "bytes": 6336,
-      "sha256": "437f1d7ab76ddbf22cf904de9d8d8c133fa50745f794fb51af32d14629fd7f28"
+      "bytes": 6718,
+      "sha256": "6047fa55909b70f6d194a9e6a9bc9cf74dcae8ca4c17e2f16f1c95108c882591"
     },
     {
       "path": "test/python/animated-render.test.py",
@@ -1077,6 +1077,11 @@
       "path": "test/python/offline-runtime.test.py",
       "bytes": 2837,
       "sha256": "c1ec92426beebbfe1533a9902cc36aa2cc71143869b86fb7e55882aa0792c348"
+    },
+    {
+      "path": "test/python/owner-pipe.test.py",
+      "bytes": 5518,
+      "sha256": "8e115aafd3d5e2e85a77f3e0795cd9db5c314856de882d5ca7f3bd4a2dd5a52f"
     },
     {
       "path": "test/python/package-active-content.test.py",
@@ -1290,8 +1295,8 @@
     },
     {
       "path": "tools/source-files.json",
-      "bytes": 8743,
-      "sha256": "172a3cc224c597120e820c63281e697b458cab3df66ba58fedf9c3001f222a91"
+      "bytes": 8779,
+      "sha256": "bd5f9d9f316194102699c56672bea0ebbafbd2951e1bc751f07d47be5e208e69"
     },
     {
       "path": "tools/update-source-files.py",
