@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "a842f2fdd9bbdda3fb7a67beaec68549abb265fa",
+  "sourceCommit": "bf85cb99f50d0b2620923294e8d9c7176ebd5802",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -170,8 +170,8 @@
     },
     {
       "path": "docs/WINDOWS.md",
-      "bytes": 11508,
-      "sha256": "41536c44eee1216c1c7c204f354521d5c547a00f5fb6da52eccd7f2b8dab8b50"
+      "bytes": 12002,
+      "sha256": "919ca6af79f61a760680e996d8fd66b28e4e92c7ddf22aadedc8f41822cd545b"
     },
     {
       "path": "hooks/hooks.json",
@@ -995,8 +995,8 @@
     },
     {
       "path": "test/js/windows-install.test.js",
-      "bytes": 1798,
-      "sha256": "6dc1518dfb9285b9b0244077b3aaef3e06bca04a0ce4d5f351799bf61532e07d"
+      "bytes": 2487,
+      "sha256": "5bb200b155c76586bb84369064544cd26e98c4204e4475370f3ef0afa15bb427"
     },
     {
       "path": "test/js/windows-lifetime.test.js",
@@ -1075,8 +1075,8 @@
     },
     {
       "path": "test/python/offline-runtime.test.py",
-      "bytes": 1728,
-      "sha256": "e2d7104c525eb52bd2bfea6b058457fefacaf784b684c3f0237a63d29aa6c367"
+      "bytes": 2837,
+      "sha256": "c1ec92426beebbfe1533a9902cc36aa2cc71143869b86fb7e55882aa0792c348"
     },
     {
       "path": "test/python/package-active-content.test.py",
@@ -1219,6 +1219,11 @@
       "sha256": "61f4c4cec748a9d7808fb9654dfc6c1362f32d6d8123a1f51a6a1d73c86c8193"
     },
     {
+      "path": "test/windows/runtime-directory.test.ps1",
+      "bytes": 3351,
+      "sha256": "e65d2baa8a6f30335cc1c24433b1dd9e7fb4f262ba4fd1ada3fb04cd8a0863ce"
+    },
+    {
       "path": "tools/generate-release.py",
       "bytes": 5373,
       "sha256": "2c758b75020211ca05843b5bd18fded9ff2cc5691f855f8d1fe3ab4c2c3d8bb3"
@@ -1280,13 +1285,13 @@
     },
     {
       "path": "tools/setup-runtime.py",
-      "bytes": 4924,
-      "sha256": "693e05ba6c0d26feb3d19b990f8d78c7832750bfa462a2e9003e9aaaaef3b678"
+      "bytes": 7939,
+      "sha256": "7aa42b8ad2df9ea49083f21cbe62284b52c35ee3e389c14bfab857a4187b6c2d"
     },
     {
       "path": "tools/source-files.json",
-      "bytes": 8698,
-      "sha256": "30e4b8dc077717ce4c56c733a640d6588f6e636bf4f14c3c754071f2ccef6ca8"
+      "bytes": 8743,
+      "sha256": "172a3cc224c597120e820c63281e697b458cab3df66ba58fedf9c3001f222a91"
     },
     {
       "path": "tools/update-source-files.py",
