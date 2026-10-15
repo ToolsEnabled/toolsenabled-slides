@@ -1,3 +1,8 @@
+## Unreleased — native owner-pipe retirement
+
+- Observe the owned Windows lifetime pipe through an independent non-inheritable handle with bounded raw reads. Keep its non-daemon observer active until descendant Job accounting settles, then explicitly stop and join it before normal Python shutdown. Native render and lifecycle acceptance remains pending.
+- Preserve redacted lifecycle failure artifacts and native workspace path/health receipts when the test harness explicitly retains its fixtures.
+
 # Changelog
 
 ## 0.1.10 — native Windows candidate (unpublished)

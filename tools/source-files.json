@@ -213,6 +213,7 @@
   "test/python/embedded-chart-message.test.py",
   "test/python/final_deck_acceptance.test.py",
   "test/python/offline-runtime.test.py",
+  "test/python/owner-pipe.test.py",
   "test/python/package-active-content.test.py",
   "test/python/package-comments.test.py",
   "test/python/package-disguised-xml.test.py",

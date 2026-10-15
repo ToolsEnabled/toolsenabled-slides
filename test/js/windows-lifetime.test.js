@@ -23,3 +23,23 @@ for(const mode of ['owner EOF','forced guardian termination'])test('Windows life
   await assertProcessExited(pids.root);await assertProcessExited(pids.grandchild);
  }finally{if(guardian.exitCode===null&&guardian.signalCode===null)guardian.kill('SIGKILL');await closed;}
 });
+test('Windows owner observer retires after the actual detached descendant exits without buffered-stdin shutdown failure',{skip:process.platform!=='win32'?'native Windows pipe and Job Object fixture':false},async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'slides-win-job-retire-'));
+ const grandchild=path.join(root,'grandchild.js'),child=path.join(root,'child.js'),receipt=path.join(root,'pids.json'),done=path.join(root,'done');
+ fs.writeFileSync(grandchild,"setTimeout(()=>require('node:fs').writeFileSync(process.argv[2],'complete'),300);\n");
+ fs.writeFileSync(child,"const fs=require('node:fs');const {spawn}=require('node:child_process');const child=spawn(process.execPath,[process.argv[2],process.argv[4]],{stdio:'ignore',detached:true});child.unref();fs.writeFileSync(process.argv[3],JSON.stringify({root:process.pid,grandchild:child.pid}));console.log('launcher complete');\n");
+ const python=require('../../src/lib/prerequisites').python();
+ const guardian=spawn(python,['-I','-S','-B',path.resolve(__dirname,'../../src/python/node_child.py'),'--inherit-environment','--owner-pipe','--',process.execPath,child,grandchild,receipt,done],{stdio:['pipe','pipe','pipe']});
+ let stderr='',stdout='';guardian.stderr.on('data',part=>stderr+=part);guardian.stdout.on('data',part=>stdout+=part);
+ const closed=new Promise(resolve=>guardian.once('close',(code,signal)=>resolve({code,signal})));
+ const timer=setTimeout(()=>guardian.kill('SIGKILL'),10000);
+ try{
+  // Keep the owner pipe open throughout normal helper retirement; EOF is not the trigger.
+  const result=await closed;
+  assert.deepEqual(result,{code:0,signal:null},stderr);
+  assert.equal(fs.readFileSync(done,'utf8'),'complete');
+  assert.match(stdout,/launcher complete/);assert.doesNotMatch(stderr,/_enter_buffered_busy|Fatal Python error/);
+  const pids=JSON.parse(fs.readFileSync(receipt,'utf8'));
+  await assertProcessExited(pids.root);await assertProcessExited(pids.grandchild);
+ }finally{clearTimeout(timer);if(guardian.exitCode===null&&guardian.signalCode===null)guardian.kill('SIGKILL');await closed;}
+});

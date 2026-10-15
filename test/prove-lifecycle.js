@@ -52,7 +52,8 @@ async function proof(output,{pptxOnly=false,runtimePython}={}){
   for(const e of exports)for(const file of e.files){const dest=path.join(output,file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(workspace,file),dest);}
   const report={ok:true,node:process.version,platform:process.platform,display:process.env.DISPLAY||null,mode:pptxOnly?'pptx-only':'libreoffice',runtimePython:runtimePython||null,slides:3,tools:listed.tools.length,serverPid:pid,checks:['initialize','golden tools/list','locks required','3-slide MCP editing','attach and detach','real exports','import','EOF shutdown','lease released'],exports,transcript};
   fs.writeFileSync(path.join(output,'receipt.json'),JSON.stringify(report,null,2)+'\n');fs.writeFileSync(path.join(output,'stderr.log'),proofStderr(client.stderr));return report;
- }finally{if(attached&&attached.child.exitCode===null)attached.child.kill('SIGTERM');if(client.child.exitCode===null)client.child.kill('SIGTERM');fs.rmSync(workspace,{recursive:true,force:true});}
+ }catch(error){fs.writeFileSync(path.join(output,'failure.json'),JSON.stringify({ok:false,workspace,port,error:proofStderr(error.stack||error.message),transcript},null,2)+'\n');fs.writeFileSync(path.join(output,'stderr.log'),proofStderr(client.stderr));throw error;
+ }finally{if(attached&&attached.child.exitCode===null)attached.child.kill('SIGTERM');if(client.child.exitCode===null)client.child.kill('SIGTERM');if(process.env.SLIDES_KEEP_TESTS==='1')console.log('Retained lifecycle workspace: '+JSON.stringify(workspace));else fs.rmSync(workspace,{recursive:true,force:true});}
 }
 module.exports={proof,proofStderr};
 if(require.main===module){const i=process.argv.indexOf('--output');if(i<0||!process.argv[i+1]){console.error('Usage: node test/prove-lifecycle.js --output <new evidence directory> [--pptx-only]');process.exit(2);}
