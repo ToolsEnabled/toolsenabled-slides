@@ -1,7 +1,7 @@
 {
   "plugin": "toolsenabled-slides",
   "version": "0.1.10",
-  "sourceCommit": "3c5e086d1e1be7c85b8c9d6e1658b3a06ba87c4c",
+  "sourceCommit": "175c68823a8e3301be1c4b90dff0570880264127",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -170,8 +170,8 @@
     },
     {
       "path": "docs/WINDOWS.md",
-      "bytes": 11059,
-      "sha256": "9955333d6fbb7001585e2c39330f11fad47bf3b1515afeea431be5de3b7b2bdc"
+      "bytes": 11508,
+      "sha256": "41536c44eee1216c1c7c204f354521d5c547a00f5fb6da52eccd7f2b8dab8b50"
     },
     {
       "path": "hooks/hooks.json",
@@ -1195,8 +1195,8 @@
     },
     {
       "path": "test/windows/install-filesystem.test.ps1",
-      "bytes": 4196,
-      "sha256": "956c9b0cec27d24e03d2c8b221992ebad0c9a6f968f569eede274175c2d88617"
+      "bytes": 4966,
+      "sha256": "fa4a82507a47971fd61581e9ed1b1dafd7f4e85b27d7554bd8ed9178f447ae0e"
     },
     {
       "path": "test/windows/install-path.test.ps1",
@@ -1315,8 +1315,8 @@
     },
     {
       "path": "tools/windows-volume.cs",
-      "bytes": 1350,
-      "sha256": "33b411d88970ace1164d2dbf775b6e4febe2aa495692933dc3e293f1ff12d5b5"
+      "bytes": 3310,
+      "sha256": "07d9459ea0aa9c77735cabd2818edf91f8aee71c02ccf928b3fbcc15e7eeed54"
     }
   ]
 }
